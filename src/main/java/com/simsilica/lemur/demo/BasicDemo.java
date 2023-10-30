@@ -60,17 +60,25 @@ import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.CursorMotionEvent;
 import com.simsilica.lemur.event.DefaultCursorListener;
 import com.simsilica.lemur.event.DragHandler;
+import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.style.Styles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- *
- *  @version   $Revision$
- *  @author    Paul Speed
+ * @author Paul Speed
+ * @version $Revision$
  */
 public class BasicDemo extends SimpleApplication {
 
+    private static final Logger logger = LoggerFactory.getLogger(BasicDemo.class);
+
+    private static final String BACKGROUND = "background";
+    private static final String HEADER = "header";
+    private static final String SPACER = "spacer";
+    private final ColorRGBA boxColor = ColorRGBA.Blue.clone();
     // Define some model references we will use in
     // update.
     private VersionedReference<Double> redRef;
@@ -79,12 +87,6 @@ public class BasicDemo extends SimpleApplication {
     private VersionedReference<Double> alphaRef;
     private VersionedReference<Boolean> showStatsRef;
     private VersionedReference<Boolean> showFpsRef;
-
-    private ColorRGBA boxColor = ColorRGBA.Blue.clone();
-
-    private Panel test;
-    private TextField tf;
-    private String strInsertText = "Inserted ";
 
     public static void main(String[] args) {
         BasicDemo app = new BasicDemo();
@@ -100,7 +102,7 @@ public class BasicDemo extends SimpleApplication {
 
         // Remove the flycam because we don't want it in this
         // demo
-        stateManager.detach( stateManager.getState(FlyCamAppState.class) );
+        stateManager.detach(stateManager.getState(FlyCamAppState.class));
 
         // Now, let's create some styles in code.
         // For this demo, we'll just give some of the elements
@@ -108,146 +110,146 @@ public class BasicDemo extends SimpleApplication {
         // We also define a custom element type called "spacer" which
         // picks up a specific style.
         Styles styles = GuiGlobals.getInstance().getStyles();
-        styles.getSelector( Slider.THUMB_ID, "glass" ).set( "text", "[]", false );
-        styles.getSelector( Panel.ELEMENT_ID, "glass" ).set( "background",
-                                new QuadBackgroundComponent(new ColorRGBA(0, 0.25f, 0.25f, 0.5f)) );
-        styles.getSelector( Checkbox.ELEMENT_ID, "glass" ).set( "background",
-                                new QuadBackgroundComponent(new ColorRGBA(0, 0.5f, 0.5f, 0.5f)) );
-        styles.getSelector( "spacer", "glass" ).set( "background",
-                                new QuadBackgroundComponent(new ColorRGBA(1, 0.0f, 0.0f, 0.0f)) );
-        styles.getSelector( "header", "glass" ).set( "background",
-                                new QuadBackgroundComponent(new ColorRGBA(0, 0.75f, 0.75f, 0.5f)) );
-        styles.getSelector( "header", "glass" ).set( "shadowColor",
-                                                     new ColorRGBA(1, 0f, 0f, 1) );
-/*        styles.getSelector( "header", "glass" ).set( "shadowOffset", 
-                                                     new Vector3f(3, -3, 3) );*/
+        styles.getSelector(Slider.THUMB_ID, BaseStyles.GLASS).set("text", "[]", false);
+        styles.getSelector(Panel.ELEMENT_ID, BaseStyles.GLASS).set(BACKGROUND,
+                new QuadBackgroundComponent(new ColorRGBA(0, 0.25f, 0.25f, 0.5f)));
+        styles.getSelector(Checkbox.ELEMENT_ID, BaseStyles.GLASS).set(BACKGROUND,
+                new QuadBackgroundComponent(new ColorRGBA(0, 0.5f, 0.5f, 0.5f)));
+        styles.getSelector(SPACER, BaseStyles.GLASS).set(BACKGROUND,
+                new QuadBackgroundComponent(new ColorRGBA(1, 0.0f, 0.0f, 0.0f)));
+        styles.getSelector(HEADER, BaseStyles.GLASS).set(BACKGROUND,
+                new QuadBackgroundComponent(new ColorRGBA(0, 0.75f, 0.75f, 0.5f)));
+        styles.getSelector(HEADER, BaseStyles.GLASS).set("shadowColor",
+                new ColorRGBA(1, 0f, 0f, 1));
+        // styles.getSelector(HEADER, BaseStyles.GLASS).set("shadowOffset",
+        //         new Vector3f(3, -3, 3));
 
         // Now construct some HUD panels in the "glass" style that
         // we just configured above.
-        Container hudPanel = new Container("glass");
-        hudPanel.setLocalTranslation( 5, cam.getHeight() - 50, 0 );
+        Container hudPanel = new Container(BaseStyles.GLASS);
+        hudPanel.setLocalTranslation(5, cam.getHeight() - 50, 0);
         guiNode.attachChild(hudPanel);
 
         // Create a top panel for some stats toggles.
-        Container panel = new Container("glass");
+        Container panel = new Container(BaseStyles.GLASS);
         hudPanel.addChild(panel);
 
-        panel.setBackground(new QuadBackgroundComponent(new ColorRGBA(0,0.5f,0.5f,0.5f),5,5, 0.02f, false));
-        panel.addChild( new Label( "Stats Settings", new ElementId("header"), "glass" ) );
-        panel.addChild( new Panel( 2, 2, ColorRGBA.Cyan, "glass" ) ).setUserData( LayerComparator.LAYER, 2 );
+        panel.setBackground(new QuadBackgroundComponent(new ColorRGBA(0, 0.5f, 0.5f, 0.5f), 5, 5, 0.02f, false));
+        panel.addChild(new Label("Stats Settings", new ElementId(HEADER), BaseStyles.GLASS));
+        panel.addChild(new Panel(2, 2, ColorRGBA.Cyan, BaseStyles.GLASS)).setUserData(LayerComparator.LAYER, 2);
 
         // Adding components returns the component so we can set other things
         // if we want.
-        Checkbox temp = panel.addChild( new Checkbox( "Show Stats" ) );
+        Checkbox temp = panel.addChild(new Checkbox("Show Stats"));
         temp.setChecked(true);
         showStatsRef = temp.getModel().createReference();
 
-        temp = panel.addChild( new Checkbox( "Show FPS" ) );
+        temp = panel.addChild(new Checkbox("Show FPS"));
         temp.setChecked(true);
         showFpsRef = temp.getModel().createReference();
 
 
         // Custom "spacer" element type
-        hudPanel.addChild( new Panel( 10f, 10f, new ElementId("spacer"), "glass" ) );
+        hudPanel.addChild(new Panel(10f, 10f, new ElementId(SPACER), BaseStyles.GLASS));
 
         // Create a second panel in the same overall HUD panel
         // that lets us tweak things about the cube.
-        panel = new Container("glass");
-        panel.setBackground(new QuadBackgroundComponent(new ColorRGBA(0,0.5f,0.5f,0.5f),5,5, 0.02f, false));
+        panel = new Container(BaseStyles.GLASS);
+        panel.setBackground(new QuadBackgroundComponent(new ColorRGBA(0, 0.5f, 0.5f, 0.5f), 5, 5, 0.02f, false));
         // Custom "header" element type.
-        panel.addChild( new Label( "Cube Settings", new ElementId("header"), "glass" ) );
-        panel.addChild( new Panel( 2, 2, ColorRGBA.Cyan, "glass" ) ).setUserData( LayerComparator.LAYER, 2 );
-        panel.addChild( new Label( "Red:" ) );
-        final Slider redSlider = new Slider("glass");
-        redSlider.setBackground(new QuadBackgroundComponent(new ColorRGBA(0.5f,0.1f,0.1f,0.5f),5,5, 0.02f, false));
-        redRef = panel.addChild( redSlider ).getModel().createReference();
+        panel.addChild(new Label("Cube Settings", new ElementId(HEADER), BaseStyles.GLASS));
+        panel.addChild(new Panel(2, 2, ColorRGBA.Cyan, BaseStyles.GLASS)).setUserData(LayerComparator.LAYER, 2);
+        panel.addChild(new Label("Red:"));
+        final Slider redSlider = new Slider(BaseStyles.GLASS);
+        redSlider.setBackground(new QuadBackgroundComponent(new ColorRGBA(0.5f, 0.1f, 0.1f, 0.5f), 5, 5, 0.02f, false));
+        redRef = panel.addChild(redSlider).getModel().createReference();
         CursorEventControl.addListenersToSpatial(redSlider, new DefaultCursorListener() {
-                @Override
-                public void cursorMoved( CursorMotionEvent event, Spatial target, Spatial capture ) {
-                    System.out.println( "event:" + event );
-                    Vector3f cp = event.getCollision().getContactPoint();
-                    cp = redSlider.worldToLocal(cp, null);
-                    System.out.println( "Range value:" + redSlider.getValueForLocation(cp) );      
-                }
+            @Override
+            public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
+                logger.info("event:{}", event);
+                Vector3f cp = event.getCollision().getContactPoint();
+                cp = redSlider.worldToLocal(cp, null);
+                logger.info("Range value:{}", redSlider.getValueForLocation(cp));
+            }
 
-            });
-        
-        panel.addChild( new Label( "Green:" ) );
-        greenRef = panel.addChild( new Slider("glass") ).getModel().createReference();
-        panel.addChild( new Label( "Blue:" ) );
-        blueRef = panel.addChild( new Slider(new DefaultRangedValueModel(0,100,100), "glass") ).getModel().createReference();
-        panel.addChild( new Label( "Alpha:" ) );
-        alphaRef = panel.addChild( new Slider(new DefaultRangedValueModel(0,100,100), "glass") ).getModel().createReference();
+        });
+
+        panel.addChild(new Label("Green:"));
+        greenRef = panel.addChild(new Slider(BaseStyles.GLASS)).getModel().createReference();
+        panel.addChild(new Label("Blue:"));
+        blueRef = panel.addChild(new Slider(new DefaultRangedValueModel(0, 100, 100), BaseStyles.GLASS)).getModel().createReference();
+        panel.addChild(new Label("Alpha:"));
+        alphaRef = panel.addChild(new Slider(new DefaultRangedValueModel(0, 100, 100), BaseStyles.GLASS)).getModel().createReference();
         hudPanel.addChild(panel);
 
         // Custom "spacer" element type
-        hudPanel.addChild( new Panel( 10f, 10f, new ElementId("spacer"), "glass" ) );
-        
+        hudPanel.addChild(new Panel(10f, 10f, new ElementId(SPACER), BaseStyles.GLASS));
+
         // Test text entry
-        panel = new Container("glass");
-        panel.addChild( new Label( "Test entry:", "glass" ) );
+        panel = new Container(BaseStyles.GLASS);
+        panel.addChild(new Label("Test entry:", BaseStyles.GLASS));
         hudPanel.addChild(panel);
-        
+
         guiNode.attachChild(hudPanel);
-        
+
         // Increase the default size of the hud to be a little wider
         // if it would otherwise be smaller.  Height is unaffected.
-        Vector3f hudSize = new Vector3f(200,0,0);
+        Vector3f hudSize = new Vector3f(200, 0, 0);
         hudSize.maxLocal(hudPanel.getPreferredSize());
-        hudPanel.setPreferredSize( hudSize );
+        hudPanel.setPreferredSize(hudSize);
 
         // Note: after next nightly, this will also work:
-        // hudPanel.setPreferredSize( new Vector3f(200,0,0).maxLocal(hudPanel.getPreferredSize()) );
+        // hudPanel.setPreferredSize(new Vector3f(200, 0, 0).maxLocal(hudPanel.getPreferredSize()));
 
         // Something in scene
         Box box = new Box(1, 1, 1);
-        Geometry geom = new Geometry( "Box", box );
-        Material mat = new Material( assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor( "Color", boxColor );
-        mat.getAdditionalRenderState().setBlendMode( BlendMode.Alpha );
+        Geometry geom = new Geometry("Box", box);
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", boxColor);
+        mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
         geom.setMaterial(mat);
-        rootNode.attachChild( geom );
+        rootNode.attachChild(geom);
 
         // A draggable bordered panel
         Container testPanel = new Container();
-        testPanel.setPreferredSize( new Vector3f(200, 200,0) );
-        testPanel.setBackground( TbtQuadBackgroundComponent.create( "/com/simsilica/lemur/icons/border.png",
-                                                                    1, 2, 2, 3, 3, 0, false ) );
-        Label test = testPanel.addChild( new Label( "Border Test" ) );
+        testPanel.setPreferredSize(new Vector3f(200, 200, 0));
+        testPanel.setBackground(TbtQuadBackgroundComponent.create("/com/simsilica/lemur/icons/border.png",
+                1, 2, 2, 3, 3, 0, false));
+        Label test = testPanel.addChild(new Label("Border Test"));
         test.setShadowColor(ColorRGBA.Red);
 
         // Center the text in the box.
         test.setInsetsComponent(new DynamicInsetsComponent(0.5f, 0.5f, 0.5f, 0.5f));
-        testPanel.setLocalTranslation( 400, 400, 0 );
+        testPanel.setLocalTranslation(400, 400, 0);
 
         CursorEventControl.addListenersToSpatial(testPanel, new DragHandler());
-        guiNode.attachChild( testPanel );
+        guiNode.attachChild(testPanel);
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-    
-        if( showStatsRef.update() ) {
-            setDisplayStatView( showStatsRef.get() );
+
+        if (showStatsRef.update()) {
+            setDisplayStatView(showStatsRef.get());
         }
-        if( showFpsRef.update() ) {
-            setDisplayFps( showFpsRef.get() );
+        if (showFpsRef.update()) {
+            setDisplayFps(showFpsRef.get());
         }
 
         boolean updateColor = false;
-        if( redRef.update() )
+        if (redRef.update())
             updateColor = true;
-        if( greenRef.update() )
+        if (greenRef.update())
             updateColor = true;
-        if( blueRef.update() )
+        if (blueRef.update())
             updateColor = true;
-        if( alphaRef.update() )
+        if (alphaRef.update())
             updateColor = true;
-        if( updateColor ) {
-            boxColor.set( (float)(redRef.get()/100.0),
-                          (float)(greenRef.get()/100.0),
-                          (float)(blueRef.get()/100.0),
-                          (float)(alphaRef.get()/100.0) );
+        if (updateColor) {
+            boxColor.set((float) (redRef.get() / 100.0),
+                    (float) (greenRef.get() / 100.0),
+                    (float) (blueRef.get() / 100.0),
+                    (float) (alphaRef.get() / 100.0));
         }
     }
 }

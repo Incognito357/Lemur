@@ -34,46 +34,48 @@
 
 package com.simsilica.lemur.event;
 
-import java.util.*;
-import java.util.concurrent.*;
-
-import com.jme3.renderer.*;
-import com.jme3.scene.control.*;
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.AbstractControl;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
- *  A control that can be added to any Spatial to provide
- *  standard CursorListener/CursorEvent support.  The only requirement
- *  is that the Spatial must be somewhere in a hierarchy that has
- *  been provided to the MouseAppState or GuiGlobals class and that
- *  MouseAppState is active (either manually attached to the StateManager
- *  or done automatically by GuiGlobals.initialize()) or is otherwise
- *  a part of a PickEventSession.
+ * A control that can be added to any Spatial to provide
+ * standard CursorListener/CursorEvent support.  The only requirement
+ * is that the Spatial must be somewhere in a hierarchy that has
+ * been provided to the MouseAppState or GuiGlobals class and that
+ * MouseAppState is active (either manually attached to the StateManager
+ * or done automatically by GuiGlobals.initialize()) or is otherwise
+ * a part of a PickEventSession.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class CursorEventControl extends AbstractControl {
 
-    private List<CursorListener> listeners = new CopyOnWriteArrayList<CursorListener>();
+    private final List<CursorListener> listeners = new CopyOnWriteArrayList<>();
 
     public CursorEventControl() {
     }
 
-    public CursorEventControl( CursorListener... listeners ) {
+    public CursorEventControl(CursorListener... listeners) {
         this.listeners.addAll(Arrays.asList(listeners));
     }
 
     /**
-     *  Convenience method that will add a CursorEventControl if it
-     *  doesn't exist, while adding the specified listeners.
+     * Convenience method that will add a CursorEventControl if it
+     * doesn't exist, while adding the specified listeners.
      */
-    public static void addListenersToSpatial( Spatial s, CursorListener... listeners ) {
-        if( s == null ) {
+    public static void addListenersToSpatial(Spatial s, CursorListener... listeners) {
+        if (s == null) {
             return;
         }
         CursorEventControl cec = s.getControl(CursorEventControl.class);
-        if( cec == null ) {
+        if (cec == null) {
             s.addControl(new CursorEventControl(listeners));
         } else {
             cec.listeners.addAll(Arrays.asList(listeners));
@@ -81,24 +83,22 @@ public class CursorEventControl extends AbstractControl {
     }
 
     /**
-     *  Convenience method that will remove the specified listeners
-     *  from a Spatial only if a CursorEventControl already exists.
+     * Convenience method that will remove the specified listeners
+     * from a Spatial only if a CursorEventControl already exists.
      */
-    public static void removeListenersFromSpatial( Spatial s, CursorListener... listeners ) {
-        if( s == null ) {
+    public static void removeListenersFromSpatial(Spatial s, CursorListener... listeners) {
+        if (s == null) {
             return;
         }
-        CursorEventControl mec = s.getControl(CursorEventControl.class);        
-        if( mec == null ) {
-            return;
-        } else {
+        CursorEventControl mec = s.getControl(CursorEventControl.class);
+        if (mec != null) {
             mec.listeners.removeAll(Arrays.asList(listeners));
         }
     }
 
-    public <T extends CursorListener> T getMouseListener( Class<T> type ) {
-        for( CursorListener l : listeners ) {
-            if( l.getClass() == type ) {
+    public <T extends CursorListener> T getMouseListener(Class<T> type) {
+        for (CursorListener l : listeners) {
+            if (l.getClass() == type) {
                 return type.cast(l);
             }
         }
@@ -109,44 +109,44 @@ public class CursorEventControl extends AbstractControl {
         return listeners.isEmpty();
     }
 
-    public void addMouseListener( CursorListener l ) {
+    public void addMouseListener(CursorListener l) {
         listeners.add(l);
     }
 
-    public void removeMouseListener( CursorListener l ) {
+    public void removeMouseListener(CursorListener l) {
         listeners.remove(l);
     }
 
-    public void cursorButtonEvent( CursorButtonEvent event, Spatial target, Spatial capture ) {
-        for( CursorListener l : listeners ) {
+    public void cursorButtonEvent(CursorButtonEvent event, Spatial target, Spatial capture) {
+        for (CursorListener l : listeners) {
             l.cursorButtonEvent(event, target, capture);
         }
     }
 
-    public void cursorEntered( CursorMotionEvent event, Spatial target, Spatial capture ) {
-        for( CursorListener l : listeners ) {
+    public void cursorEntered(CursorMotionEvent event, Spatial target, Spatial capture) {
+        for (CursorListener l : listeners) {
             l.cursorEntered(event, target, capture);
         }
     }
 
-    public void cursorExited( CursorMotionEvent event, Spatial target, Spatial capture ) {
-        for( CursorListener l : listeners ) {
+    public void cursorExited(CursorMotionEvent event, Spatial target, Spatial capture) {
+        for (CursorListener l : listeners) {
             l.cursorExited(event, target, capture);
         }
     }
 
-    public void cursorMoved( CursorMotionEvent event, Spatial target, Spatial capture ) {
-        for( CursorListener l : listeners ) {
+    public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
+        for (CursorListener l : listeners) {
             l.cursorMoved(event, target, capture);
         }
     }
 
     @Override
-    protected void controlRender( RenderManager rm, ViewPort vp ) {
+    protected void controlRender(RenderManager rm, ViewPort vp) {
     }
 
     @Override
-    protected void controlUpdate( float tpf ) {
+    protected void controlUpdate(float tpf) {
     }
 }
 

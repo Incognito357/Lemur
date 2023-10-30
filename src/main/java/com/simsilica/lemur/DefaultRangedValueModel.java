@@ -38,12 +38,12 @@ import com.simsilica.lemur.core.VersionedReference;
 
 
 /**
- *  A default implementation of the RangedValueModel interface
- *  that keeps a value and a version, incrementing the version
- *  whenever the value changes.  Values are kept between the
- *  configured min and max.
+ * A default implementation of the RangedValueModel interface
+ * that keeps a value and a version, incrementing the version
+ * whenever the value changes.  Values are kept between the
+ * configured min and max.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class DefaultRangedValueModel implements RangedValueModel {
 
@@ -56,7 +56,7 @@ public class DefaultRangedValueModel implements RangedValueModel {
         this(0, 100, 0);
     }
 
-    public DefaultRangedValueModel( double min, double max, double value ) {
+    public DefaultRangedValueModel(double min, double max, double value) {
         this.min = min;
         this.max = max;
         this.value = value;
@@ -72,7 +72,7 @@ public class DefaultRangedValueModel implements RangedValueModel {
     }
 
     public VersionedReference<Double> createReference() {
-        return new VersionedReference<Double>(this);
+        return new VersionedReference<>(this);
     }
 
     protected void checkRange() {
@@ -80,54 +80,54 @@ public class DefaultRangedValueModel implements RangedValueModel {
         value = Math.min(max, value);
     }
 
-    public void setValue( double value ) {
-        if( this.value == value )
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        if (this.value == value)
             return;
         this.value = value;
         version++;
         checkRange();
     }
 
-    public double getValue() {
-        return value;
-    }
-
-    public void setPercent( double v ) {
-        double range = max - min;
-        double projected = min + range * v;
-        setValue(projected);
-    }
-
     public double getPercent() {
         double range = max - min;
-        if( range == 0 )
+        if (range == 0)
             return 0;
         double part = getValue() - min;
         return part / range;
     }
 
-    public void setMaximum( double max ) {
-        if( this.max == max ) 
-            return;
-        this.max = max;
-        version++;
-        checkRange();
+    public void setPercent(double v) {
+        double range = max - min;
+        double projected = min + range * v;
+        setValue(projected);
     }
 
     public double getMaximum() {
         return max;
     }
 
-    public void setMinimum( double min ) {
-        if( this.min == min ) 
+    public void setMaximum(double max) {
+        if (this.max == max)
             return;
-        this.min = min;
+        this.max = max;
         version++;
         checkRange();
     }
 
     public double getMinimum() {
         return min;
+    }
+
+    public void setMinimum(double min) {
+        if (this.min == min)
+            return;
+        this.min = min;
+        version++;
+        checkRange();
     }
 
     @Override

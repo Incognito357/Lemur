@@ -48,7 +48,7 @@ import com.jme3.scene.control.AbstractControl;
  *
  *  @author    Paul Speed
  */
-public abstract class AbstractNodeControl<T> extends AbstractControl {
+public abstract class AbstractNodeControl extends AbstractControl {
     protected Node getNode() {
         return (Node)getSpatial();
     }

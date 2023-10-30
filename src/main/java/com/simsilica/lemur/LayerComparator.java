@@ -41,23 +41,23 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 /**
- *  Sorts geometry based on an included "layer" user data,
- *  accumulating an effective layer by walking up the
- *  scene graph back to root.  Layers are parent-local layers
- *  and not global layers.  In other words, they only control
- *  the sorting of children.  This approach is more useful in
- *  a GUI environment where UI elements are grouped in
- *  scene graph hierarchies already.
+ * Sorts geometry based on an included "layer" user data,
+ * accumulating an effective layer by walking up the
+ * scene graph back to root.  Layers are parent-local layers
+ * and not global layers.  In other words, they only control
+ * the sorting of children.  This approach is more useful in
+ * a GUI environment where UI elements are grouped in
+ * scene graph hierarchies already.
  *
- *  @author PSpeed
+ * @author PSpeed
  */
 public class LayerComparator implements GeometryComparator {
 
     public static final String LAYER = "layer";
     public static final String EFFECTIVE_LAYER = "effectiveLayer";
 
-    private GeometryComparator delegate;
-    private int bias;
+    private final GeometryComparator delegate;
+    private final int bias;
 
     public LayerComparator(GeometryComparator delegate) {
         this(delegate, 1);
@@ -68,29 +68,29 @@ public class LayerComparator implements GeometryComparator {
         this.bias = -bias;
     }
 
-    public static void setLayer( Spatial s, int layer ) {
-        if( layer == 0 ) {
+    public static void setLayer(Spatial s, int layer) {
+        if (layer == 0) {
             s.setUserData(LAYER, null);
-        } else {        
+        } else {
             s.setUserData(LAYER, layer);
         }
     }
 
-    public static void resetLayer( Spatial s, int layer ) {
+    public static void resetLayer(Spatial s, int layer) {
         setLayer(s, layer);
 
         // Need to clear the effective layer for the geometry children
         clearEffectiveLayer(s);
     }
 
-    public static Integer getLayer( Spatial s ) {
+    public static Integer getLayer(Spatial s) {
         return s.getUserData(LAYER);
     }
 
-    public static void clearEffectiveLayer( Spatial s ) {
+    public static void clearEffectiveLayer(Spatial s) {
         s.setUserData(EFFECTIVE_LAYER, null);
-        if( s instanceof Node ) {
-            for( Spatial child : ((Node)s).getChildren() ) {
+        if (s instanceof Node) {
+            for (Spatial child : ((Node) s).getChildren()) {
                 clearEffectiveLayer(child);
             }
         }
@@ -104,46 +104,47 @@ public class LayerComparator implements GeometryComparator {
         Integer childLayer = g.getUserData(LAYER);
         float layer = childLayer != null ? (childLayer + 1) : 1;
 
-        for( Spatial s = g.getParent(); s != null; s = s.getParent() ) {
+        for (Spatial s = g.getParent(); s != null; s = s.getParent()) {
             Integer i = s.getUserData(LAYER);
             // I'm not sure skipping a null layer is right but it's 
             // been this way for a while without obvious issue.  It
             // seems like skipping it might cause two separate objects
             // with sparse hierarchies to sort incorrectly.  I'm
             // leaving it for now.
-            if (i == null)
+            if (i == null) {
                 continue;
+            }
             // Should really base the divisor on the number
             // of children... since right now if we exceed more
             // than 10 layers under a parent then we overflow
             layer = layer * 0.1F;
-            layer += i != null ? (i + 1) : 1;
+            layer += i + 1;
         }
 
         return layer;
     }
 
     public float getLayer(Geometry g) {
-        Float d = g.getUserData("effectiveLayer");
+        Float d = g.getUserData(EFFECTIVE_LAYER);
         if (d != null)
             return d;
         d = calculateEffectiveLayer(g);
-        g.setUserData("effectiveLayer", d);
+        g.setUserData(EFFECTIVE_LAYER, d);
         return d;
     }
 
-    public int compare( Geometry g1, Geometry g2 ) {
+    public int compare(Geometry g1, Geometry g2) {
         float l1 = getLayer(g1);
         float l2 = getLayer(g2);
         if (l1 < l2)
             return -1 * bias;
         if (l2 < l1)
-            return 1 * bias;
+            return bias;
         return delegate.compare(g1, g2);
     }
-    
-    @Override       
+
+    @Override
     public String toString() {
         return getClass().getName() + "[delegate=" + delegate + ", bias=" + bias + "]";
-    }    
+    }
 }

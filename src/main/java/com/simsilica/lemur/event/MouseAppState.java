@@ -39,42 +39,40 @@ import com.jme3.app.Application;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.math.Vector2f;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Spatial;
 
 
 /**
- *  Keeps track of a set of "collision roots" for mouse picking
- *  and performs the pick event processing necessary to deliver
- *  MouseEvents and CollisionEvents to spatials with either the
- *  MouseEventControl or CursorEventControl attached.  (The
- *  actual event delivery is done by the PickEventSession class
- *  for which this app state has one active session.)
+ * Keeps track of a set of "collision roots" for mouse picking
+ * and performs the pick event processing necessary to deliver
+ * MouseEvents and CollisionEvents to spatials with either the
+ * MouseEventControl or CursorEventControl attached.  (The
+ * actual event delivery is done by the PickEventSession class
+ * for which this app state has one active session.)
  *
- *  <h2>PickEventSession behavior:</h2>
+ * <h2>PickEventSession behavior:</h2>
  *
- *  <p>Collision roots may either be perspective or orthogonal
- *  and the appropriate type of collision is done.  The ViewPort's
- *  camera is used to detect the difference.</p>
+ * <p>Collision roots may either be perspective or orthogonal
+ * and the appropriate type of collision is done.  The ViewPort's
+ * camera is used to detect the difference.</p>
  *
- *  <p>Events are delivered in near to far order to any 'target'
- *  that the cursor ray collides with until the event is consumed.
- *  Enter and exit events are delivered as targets are acquired or
- *  lost.</p>
+ * <p>Events are delivered in near to far order to any 'target'
+ * that the cursor ray collides with until the event is consumed.
+ * Enter and exit events are delivered as targets are acquired or
+ * lost.</p>
  *
- *  <p>If a button down event happens over a target then it is considered
- *  'captured'.  This spatial will be provided to subsequent events
- *  in addition to the normal target.  Furthermore, any new motion
- *  events are always delivered to the captured spatial first.<p>
+ * <p>If a button down event happens over a target then it is considered
+ * 'captured'.  This spatial will be provided to subsequent events
+ * in addition to the normal target.  Furthermore, any new motion
+ * events are always delivered to the captured spatial first.<p>
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class MouseAppState extends BasePickState {
 
-    private MouseObserver mouseObserver = new MouseObserver();
+    private final MouseObserver mouseObserver = new MouseObserver();
     private int scrollWheel = 0;
 
-    public MouseAppState( Application app ) {
+    public MouseAppState(Application app) {
         setEnabled(true);
 
         // We do this as early as possible because we want
@@ -83,7 +81,7 @@ public class MouseAppState extends BasePickState {
     }
 
     @Override
-    protected void cleanup( Application app ) {
+    protected void cleanup(Application app) {
         app.getInputManager().removeRawInputListener(mouseObserver);
         super.cleanup(app);
     }
@@ -91,26 +89,26 @@ public class MouseAppState extends BasePickState {
     @Override
     protected void dispatchMotion() {
         Vector2f cursor = getApplication().getInputManager().getCursorPosition();
-        getSession().cursorMoved((int)cursor.x, (int)cursor.y, scrollWheel);
+        getSession().cursorMoved((int) cursor.x, (int) cursor.y, scrollWheel);
     }
 
-    protected void dispatch( MouseButtonEvent evt ) {
-        if( getSession().buttonEvent(evt.getButtonIndex(), evt.getX(), evt.getY(), evt.isPressed()) ) {
+    protected void dispatch(MouseButtonEvent evt) {
+        if (getSession().buttonEvent(evt.getButtonIndex(), evt.getX(), evt.getY(), evt.isPressed())) {
             evt.setConsumed();
         }
     }
 
     protected class MouseObserver extends DefaultRawInputListener {
         @Override
-        public void onMouseMotionEvent( MouseMotionEvent evt ) {
+        public void onMouseMotionEvent(MouseMotionEvent evt) {
             //if( isEnabled() )
             //    dispatch(evt);
             scrollWheel = evt.getWheel();
         }
 
         @Override
-        public void onMouseButtonEvent( MouseButtonEvent evt ) {
-            if( isEnabled() ) {
+        public void onMouseButtonEvent(MouseButtonEvent evt) {
+            if (isEnabled()) {
                 dispatch(evt);
             }
         }

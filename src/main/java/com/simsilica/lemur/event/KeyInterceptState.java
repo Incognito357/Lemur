@@ -42,21 +42,20 @@ import com.jme3.util.SafeArrayList;
 
 
 /**
- *  AppState that registers a RawInputListener with the
- *  InputManager so that key events can optionally be received
- *  and consumed before normal listeners get them.
+ * AppState that registers a RawInputListener with the
+ * InputManager so that key events can optionally be received
+ * and consumed before normal listeners get them.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class KeyInterceptState extends BaseAppState {
 
-    private KeyObserver keyObserver = new KeyObserver();
+    private final KeyObserver keyObserver = new KeyObserver();
     private int modifiers;
 
-    private SafeArrayList<KeyListener> keyListeners
-                            = new SafeArrayList<KeyListener>(KeyListener.class);
+    private final SafeArrayList<KeyListener> keyListeners = new SafeArrayList<>(KeyListener.class);
 
-    public KeyInterceptState( Application app ) {
+    public KeyInterceptState(Application app) {
         setEnabled(true);
 
         // We do this as early as possible because we want to
@@ -65,20 +64,20 @@ public class KeyInterceptState extends BaseAppState {
         app.getInputManager().addRawInputListener(keyObserver);
     }
 
-    public void addKeyListener( KeyListener l ) {
+    public void addKeyListener(KeyListener l) {
         keyListeners.add(l);
     }
 
-    public void removeKeyListener( KeyListener l ) {
+    public void removeKeyListener(KeyListener l) {
         keyListeners.remove(l);
     }
 
     @Override
-    protected void initialize( Application app ) {
+    protected void initialize(Application app) {
     }
 
     @Override
-    protected void cleanup( Application app ) {
+    protected void cleanup(Application app) {
         app.getInputManager().removeRawInputListener(keyObserver);
     }
 
@@ -90,34 +89,34 @@ public class KeyInterceptState extends BaseAppState {
     protected void onDisable() {
     }
 
-    protected void setModifier( int mask, boolean on ) {
-        if( on ) {
+    protected void setModifier(int mask, boolean on) {
+        if (on) {
             modifiers = modifiers | mask;
         } else {
-            modifiers = modifiers & ~mask; 
+            modifiers = modifiers & ~mask;
         }
     }
 
     protected void dispatch(KeyInputEvent evt) {
-        if( !isEnabled() )
+        if (!isEnabled())
             return;
-            
+
         // Intercept for key modifiers
         int code = evt.getKeyCode();
-        if( code == KeyInput.KEY_LSHIFT || code == KeyInput.KEY_RSHIFT ) {
+        if (code == KeyInput.KEY_LSHIFT || code == KeyInput.KEY_RSHIFT) {
             setModifier(KeyModifiers.SHIFT_DOWN, evt.isPressed());
         }
-        if( code == KeyInput.KEY_LCONTROL || code == KeyInput.KEY_RCONTROL ) {
+        if (code == KeyInput.KEY_LCONTROL || code == KeyInput.KEY_RCONTROL) {
             setModifier(KeyModifiers.CONTROL_DOWN, evt.isPressed());
-        }        
-        if( code == KeyInput.KEY_LMENU || code == KeyInput.KEY_RMENU ) {
+        }
+        if (code == KeyInput.KEY_LMENU || code == KeyInput.KEY_RMENU) {
             setModifier(KeyModifiers.ALT_DOWN, evt.isPressed());
-        }        
-            
+        }
+
         ModifiedKeyInputEvent wrapper = null;
-        for( KeyListener l : keyListeners.getArray() ) {
+        for (KeyListener l : keyListeners.getArray()) {
             // Only wrap if we will actually deliver
-            if( wrapper == null ) {
+            if (wrapper == null) {
                 wrapper = new ModifiedKeyInputEvent(evt, modifiers);
             }
             l.onKeyEvent(wrapper);
@@ -127,9 +126,9 @@ public class KeyInterceptState extends BaseAppState {
     protected class KeyObserver extends DefaultRawInputListener {
 
         @Override
-        public void onKeyEvent( KeyInputEvent evt ) {
+        public void onKeyEvent(KeyInputEvent evt) {
             dispatch(evt);
         }
     }
-    
+
 }

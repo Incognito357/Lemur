@@ -39,59 +39,53 @@ import com.simsilica.lemur.Insets3f;
 
 
 /**
- *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class DynamicInsetsComponent extends InsetsComponent {
 
     private Vector3f lastPreferredSize;
 
-    public DynamicInsetsComponent( float top, float left, float bottom, float right ) {
-        super( new Insets3f(top, left, bottom, right) );
+    public DynamicInsetsComponent(float top, float left, float bottom, float right) {
+        super(new Insets3f(top, left, bottom, right));
     }
 
-    public DynamicInsetsComponent( float top, float left, float bottom, float right,
-                            float front, float back ) {
-        super( new Insets3f(top, left, bottom, right, front, back) );
+    public DynamicInsetsComponent(float top, float left, float bottom, float right,
+                                  float front, float back) {
+        super(new Insets3f(top, left, bottom, right, front, back));
     }
 
-    public DynamicInsetsComponent( Insets3f insets ) {
-        super( insets );
+    public DynamicInsetsComponent(Insets3f insets) {
+        super(insets);
     }
 
     @Override
-    public void setInsets( Insets3f insets ) {
+    public void setInsets(Insets3f insets) {
 
         Insets3f balanced = insets.clone();
 
         // Make sure the insets add to 1.0 in each axis
-        for( int i = 0; i < 3; i++ ) {
+        for (int i = 0; i < 3; i++) {
             float min = balanced.min.get(i);
             float max = balanced.max.get(i);
-            //if( min == 0 && max == 0 ) {
-            //    // If both are 0 then center... prevents divide by zero
-            //    min = 0.5f;
-            //    max = 0.5f;
-            //}
             float size = min + max;
             float scale = size < 1 ? 1 : (1 / size);
             balanced.min.set(i, min * scale);
             balanced.max.set(i, max * scale);
         }
 
-        super.setInsets( balanced );
+        super.setInsets(balanced);
     }
 
     @Override
     public DynamicInsetsComponent clone() {
-        DynamicInsetsComponent result = (DynamicInsetsComponent)super.clone();
+        DynamicInsetsComponent result = (DynamicInsetsComponent) super.clone();
         result.lastPreferredSize = null;
         return result;
     }
 
     @Override
-    public void calculatePreferredSize( Vector3f size ) {
-    
+    public void calculatePreferredSize(Vector3f size) {
+
         // Keep track of the preferred size of the rest of
         // the stack up to this point.  We don't add any insets
         // here.
@@ -99,10 +93,10 @@ public class DynamicInsetsComponent extends InsetsComponent {
     }
 
     @Override
-    public void reshape( Vector3f pos, Vector3f size ) {
+    public void reshape(Vector3f pos, Vector3f size) {
         Vector3f prefSize = lastPreferredSize;
-        if( prefSize == null ) {
-        
+        if (prefSize == null) {
+
             // Dynamic insets by its nature is going to be the
             // 'base' component or very close to it.  If we don't have
             // a lastPreferredSize then it means calculatePreferredSize
@@ -111,9 +105,9 @@ public class DynamicInsetsComponent extends InsetsComponent {
             // we are attached we will assume that our parent knows
             // best.  We won't cache the value, though, since it implies
             // that we might be incorrect later.  We'll fetch it every time.
-            if( isAttached() ) {
-                prefSize = getGuiControl().getPreferredSize(); 
-            } else {           
+            if (isAttached()) {
+                prefSize = getGuiControl().getPreferredSize();
+            } else {
                 // There is nothing we can do, so we won't do anything
                 return;
             }
@@ -123,12 +117,12 @@ public class DynamicInsetsComponent extends InsetsComponent {
         // desired size and
         Vector3f delta = size.subtract(prefSize);
         Insets3f insets = getInsets();
-        for( int i = 0; i < 3; i++ ) {
+        for (int i = 0; i < 3; i++) {
             float d = delta.get(i);
-            if( d <= 0 ) {
-                // We don't go smaller than preferred size so
-                // we skip if less than 0 and 0 would be a no-op
-                // anyway so we skip then too
+            if (d <= 0) {
+                // We don't go smaller than preferred size, so
+                // we skip if less than 0, and 0 would be a no-op
+                // anyway, so we skip then too
                 continue;
             }
 
@@ -137,16 +131,15 @@ public class DynamicInsetsComponent extends InsetsComponent {
             float p = pos.get(i);
             float s = size.get(i);
 
-            if( i == 1 ) {
+            if (i == 1) {
                 // To match regular insets we invert y adjustment
                 // so that min is at the top.
                 pos.set(i, p - min * d);
             } else {
                 pos.set(i, p + min * d);
             }
-            
-            // Set the size such that min and max are accounted
-            // for
+
+            // Set the size such that min and max are accounted for
             size.set(i, s - (min * d + max * d));
         }
     }

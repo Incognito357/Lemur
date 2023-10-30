@@ -64,13 +64,13 @@ public class AppMode extends BaseAppState {
 
     // We use copy-on-write list so that we can modify it during
     // iteration.
-    private List<ModeListener> listeners = new CopyOnWriteArrayList<ModeListener>();
+    private List<ModeListener> listeners = new CopyOnWriteArrayList<>();
 
-    private ConcurrentLinkedQueue<String> modeChanges = new ConcurrentLinkedQueue<String>();
+    private ConcurrentLinkedQueue<String> modeChanges = new ConcurrentLinkedQueue<>();
 
-    private Map<AppState, ModeEnabler> modeEnabled = new HashMap<AppState, ModeEnabler>();
+    private Map<AppState, ModeEnabler> modeEnabled = new HashMap<>();
 
-    private LinkedList<String> modeStack = new LinkedList<String>();
+    private LinkedList<String> modeStack = new LinkedList<>();
 
     protected AppMode() {
     }
@@ -244,7 +244,7 @@ public class AppMode extends BaseAppState {
     
         private AppState state;
         private Boolean enabled;
-        private Set<String> modes = new HashSet<String>();
+        private Set<String> modes = new HashSet<>();
 
         public ModeEnabler( AppState state ) {
             this.state = state;

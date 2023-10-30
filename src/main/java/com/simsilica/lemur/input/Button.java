@@ -38,10 +38,10 @@ import java.util.Objects;
 
 
 /**
- *  Represents a logical button input with an on/off state that
- *  can be used to map inputs to logical functions.
+ * Represents a logical button input with an on/off state that
+ * can be used to map inputs to logical functions.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Button {
 
@@ -77,25 +77,25 @@ public class Button {
     private String name;
 
     /**
-     *  Creates a new button identifier with the specified logical ID
-     *  and name.  Typically user-code would not call this constructor
-     *  but it's available for situations where a game controller exposes
-     *  buttons that are not part of the predefined constants.
+     * Creates a new button identifier with the specified logical ID
+     * and name. Typically, user-code would not call this constructor,
+     * but it's available for situations where a game controller exposes
+     * buttons that are not part of the predefined constants.
      */
-    public Button( String id, String name ) {
+    public Button(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
     /**
-     *  Returns the logical ID of this button.
-     */ 
+     * Returns the logical ID of this button.
+     */
     public String getId() {
         return id;
     }
 
     /**
-     *  Returns the human-readable name of this button.
+     * Returns the human-readable name of this button.
      */
     public String getName() {
         return name;
@@ -107,18 +107,15 @@ public class Button {
     }
 
     @Override
-    public boolean equals( Object o ) {
-        if( o == this ) {
+    public boolean equals(Object o) {
+        if (o == this) {
             return true;
         }
-        if( o == null || o.getClass() != getClass() ) {
+        if (o == null || o.getClass() != getClass()) {
             return false;
         }
-        Button other = (Button)o;
-        if( !Objects.equals(id, other.id) ) {
-            return false;
-        }
-        return true;
+        Button other = (Button) o;
+        return Objects.equals(id, other.id);
     }
 
     @Override

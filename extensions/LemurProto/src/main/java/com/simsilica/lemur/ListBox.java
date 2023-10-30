@@ -73,63 +73,54 @@ import java.util.Set;
  */
 public class ListBox<T> extends Panel {
 
-    static Logger log = LoggerFactory.getLogger(ListBox.class);
+    private static final Logger log = LoggerFactory.getLogger(ListBox.class);
 
     public static final String ELEMENT_ID = "list";
     public static final String CONTAINER_ID = "container";
     public static final String ITEMS_ID = "items";
     public static final String SLIDER_ID = "slider";
     public static final String SELECTOR_ID = "selector";
-
     public static final String EFFECT_PRESS = "press";
     public static final String EFFECT_RELEASE = "release";
     public static final String EFFECT_CLICK = "click";
     public static final String EFFECT_ACTIVATE = "activate";
     public static final String EFFECT_DEACTIVATE = "deactivate";
 
-    public enum ListAction {
-        Down, Up, Click, Entered, Exited
-    }
-
-    private ElementId baseElementId;
-    private BorderLayout layout;
+    private final ElementId baseElementId;
+    private final ClickListener clickListener = new ClickListener();
+    private final CommandMap<ListBox<T>, ListAction> commandMap = new CommandMap<>(this);
+    private final GridPanel grid;
+    private final Slider slider;
+    private final Node selectorArea;
+    private final Panel selector;
+    private final Vector3f selectorAreaOrigin = new Vector3f();
+    private final Vector3f selectorAreaSize = new Vector3f();
+    private final RangedValueModel baseIndex;  // upside down actually
+    private final VersionedReference<Double> indexRef;
     private VersionedList<T> model;
     private VersionedReference<List<T>> modelRef;
     private ValueRenderer<T> cellRenderer;
-
     private SelectionModel selection;
     private VersionedReference<Set<Integer>> selectionRef;
-
-    private ClickListener clickListener = new ClickListener();
-    private BackgroundListener backgroundListener = new BackgroundListener();
-    private CommandMap<ListBox<T>, ListAction> commandMap = new CommandMap<>(this);
-
-    private GridPanel grid;
-    private Slider slider;
-    private Node selectorArea;
-    private Panel selector;
-    private Vector3f selectorAreaOrigin = new Vector3f();
-    private Vector3f selectorAreaSize = new Vector3f();
-    private RangedValueModel baseIndex;  // upside down actually
-    private VersionedReference<Double> indexRef;
     private int maxIndex;
-
     /**
      * Set to true the mouse wheel will scroll the list if the mouse
      * is over the list.
      */
     private boolean scrollOnHover = true;
-
     /**
      * Keeps track of if we've triggered 'activated' effects (and send entered events)
      */
     private boolean activated = false;
-
     /**
      * Keeps track of whether some listener has detected enter/exit.  When this
-     * is different than activated then we need to trigger effects and fire events.
+     * is different from activated then we need to trigger effects and fire events.
      */
     private boolean entered = false;
+
+    public enum ListAction {
+        Down, Up, Click, Entered, Exited
+    }
 
     public ListBox() {
         this(true, new VersionedList<>(), null,
@@ -172,7 +163,7 @@ public class ListBox<T> extends Panel {
         }
         this.cellRenderer = cellRenderer;
 
-        this.layout = new BorderLayout();
+        BorderLayout layout = new BorderLayout();
         getControl(GuiControl.class).setLayout(layout);
 
         grid = new GridPanel(new GridModelDelegate(), elementId.child(ITEMS_ID), style);
@@ -191,6 +182,7 @@ public class ListBox<T> extends Panel {
         }
 
         // Listen to our own mouse events that don't hit something else
+        BackgroundListener backgroundListener = new BackgroundListener();
         CursorEventControl.addListenersToSpatial(this, backgroundListener);
 
         // Need a spacer so that the 'selector' panel doesn't think
@@ -212,9 +204,7 @@ public class ListBox<T> extends Panel {
 
     @StyleDefaults(ELEMENT_ID)
     public static void initializeDefaultStyles(Styles styles, Attributes attrs) {
-
         ElementId parent = new ElementId(ELEMENT_ID);
-        //QuadBackgroundComponent quad = new QuadBackgroundComponent(new ColorRGBA(0.5f, 0.5f, 0.5f, 1));
         QuadBackgroundComponent quad = new QuadBackgroundComponent(new ColorRGBA(0.8f, 0.9f, 0.1f, 1));
         quad.getMaterial().getMaterial().getAdditionalRenderState().setBlendMode(BlendMode.Exclusion);
         styles.getSelector(parent.child(SELECTOR_ID), null).set("background", quad, false);
@@ -254,6 +244,10 @@ public class ListBox<T> extends Panel {
         refreshSelector();
     }
 
+    public VersionedList<T> getModel() {
+        return model;
+    }
+
     public void setModel(VersionedList<T> model) {
         if (this.model == model && model != null) {
             return;
@@ -280,10 +274,6 @@ public class ListBox<T> extends Panel {
         refreshSelector();
     }
 
-    public VersionedList<T> getModel() {
-        return model;
-    }
-
     public Slider getSlider() {
         return slider;
     }
@@ -296,6 +286,10 @@ public class ListBox<T> extends Panel {
         return selector;
     }
 
+    public SelectionModel getSelectionModel() {
+        return selection;
+    }
+
     public void setSelectionModel(SelectionModel selection) {
         if (this.selection == selection) {
             return;
@@ -303,10 +297,6 @@ public class ListBox<T> extends Panel {
         this.selection = selection;
         this.selectionRef = selection.createReference();
         refreshSelector();
-    }
-
-    public SelectionModel getSelectionModel() {
-        return selection;
     }
 
     /**
@@ -367,6 +357,10 @@ public class ListBox<T> extends Panel {
         }
     }
 
+    public int getVisibleItems() {
+        return grid.getVisibleRows();
+    }
+
     @StyleAttribute(value = "visibleItems", lookupDefault = false)
     public void setVisibleItems(int count) {
         grid.setVisibleRows(count);
@@ -374,8 +368,8 @@ public class ListBox<T> extends Panel {
         refreshSelector();
     }
 
-    public int getVisibleItems() {
-        return grid.getVisibleRows();
+    public ValueRenderer<T> getCellRenderer() {
+        return cellRenderer;
     }
 
     @StyleAttribute(value = "cellRenderer", lookupDefault = false)
@@ -385,13 +379,9 @@ public class ListBox<T> extends Panel {
         }
         this.cellRenderer = renderer;
         // We send through the same element ID that was provided to our constructor
-        // because that's what the default cell renderer would have used.            
+        // because that's what the default cell renderer would have used.
         cellRenderer.configureStyle(baseElementId.child("item"), getStyle());
         grid.refreshGrid(); // cheating
-    }
-
-    public ValueRenderer<T> getCellRenderer() {
-        return cellRenderer;
     }
 
     public void setAlpha(float alpha, boolean recursive) {
@@ -399,6 +389,10 @@ public class ListBox<T> extends Panel {
 
         // Catch some of our intermediaries
         setChildAlpha(selector, alpha);
+    }
+
+    public boolean getScrollOnHover() {
+        return scrollOnHover;
     }
 
     /**
@@ -411,28 +405,24 @@ public class ListBox<T> extends Panel {
         this.scrollOnHover = f;
     }
 
-    public boolean getScrollOnHover() {
-        return scrollOnHover;
-    }
-
     protected void refreshSelector() {
         if (selectorArea == null) {
             return;
         }
         Panel selectedCell = null;
-        if( selection != null && !selection.isEmpty() ) {
+        if (selection != null && !selection.isEmpty()) {
             // For now just one item... otherwise we have to loop
             // over visible items
             int selected = selection.iterator().next();
-            if( selected >= model.size() ) {
+            if (selected >= model.size()) {
                 selected = model.size() - 1;
-                selection.setSelection(selected);      
+                selection.setSelection(selected);
             }
-            selectedCell = grid.getCell(selected, 0); 
+            selectedCell = grid.getCell(selected, 0);
         }
-                
-        if( selectedCell == null ) {
-            selectorArea.detachChild(selector);            
+
+        if (selectedCell == null) {
+            selectorArea.detachChild(selector);
         } else {
             Vector3f size = selectedCell.getSize().clone();
             Vector3f loc = selectedCell.getLocalTranslation();
@@ -441,9 +431,9 @@ public class ListBox<T> extends Panel {
             selector.setLocalTranslation(pos);
             selector.setSize(size);
             selector.setPreferredSize(size);
-            
+
             selectorArea.attachChild(selector);
-            selectorArea.setLocalTranslation(grid.getLocalTranslation());            
+            selectorArea.setLocalTranslation(grid.getLocalTranslation());
         }
     }
 
@@ -638,11 +628,11 @@ public class ListBox<T> extends Panel {
         public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
             if (event.getScrollDelta() != 0) {
                 if (log.isTraceEnabled()) {
-                    log.trace("Scroll delta:" + event.getScrollDelta() + "  value:" + event.getScrollValue());
+                    log.trace("Scroll delta:{}  value:{}", event.getScrollDelta(), event.getScrollValue());
                 }
                 if (scrollOnHover) {
                     // My wheel moves in multiples of 120... I don't know if that's
-                    // universal so we'll at least always send some value. 
+                    // universal, so we'll at least always send some value.
                     if (event.getScrollDelta() > 0) {
                         scroll(Math.max(1, event.getScrollDelta() / 120));
                     } else {

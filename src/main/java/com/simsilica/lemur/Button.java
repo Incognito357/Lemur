@@ -82,16 +82,6 @@ public class Button extends Label {
     public static final String EFFECT_ENABLE = "enable";
     public static final String EFFECT_DISABLE = "disable";
 
-    public enum ButtonAction {
-        Down, Up, Click,
-        HighlightOn, HighlightOff,
-        FocusGained, FocusLost,
-        Hover,
-        Enabled, Disabled
-    }
-
-    ;
-
     private boolean enabled = true;
     private ColorRGBA color;
     private ColorRGBA shadowColor;
@@ -102,7 +92,20 @@ public class Button extends Label {
     private boolean highlightOn;
     private boolean focusOn;
     private boolean pressed;
-    private CommandMap<Button, ButtonAction> commandMap = new CommandMap<>(this);
+    private final CommandMap<Button, ButtonAction> commandMap = new CommandMap<>(this);
+
+    public enum ButtonAction {
+        Down,
+        Up,
+        Click,
+        HighlightOn,
+        HighlightOff,
+        FocusGained,
+        FocusLost,
+        Hover,
+        Enabled,
+        Disabled
+    }
 
     public Button(String s) {
         this(s, true, new ElementId(ELEMENT_ID), null);
@@ -140,6 +143,19 @@ public class Button extends Label {
         attrs.set("highlightColor", ColorRGBA.Yellow, false);  // yellow should not need srgb conversion
         attrs.set("focusColor", ColorRGBA.Green, false);       // green should not need srgb conversion
         attrs.set("shadowColor", globals.srgbaColor(new ColorRGBA(0, 0, 0, 0.5f)), false);
+    }
+
+    private static ColorRGBA mix(ColorRGBA c1, ColorRGBA c2) {
+        if (c1 == null && c2 == null) {
+            return null;
+        }
+        if (c1 == null) {
+            return c2;
+        }
+        if (c2 == null) {
+            return c1;
+        }
+        return c1.clone().interpolateLocal(c2, 0.5f);
     }
 
     public void addCommand(ButtonAction a, Command<Button> command) {
@@ -184,6 +200,11 @@ public class Button extends Label {
         }
     }
 
+    @Override
+    public ColorRGBA getColor() {
+        return color;
+    }
+
     @StyleAttribute("color")
     @Override
     public void setColor(ColorRGBA color) {
@@ -192,8 +213,8 @@ public class Button extends Label {
     }
 
     @Override
-    public ColorRGBA getColor() {
-        return color;
+    public ColorRGBA getShadowColor() {
+        return shadowColor;
     }
 
     @StyleAttribute(value = "shadowColor", lookupDefault = false)
@@ -203,11 +224,9 @@ public class Button extends Label {
         super.setShadowColor(shadowColor);
     }
 
-    @Override
-    public ColorRGBA getShadowColor() {
-        return shadowColor;
+    public ColorRGBA getHighlightColor() {
+        return highlightColor;
     }
-
 
     @StyleAttribute(value = "highlightColor", lookupDefault = false)
     public void setHighlightColor(ColorRGBA color) {
@@ -217,8 +236,8 @@ public class Button extends Label {
         }
     }
 
-    public ColorRGBA getHighlightColor() {
-        return highlightColor;
+    public ColorRGBA getHighlightShadowColor() {
+        return highlightShadowColor;
     }
 
     @StyleAttribute(value = "highlightShadowColor", lookupDefault = false)
@@ -229,8 +248,8 @@ public class Button extends Label {
         }
     }
 
-    public ColorRGBA getHighlightShadowColor() {
-        return highlightShadowColor;
+    public ColorRGBA getFocusColor() {
+        return focusColor;
     }
 
     @StyleAttribute(value = "focusColor", lookupDefault = false)
@@ -241,8 +260,8 @@ public class Button extends Label {
         }
     }
 
-    public ColorRGBA getFocusColor() {
-        return focusColor;
+    public ColorRGBA getFocusShadowColor() {
+        return focusShadowColor;
     }
 
     @StyleAttribute(value = "focusShadowColor", lookupDefault = false)
@@ -253,10 +272,6 @@ public class Button extends Label {
         }
     }
 
-    public ColorRGBA getFocusShadowColor() {
-        return focusShadowColor;
-    }
-
     /**
      * Can be called by application code to simulate a click on a button.
      * Note: this will run the click effects/actions but not the press/release
@@ -264,6 +279,10 @@ public class Button extends Label {
      */
     public void click() {
         runClick();
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public void setEnabled(boolean b) {
@@ -280,12 +299,22 @@ public class Button extends Label {
         }
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     public boolean isPressed() {
         return pressed;
+    }
+
+    protected void setPressed(boolean f) {
+        if (pressed == f) {
+            return;
+        }
+        this.pressed = f;
+        if (pressed) {
+            commandMap.runCommands(ButtonAction.Down);
+            runEffect(EFFECT_PRESS);
+        } else {
+            commandMap.runCommands(ButtonAction.Up);
+            runEffect(EFFECT_RELEASE);
+        }
     }
 
     public boolean isHighlightOn() {
@@ -310,58 +339,35 @@ public class Button extends Label {
         resetColors();
     }
 
-    private static ColorRGBA mix(ColorRGBA c1, ColorRGBA c2) {
-        if (c1 == null && c2 == null) {
-            return null;
-        }
-        if (c1 == null) {
-            return c2;
-        }
-        if (c2 == null) {
-            return c1;
-        }
-        return c1.clone().interpolateLocal(c2, 0.5f);
-    }
-
     protected void resetColors() {
         if (focusOn && highlightOn) {
             // Mix them
-            ColorRGBA color = mix(getHighlightColor(), getFocusColor());
-            if (color != null) {
-                super.setColor(color);
+            ColorRGBA col = mix(getHighlightColor(), getFocusColor());
+            if (col != null) {
+                super.setColor(col);
             }
             ColorRGBA shadow = mix(getHighlightShadowColor(), getFocusShadowColor());
             if (shadow != null) {
                 super.setShadowColor(shadow);
             }
         } else if (highlightOn) {
-            if (getHighlightColor() != null)
+            if (getHighlightColor() != null) {
                 super.setColor(getHighlightColor());
-            if (getHighlightShadowColor() != null)
+            }
+            if (getHighlightShadowColor() != null) {
                 super.setShadowColor(getHighlightShadowColor());
+            }
         } else if (focusOn) {
-            if (getFocusColor() != null)
+            if (getFocusColor() != null) {
                 super.setColor(getFocusColor());
-            if (getFocusShadowColor() != null)
+            }
+            if (getFocusShadowColor() != null) {
                 super.setShadowColor(getFocusShadowColor());
+            }
         } else {
             // Just the plain color
             super.setColor(getColor());
             super.setShadowColor(getShadowColor());
-        }
-    }
-
-    protected void setPressed(boolean f) {
-        if (pressed == f) {
-            return;
-        }
-        this.pressed = f;
-        if (pressed) {
-            commandMap.runCommands(ButtonAction.Down);
-            runEffect(EFFECT_PRESS);
-        } else {
-            commandMap.runCommands(ButtonAction.Up);
-            runEffect(EFFECT_RELEASE);
         }
     }
 
@@ -419,11 +425,6 @@ public class Button extends Label {
     }
 
     protected class ButtonMouseHandler extends DefaultMouseListener {
-
-        @Override
-        protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
-        }
-
         @Override
         public void mouseButtonEvent(MouseButtonEvent event, Spatial target, Spatial capture) {
 
@@ -431,7 +432,6 @@ public class Button extends Label {
             event.setConsumed();
 
             // Do our own better handling of 'click' now
-            //super.mouseButtonEvent(event, target, capture);
             if (!isEnabled())
                 return;
 
@@ -471,8 +471,6 @@ public class Button extends Label {
 
         @Override
         public void mouseExited(MouseMotionEvent event, Spatial target, Spatial capture) {
-            //if( !isEnabled() )
-            //    return;
             if (!isHighlightOn()) {
                 // If the highlight is on then we need to run through
                 // the events regardless of enabled state... and if it's 
@@ -485,9 +483,7 @@ public class Button extends Label {
 
         @Override
         public void mouseMoved(MouseMotionEvent event, Spatial target, Spatial capture) {
-            //System.out.println("mouseMoved(" + event + ")");
             commandMap.runCommands(ButtonAction.Hover);
         }
-
     }
 }

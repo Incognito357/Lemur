@@ -36,8 +36,6 @@
 
 package com.simsilica.lemur;
 
-import com.simsilica.lemur.core.GuiComponent;
-import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.style.ElementId;
 
@@ -49,8 +47,6 @@ import com.simsilica.lemur.style.ElementId;
  *  @author    Paul Speed
  */
 public class ActionButton extends Button {
- 
-    //private static final String KEY_ICON = "icon";
     
     private Action action;
     private VersionedReference<Action> actionRef;
@@ -117,7 +113,7 @@ public class ActionButton extends Button {
     }
     
     protected void updateEnabled() {
-        setEnabled(action != null ? action.isEnabled() : false);
+        setEnabled(action != null && action.isEnabled());
     }
     
     protected void updateIcon() {
@@ -127,7 +123,7 @@ public class ActionButton extends Button {
     /**
      *  Registered with the parent class for all click events
      *  which then delegates to the action.  We could have gone
-     *  direct but I wanted the intercept just in case.
+     *  direct, but I wanted the intercept just in case.
      */
     private class ClickCommand implements Command<Button> {
 

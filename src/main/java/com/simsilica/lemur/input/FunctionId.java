@@ -34,44 +34,46 @@
 
 package com.simsilica.lemur.input;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 
 /**
- *  A logical function identifier that can be used to map
- *  controller inputs to actual analog and state listeners.
- *  A FunctionId consists of a group ID and a function name.
- *  Groups help logically organize otherwise potentially similar
- *  names as well as providing a convenient way to turn on/off
- *  entire sets of functions based on application state.
+ * A logical function identifier that can be used to map
+ * controller inputs to actual analog and state listeners.
+ * A FunctionId consists of a group ID and a function name.
+ * Groups help logically organize otherwise potentially similar
+ * names as well as providing a convenient way to turn on/off
+ * entire sets of functions based on application state.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class FunctionId {
 
     public static final String DEFAULT_GROUP = "default";
 
-    private static Set<FunctionId> existing = new HashSet<FunctionId>();
+    private static final Set<FunctionId> existing = new HashSet<>();
 
-    private String group;
-    private String id;
-    private String name;
+    private final String group;
+    private final String id;
+    private final String name;
 
-    public FunctionId( String id ) {
+    public FunctionId(String id) {
         this(DEFAULT_GROUP, id, id);
     }
 
-    public FunctionId( String group, String id ) {
+    public FunctionId(String group, String id) {
         this(group, id, id);
     }
 
-    public FunctionId( String group, String id, String name ) {
+    public FunctionId(String group, String id, String name) {
         this.group = group;
         this.id = id;
         this.name = name;
 
         // Have to check last
-        if( !existing.add(this) ) {
+        if (!existing.add(this)) {
             // This is a duplicate
             throw new RuntimeException("FunctionId already exists for:" + group + ", " + id);
         }
@@ -95,17 +97,15 @@ public class FunctionId {
     }
 
     @Override
-    public boolean equals( Object o ) {
-        if( o == this )
+    public boolean equals(Object o) {
+        if (o == this)
             return true;
-        if( o == null || o.getClass() != getClass() )
+        if (o == null || o.getClass() != getClass())
             return false;
-        FunctionId other = (FunctionId)o;
-        if( !Objects.equals(id, other.id) )
+        FunctionId other = (FunctionId) o;
+        if (!Objects.equals(id, other.id))
             return false;
-        if( !Objects.equals(group, other.group) )
-            return false;
-        return true;
+        return Objects.equals(group, other.group);
     }
 
     @Override

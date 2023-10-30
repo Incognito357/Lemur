@@ -31,7 +31,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 package com.simsilica.script;
 
 import com.jme3.app.SimpleApplication;
@@ -49,57 +49,57 @@ import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.StyleLoader;
 import com.simsilica.lemur.style.Styles;
+
 import java.io.File;
 
 /**
- * 
- *  @author PSpeed
+ * @author PSpeed
  */
 public class Main extends SimpleApplication {
-    
+
     private boolean hasFocus;
     private long lastFrameTime;
     private long offFocusFrameTime = 1000000000L / 60;  // ~60 FPS 
+
+    public Main() {
+        super(new StatsAppState(),
+                new HudState(),
+                new CameraMovementState(),
+                new SelectionState(),
+                AppMode.getInstance(),
+                new ScreenshotAppState("ScriptMonkey", System.currentTimeMillis()));
+    }
 
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
     }
 
-    public Main() {
-        super( new StatsAppState(), 
-               new HudState(), 
-               new CameraMovementState(),
-               new SelectionState(),
-               AppMode.getInstance(),
-               new ScreenshotAppState("ScriptMonkey", System.currentTimeMillis()) );
-    }
-
     @Override
     public void simpleInitApp() {
- 
+
         // Initialize Lemur and setup some default key/input mappings.
         GuiGlobals.initialize(this);
         InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-        MainFunctions.initializeDefaultMappings( inputMapper );
-        CameraMovementFunctions.initializeDefaultMappings( inputMapper );
+        MainFunctions.initializeDefaultMappings(inputMapper);
+        CameraMovementFunctions.initializeDefaultMappings(inputMapper);
 
         inputMapper.activateGroup(MainFunctions.GROUP);
- 
+
         AppMode.setMode(SelectionState.MODE_SELECTION);
- 
+
         // Load up a custom style for the UI related stuff
         Styles styles = GuiGlobals.getInstance().getStyles();
         //new StyleLoader(styles).loadStyleResource( "/com/simsilica/script/glass-style.groovy" );       
 
         BaseStyles.loadGlassStyle();
- 
+
         DirectionalLight sun = new DirectionalLight();
         rootNode.addLight(sun);
 
         AmbientLight ambient = new AmbientLight();
         rootNode.addLight(ambient);
-     
+
         // Setup the script state
         GroovyConsoleState scripts = new GroovyConsoleState();
         scripts.setInitBinding("app", this);
@@ -116,20 +116,20 @@ public class Main extends SimpleApplication {
         scripts.addInitializationScript(getClass().getResource("ModelApi.groovy"));
         scripts.addInitializationScript(getClass().getResource("FileApi.groovy"));
         scripts.addInitializationScript(getClass().getResource("InterfaceApi.groovy"));
-        
+
         // Load any scripts in the "scripts" directory
         File dir = new File("scripts");
-        if( dir.exists() ) {
-            for( File f : dir.listFiles() ) {
-                if( f.getName().toLowerCase().endsWith(".groovy") ) {
+        if (dir.exists()) {
+            for (File f : dir.listFiles()) {
+                if (f.getName().toLowerCase().endsWith(".groovy")) {
                     scripts.addInitializationScript(f);
                 }
             }
         }
-        
+
         // And finally attach the script managing state
         stateManager.attach(scripts);
-    
+
         Box b = new Box(1, 1, 1);
         Geometry geom = new Geometry("Box1", b);
 
@@ -140,25 +140,25 @@ public class Main extends SimpleApplication {
 
         b = new Box(1, 1, 1);
         geom = new Geometry("Box2", b);
-        geom.setLocalTranslation(10, 0, 10 );
+        geom.setLocalTranslation(10, 0, 10);
 
         mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.Red);
         geom.setMaterial(mat);
         rootNode.attachChild(geom);
-        
+
         b = new Box(1, 1, 1);
         geom = new Geometry("Box3", b);
-        geom.setLocalTranslation(0, 10, 10 );
+        geom.setLocalTranslation(0, 10, 10);
 
         mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.Cyan);
         geom.setMaterial(mat);
         rootNode.attachChild(geom);
-        
+
         b = new Box(1, 1, 1);
         geom = new Geometry("Box4", b);
-        geom.setLocalTranslation(0, -10, 10 );
+        geom.setLocalTranslation(0, -10, 10);
 
         mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.Green);
@@ -180,11 +180,11 @@ public class Main extends SimpleApplication {
         hasFocus = false;
     }
 
-    protected void sleep( long nanos ) {
+    protected void sleep(long nanos) {
         try {
-            long ms = nanos/1000000L;
+            long ms = nanos / 1000000L;
             Thread.sleep(ms);
-        } catch( InterruptedException e ) {
+        } catch (InterruptedException e) {
             // checked exceptions are lame
             throw new RuntimeException("Sleep interrupted", e);
         }
@@ -192,20 +192,20 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
-        if( !hasFocus ) {
+        if (!hasFocus) {
             // Then force limit the FPS to around 60
-            
+
             // Sleep until the appropriate frame time has passed
-            while( true ) {
+            while (true) {
                 long time = System.nanoTime();
                 long delta = time - lastFrameTime;
-                if( delta < offFocusFrameTime ) {
+                if (delta < offFocusFrameTime) {
                     sleep(offFocusFrameTime - delta);
                 } else {
                     lastFrameTime = time;
                     break;
                 }
-            }      
+            }
         }
     }
 

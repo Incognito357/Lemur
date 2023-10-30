@@ -34,50 +34,47 @@
 
 package com.simsilica.lemur.event;
 
-import com.jme3.scene.*;
+import com.jme3.scene.Spatial;
 
 
 /**
- *  A default implementation cursor listener that provides default
- *  implementations for all CursorListener methods.  In addition,
- *  the cursorButtonEvent() provides basic default click behavior
- *  calling an overridable click() method.
+ * A default implementation cursor listener that provides default
+ * implementations for all CursorListener methods.  In addition,
+ * the cursorButtonEvent() provides basic default click behavior
+ * calling an overridable click() method.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class DefaultCursorListener implements CursorListener {
 
     private float xDown;
     private float yDown;
 
-    public DefaultCursorListener() {
+    protected void click(CursorButtonEvent event, Spatial target, Spatial capture) {
     }
 
-    protected void click( CursorButtonEvent event, Spatial target, Spatial capture ) {
-    }
-
-    public void cursorButtonEvent( CursorButtonEvent event, Spatial target, Spatial capture ) {
+    public void cursorButtonEvent(CursorButtonEvent event, Spatial target, Spatial capture) {
         event.setConsumed();
 
-        if( event.isPressed() ) {
+        if (event.isPressed()) {
             xDown = event.getX();
             yDown = event.getY();
         } else {
             float x = event.getX();
             float y = event.getY();
-            if( Math.abs(x-xDown) < 3 && Math.abs(y-yDown) < 3 ) {
+            if (Math.abs(x - xDown) < 3 && Math.abs(y - yDown) < 3) {
                 click(event, target, capture);
             }
         }
     }
 
-    public void cursorEntered( CursorMotionEvent event, Spatial target, Spatial capture ) {
+    public void cursorEntered(CursorMotionEvent event, Spatial target, Spatial capture) {
     }
 
-    public void cursorExited( CursorMotionEvent event, Spatial target, Spatial capture ) {
+    public void cursorExited(CursorMotionEvent event, Spatial target, Spatial capture) {
     }
 
-    public void cursorMoved( CursorMotionEvent event, Spatial target, Spatial capture ) {
+    public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
     }
 }
 

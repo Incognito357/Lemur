@@ -53,12 +53,11 @@ import com.jme3.math.Vector3f;
  *
  *  @author    Paul Speed
  */
-public interface GuiComponent {
-    public void calculatePreferredSize( Vector3f size );
-    public void reshape( Vector3f pos, Vector3f size );
-    public void attach( GuiControl parent );
-    public void detach( GuiControl parent );
-    public boolean isAttached();
-    public GuiControl getGuiControl();
-    public GuiComponent clone();
+public interface GuiComponent extends Cloneable {
+    void calculatePreferredSize( Vector3f size );
+    void reshape( Vector3f pos, Vector3f size );
+    void attach( GuiControl parent );
+    void detach( GuiControl parent );
+    boolean isAttached();
+    GuiControl getGuiControl();
 }

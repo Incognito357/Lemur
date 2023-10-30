@@ -49,11 +49,9 @@ import com.simsilica.lemur.input.StateFunctionListener;
 
 
 /**
- *
  * @author PSpeed
  */
-public class CameraMovementState extends BaseAppState
-                                 implements AnalogFunctionListener, StateFunctionListener {
+public class CameraMovementState extends BaseAppState implements AnalogFunctionListener, StateFunctionListener {
 
     private InputMapper inputMapper;
     private Camera camera;
@@ -62,135 +60,132 @@ public class CameraMovementState extends BaseAppState
     private double pitch;
     private double maxPitch = FastMath.HALF_PI;
     private double minPitch = -FastMath.HALF_PI;
-    private Quaternion cameraFacing = new Quaternion().fromAngles((float)pitch, (float)yaw, 0);
+    private Quaternion cameraFacing = new Quaternion().fromAngles((float) pitch, (float) yaw, 0);
     private double forward;
     private double side;
     private double elevation;
     private double speed = 3.0;
 
-    public CameraMovementState() {
+    public double getPitch() {
+        return pitch;
     }
 
-    public void setPitch( double pitch ) {
+    public void setPitch(double pitch) {
         this.pitch = pitch;
         updateFacing();
     }
 
-    public double getPitch() {
-        return pitch;
-    }
-    
-    public void setYaw( double yaw ) {
-        this.yaw = yaw;
-        updateFacing();
-    }
-    
     public double getYaw() {
         return yaw;
     }
 
-    public void setRotation( Quaternion rotation ) {
+    public void setYaw(double yaw) {
+        this.yaw = yaw;
+        updateFacing();
+    }
+
+    public Quaternion getRotation() {
+        return camera.getRotation();
+    }
+
+    public void setRotation(Quaternion rotation) {
         // Do our best
         float[] angle = rotation.toAngles(null);
         this.pitch = angle[0];
         this.yaw = angle[1];
         updateFacing();
     }
-    
-    public Quaternion getRotation() {
-        return camera.getRotation();
-    }
 
     @Override
     protected void initialize(Application app) {
         this.camera = app.getCamera();
-        
-        if( inputMapper == null )
+
+        if (inputMapper == null)
             inputMapper = GuiGlobals.getInstance().getInputMapper();
-        
+
         // Most of the movement functions are treated as analog.        
         inputMapper.addAnalogListener(this,
-                                      CameraMovementFunctions.F_Y_LOOK,
-                                      CameraMovementFunctions.F_X_LOOK,
-                                      CameraMovementFunctions.F_MOVE,
-                                      CameraMovementFunctions.F_ELEVATE,
-                                      CameraMovementFunctions.F_STRAFE);
+                CameraMovementFunctions.F_Y_LOOK,
+                CameraMovementFunctions.F_X_LOOK,
+                CameraMovementFunctions.F_MOVE,
+                CameraMovementFunctions.F_ELEVATE,
+                CameraMovementFunctions.F_STRAFE);
 
         // Only run mode is treated as a 'state' or a trinary value.
         // (Positive, Off, Negative) and in this case we only care about
         // Positive and Off.  See CameraMovementFunctions for a description
         // of alternate ways this could have been done.
         inputMapper.addStateListener(this,
-                                     CameraMovementFunctions.F_RUN);
+                CameraMovementFunctions.F_RUN);
     }
 
     @Override
     protected void cleanup(Application app) {
 
-        inputMapper.removeAnalogListener( this,
-                                          CameraMovementFunctions.F_Y_LOOK,
-                                          CameraMovementFunctions.F_X_LOOK,
-                                          CameraMovementFunctions.F_MOVE,
-                                          CameraMovementFunctions.F_ELEVATE,
-                                          CameraMovementFunctions.F_STRAFE);
-        inputMapper.removeStateListener( this,
-                                         CameraMovementFunctions.F_RUN);
+        inputMapper.removeAnalogListener(this,
+                CameraMovementFunctions.F_Y_LOOK,
+                CameraMovementFunctions.F_X_LOOK,
+                CameraMovementFunctions.F_MOVE,
+                CameraMovementFunctions.F_ELEVATE,
+                CameraMovementFunctions.F_STRAFE);
+        inputMapper.removeStateListener(this,
+                CameraMovementFunctions.F_RUN);
     }
 
     @Override
     protected void enable() {
         // Make sure our input group is enabled
-        inputMapper.activateGroup( CameraMovementFunctions.GROUP_MOVEMENT );
-        
+        inputMapper.activateGroup(CameraMovementFunctions.GROUP_MOVEMENT);
+
         // And kill the cursor
         GuiGlobals.getInstance().setCursorEventsEnabled(false);
-        
+
         // A 'bug' in Lemur causes it to miss turning the cursor off if
         // we are enabled before the MouseAppState is initialized.
-        getApplication().getInputManager().setCursorVisible(false);        
+        getApplication().getInputManager().setCursorVisible(false);
     }
 
     @Override
     protected void disable() {
-        inputMapper.deactivateGroup( CameraMovementFunctions.GROUP_MOVEMENT );
-        GuiGlobals.getInstance().setCursorEventsEnabled(true);        
+        inputMapper.deactivateGroup(CameraMovementFunctions.GROUP_MOVEMENT);
+        GuiGlobals.getInstance().setCursorEventsEnabled(true);
     }
 
     @Override
-    public void update( float tpf ) {
-    
+    public void update(float tpf) {
+
         // 'integrate' camera position based on the current move, strafe,
         // and elevation speeds.
-        if( forward != 0 || side != 0 || elevation != 0 ) {
+        if (forward != 0 || side != 0 || elevation != 0) {
             Vector3f loc = camera.getLocation();
-            
+
             Quaternion rot = camera.getRotation();
-            Vector3f move = rot.mult(Vector3f.UNIT_Z).multLocal((float)(forward * speed * tpf)); 
-            Vector3f strafe = rot.mult(Vector3f.UNIT_X).multLocal((float)(side * speed * tpf));
-            
+            Vector3f move = rot.mult(Vector3f.UNIT_Z).multLocal((float) (forward * speed * tpf));
+            Vector3f strafe = rot.mult(Vector3f.UNIT_X).multLocal((float) (side * speed * tpf));
+
             // Note: this camera moves 'elevation' along the camera's current up
             // vector because I find it more intuitive in free flight.
-            Vector3f elev = rot.mult(Vector3f.UNIT_Y).multLocal((float)(elevation * speed * tpf));
-                        
+            Vector3f elev = rot.mult(Vector3f.UNIT_Y).multLocal((float) (elevation * speed * tpf));
+
             loc = loc.add(move).add(strafe).add(elev);
-            camera.setLocation(loc); 
+            camera.setLocation(loc);
         }
     }
- 
+
     /**
-     *  Implementation of the StateFunctionListener interface.
+     * Implementation of the StateFunctionListener interface.
      */
     @Override
-    public void valueChanged( FunctionId func, InputState value, double tpf ) {
- 
+    public void valueChanged(FunctionId func, InputState value, double tpf) {
+
         // Change the speed based on the current run mode
         // Another option would have been to use the value
         // directly:
         //    speed = 3 + value.asNumber() * 5
         //...but I felt it was slightly less clear here.   
         boolean b = value == InputState.Positive;
-        if( func == CameraMovementFunctions.F_RUN ) {
-            if( b ) {
+        if (func == CameraMovementFunctions.F_RUN) {
+            if (b) {
                 speed = 10;
             } else {
                 speed = 3;
@@ -199,42 +194,42 @@ public class CameraMovementState extends BaseAppState
     }
 
     /**
-     *  Implementation of the AnalogFunctionListener interface.
+     * Implementation of the AnalogFunctionListener interface.
      */
     @Override
-    public void valueActive( FunctionId func, double value, double tpf ) {
- 
+    public void valueActive(FunctionId func, double value, double tpf) {
+
         // Setup rotations and movements speeds based on current
         // axes states.    
-        if( func == CameraMovementFunctions.F_Y_LOOK ) {
+        if (func == CameraMovementFunctions.F_Y_LOOK) {
             pitch += -value * tpf * turnSpeed;
-            if( pitch < minPitch )
+            if (pitch < minPitch)
                 pitch = minPitch;
-            if( pitch > maxPitch )
+            if (pitch > maxPitch)
                 pitch = maxPitch;
-        } else if( func == CameraMovementFunctions.F_X_LOOK ) {
+        } else if (func == CameraMovementFunctions.F_X_LOOK) {
             yaw += -value * tpf * turnSpeed;
-            if( yaw < 0 )
+            if (yaw < 0)
                 yaw += Math.PI * 2;
-            if( yaw > Math.PI * 2 )
+            if (yaw > Math.PI * 2)
                 yaw -= Math.PI * 2;
-        } else if( func == CameraMovementFunctions.F_MOVE ) {
+        } else if (func == CameraMovementFunctions.F_MOVE) {
             this.forward = value;
             return;
-        } else if( func == CameraMovementFunctions.F_STRAFE ) {
+        } else if (func == CameraMovementFunctions.F_STRAFE) {
             this.side = -value;
             return;
-        } else if( func == CameraMovementFunctions.F_ELEVATE ) {
+        } else if (func == CameraMovementFunctions.F_ELEVATE) {
             this.elevation = value;
             return;
         } else {
             return;
         }
-        updateFacing();        
+        updateFacing();
     }
 
     protected void updateFacing() {
-        cameraFacing.fromAngles( (float)pitch, (float)yaw, 0 );
+        cameraFacing.fromAngles((float) pitch, (float) yaw, 0);
         camera.setRotation(cameraFacing);
     }
 }

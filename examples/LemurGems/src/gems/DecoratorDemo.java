@@ -63,25 +63,25 @@ import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.ElementId;
 
 /**
- *  The DecoratorDemo application for demonstrating 'decorating'
- *  an object with Lemur GUI elements.
+ * The DecoratorDemo application for demonstrating 'decorating'
+ * an object with Lemur GUI elements.
  *
- *  @author pspeed
+ * @author pspeed
  */
 public class DecoratorDemo extends SimpleApplication {
+
+    public DecoratorDemo() {
+        super(new StatsAppState(), new CameraMovementState(), new CameraToggleState());
+    }
 
     public static void main(String[] args) {
         DecoratorDemo app = new DecoratorDemo();
         app.start();
     }
 
-    public DecoratorDemo() {
-        super(new StatsAppState(), new CameraMovementState(), new CameraToggleState());
-    }
-
     @Override
     public void simpleInitApp() {
- 
+
         // Initialize Lemur subsystems and setup the default
         // camera controls.   
         GuiGlobals.initialize(this);
@@ -99,14 +99,14 @@ public class DecoratorDemo extends SimpleApplication {
         rootNode.addLight(ambient);
 
         GuiGlobals globals = GuiGlobals.getInstance();
-        
+
         // Load the glass style and make it the default because it will look 
         // nicer for our GUI elements.  Note: this requires groovy-all for the
         // style language support.
         BaseStyles.loadGlassStyle();
         globals.getStyles().setDefaultStyle(BaseStyles.GLASS);
-                
-                
+
+
         // Add some instructions to the HUD
         Container window = new Container();
         window.addChild(new Label("Instructions", new ElementId("window.title")));
@@ -115,13 +115,13 @@ public class DecoratorDemo extends SimpleApplication {
         window.addChild(new Label("Press space to toggle camera movement mode."));
         guiNode.attachChild(window);
         window.move(0, cam.getHeight(), 0);
- 
+
         // Now create the simple test scene
-        for( int i = 0; i < 5; i++ ) {    
+        for (int i = 0; i < 5; i++) {
             Sphere mesh = new Sphere(9, 36, 1);
             Node ball = new Node("ball");
             ball.setLocalTranslation(-8 + i * 4, 0, -4);
-            
+
             Geometry geom = new Geometry("BallSphere", mesh);
             ball.attachChild(geom);
 
@@ -135,17 +135,17 @@ public class DecoratorDemo extends SimpleApplication {
             Node decorator = new Node("decorator");
             ball.attachChild(decorator);
             decorator.move(0, 1, 0);
-            
+
             // We will create and attach just a progress bar but we could have
             // just as easily made a container with a label, a progress bar, a button,
             // etc..  The rest of the code would be roughly the same.
             final ProgressBar progress = new ProgressBar(); // defaults to glass style
             decorator.attachChild(progress);
- 
+
             // GUI elements are used to being transparent by default so it's usually
             // best to stick them there.
             progress.setQueueBucket(Bucket.Transparent);
-            
+
             // Progress bars are normally put inside of other UI containers and
             // grow/shrink to fit.  On their own, they have no preferred size and
             // so must be given one.
@@ -167,7 +167,7 @@ public class DecoratorDemo extends SimpleApplication {
             // to calculate them from the GUI element so that it is easier to change
             // things above as needed.
             Vector3f pref = progress.getPreferredSize();
-            
+
             // For GUI elements outside of containers, their calculated preferred size becomes
             // their size.
             progress.move(-pref.x * 0.5f, pref.y, -pref.z * 0.5f);
@@ -186,37 +186,37 @@ public class DecoratorDemo extends SimpleApplication {
             MouseEventControl.addListenersToSpatial(geom,
                     new DefaultMouseListener() {
                         @Override
-                        protected void click( MouseButtonEvent event, Spatial target, Spatial capture ) {
-                            Material m = ((Geometry)target).getMaterial();
+                        protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
+                            Material m = ((Geometry) target).getMaterial();
                             m.setColor("Diffuse", ColorRGBA.Red);
                             m.setColor("Ambient", ColorRGBA.Red);
-                            if( event.getButtonIndex() == MouseInput.BUTTON_LEFT ) {
-                                progress.setProgressValue(progress.getProgressValue() + 1);                            
+                            if (event.getButtonIndex() == MouseInput.BUTTON_LEFT) {
+                                progress.setProgressValue(progress.getProgressValue() + 1);
                             } else {
-                                progress.setProgressValue(progress.getProgressValue() - 1);                            
+                                progress.setProgressValue(progress.getProgressValue() - 1);
                             }
                         }
-                    
+
                         @Override
-                        public void mouseEntered( MouseMotionEvent event, Spatial target, Spatial capture ) {
-                            Material m = ((Geometry)target).getMaterial();
+                        public void mouseEntered(MouseMotionEvent event, Spatial target, Spatial capture) {
+                            Material m = ((Geometry) target).getMaterial();
                             m.setColor("Diffuse", ColorRGBA.Yellow);
                             m.setColor("Ambient", ColorRGBA.Yellow);
                         }
 
                         @Override
-                        public void mouseExited( MouseMotionEvent event, Spatial target, Spatial capture ) {
-                            Material m = ((Geometry)target).getMaterial();
+                        public void mouseExited(MouseMotionEvent event, Spatial target, Spatial capture) {
+                            Material m = ((Geometry) target).getMaterial();
                             m.setColor("Diffuse", ColorRGBA.Blue);
                             m.setColor("Ambient", ColorRGBA.Blue);
-                        }                        
+                        }
                     });
-            
+
 
             rootNode.attachChild(ball);
         }
-        
-        
+
+
         // Make a simple "world" box
         Box b = new Box(20, 5, 20);
         Geometry world = new Geometry("world", b);

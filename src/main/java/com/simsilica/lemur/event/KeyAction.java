@@ -38,43 +38,35 @@ import com.jme3.input.KeyNames;
 
 
 /**
- *  Defines a key action including potential modifiers.
+ * Defines a key action including potential modifiers.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class KeyAction {
 
-    /**
-     *  @deprecated Use KeyModifiers.CONTROL_DOWN instead.
-     */
-    @Deprecated
-    public static final int CONTROL_DOWN = KeyModifiers.CONTROL_DOWN;
     private static final KeyNames names = new KeyNames();
-
     private int keyCode;
     private int modifiers;
 
-    public KeyAction( int keyCode, int... modifiers ) {
+    public KeyAction(int keyCode, int... modifiers) {
         this.keyCode = keyCode;
         int m = 0;
-        for( int i : modifiers ) {
+        for (int i : modifiers) {
             m = m | i;
         }
         this.modifiers = m;
     }
 
     @Override
-    public boolean equals( Object o ) {
-        if( o == this )
+    public boolean equals(Object o) {
+        if (o == this)
             return true;
-        if( o == null || o.getClass() != getClass() )
+        if (o == null || o.getClass() != getClass())
             return false;
-        KeyAction other = (KeyAction)o;
-        if( keyCode != other.keyCode )
+        KeyAction other = (KeyAction) o;
+        if (keyCode != other.keyCode)
             return false;
-        if( modifiers != other.modifiers )
-            return false;
-        return true;
+        return modifiers == other.modifiers;
     }
 
     @Override
@@ -90,21 +82,21 @@ public class KeyAction {
         return keyCode;
     }
 
-    public boolean hasModifier( int mod ) {
+    public boolean hasModifier(int mod) {
         return (modifiers & mod) == mod;
     }
 
     @Override
     public String toString() {
-        String name = names.getName(keyCode);
+        String name = KeyNames.getName(keyCode);
         StringBuilder sb = new StringBuilder("KeyAction[");
-        if( hasModifier(KeyModifiers.CONTROL_DOWN) ) {
-            sb.append( "Control " );
+        if (hasModifier(KeyModifiers.CONTROL_DOWN)) {
+            sb.append("Control ");
         }
-        if( hasModifier(KeyModifiers.SHIFT_DOWN) ) {
-            sb.append( "Shift " );
+        if (hasModifier(KeyModifiers.SHIFT_DOWN)) {
+            sb.append("Shift ");
         }
-        sb.append(name);
-        return sb.toString() + "]";
+        sb.append(name).append("]");
+        return sb.toString();
     }
 }

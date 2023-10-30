@@ -59,26 +59,24 @@ public abstract class Action implements VersionedObject<Action>, Command<Button>
     public static final String KEY_NAME = "name";
     public static final String KEY_ICON = "icon";
     public static final String KEY_LARGE_ICON = "largeIcon";
-    public static final String KEY_SHORT_DESCRIPTION = "shortDescription";
     public static final String KEY_SELECTED = "selected";
 
     private long version;
-    private Map<String, Object> properties = new HashMap<String, Object>();
-    private boolean enabled = true;
-    
-    public Action() {
+    private final Map<String, Object> properties = new HashMap<>();
+
+    protected Action() {
     }
 
-    public Action( String name ) {
+    protected Action( String name ) {
         setName(name);
     }
     
-    public Action( String name, GuiComponent icon ) {
+    protected Action( String name, GuiComponent icon ) {
         setName(name);
         setIcon(icon);
     }
 
-    public Action( String name, GuiComponent icon, boolean enabled ) {
+    protected Action( String name, GuiComponent icon, boolean enabled ) {
         setName(name);
         setIcon(icon);
         setEnabled(enabled);
@@ -203,7 +201,7 @@ public abstract class Action implements VersionedObject<Action>, Command<Button>
 
     @Override
     public VersionedReference<Action> createReference() {
-        return new VersionedReference<Action>(this);
+        return new VersionedReference<>(this);
     }
  
     protected void appendFields( StringBuilder sb ) {

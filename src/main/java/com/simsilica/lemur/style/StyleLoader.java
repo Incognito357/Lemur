@@ -37,16 +37,18 @@ package com.simsilica.lemur.style;
 import java.io.*;
 import java.util.*;
 import javax.script.*;
+
 import com.simsilica.lemur.GuiGlobals;
+
 import java.net.URL;
 
 
 /**
- *  Uses Groovy to load style definitions using a Groovy-based
- *  styles DSL.  For this loader to operate, the groovy-all jar must
- *  be on the classpath.
+ * Uses Groovy to load style definitions using a Groovy-based
+ * styles DSL.  For this loader to operate, the groovy-all jar must
+ * be on the classpath.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class StyleLoader {
 
@@ -60,21 +62,21 @@ public class StyleLoader {
 
     public StyleLoader() {
         this(GuiGlobals.getInstance(), GuiGlobals.getInstance().getStyles(),
-             "/com/simsilica/lemur/style/StyleApi.groovy");
+                "/com/simsilica/lemur/style/StyleApi.groovy");
     }
 
-    public StyleLoader( Styles styles ) {
+    public StyleLoader(Styles styles) {
         this(GuiGlobals.getInstance(), styles, "/com/simsilica/lemur/style/StyleApi.groovy");
     }
 
-    public StyleLoader( GuiGlobals globals, Styles styles, Object... apiScripts ) {
+    public StyleLoader(GuiGlobals globals, Styles styles, Object... apiScripts) {
         this.styles = styles;
         ScriptEngineManager factory = new ScriptEngineManager();
         this.engine = factory.getEngineByName("groovy");
-        if( engine == null ) {
+        if (engine == null) {
             throw new RuntimeException("Groovy scripting engine not available.");
         }
-        this.compiler = (Compilable)engine;
+        this.compiler = (Compilable) engine;
         this.bindings = engine.createBindings();
         bindings.put("styles", styles);
         bindings.put("gui", globals);
@@ -82,63 +84,63 @@ public class StyleLoader {
         compileApi(apiScripts);
     }
 
-    protected void compileApi( Object... apiScripts ) {
-        for( Object o : apiScripts ) {
+    protected void compileApi(Object... apiScripts) {
+        for (Object o : apiScripts) {
             try {
-                if( o instanceof String ) {
-                    compileApiResource((String)o);
-                } else if( o instanceof File ) {
-                    compileApiFile((File)o);
+                if (o instanceof String) {
+                    compileApiResource((String) o);
+                } else if (o instanceof File) {
+                    compileApiFile((File) o);
                 }
-            } catch( ScriptException e ) {
-                throw new RuntimeException( "Error compiling script:" + o, e );
+            } catch (ScriptException e) {
+                throw new RuntimeException("Error compiling script:" + o, e);
             }
         }
     }
 
-    protected void addApiScript( CompiledScript script, String source ) {
+    protected void addApiScript(CompiledScript script, String source) {
         api.add(script);
         sources.put(script, source);
     }
 
-    protected void compileApiResource( String s ) throws ScriptException {
+    protected void compileApiResource(String s) throws ScriptException {
         InputStream rawIn = getClass().getResourceAsStream(s);
-        if( rawIn == null )
+        if (rawIn == null)
             throw new ScriptException("Script resource not found for:" + s);
         Reader in = new InputStreamReader(rawIn);
         addApiScript(compiler.compile(in), "resource:" + s);
     }
 
-    protected void compileApiFile( File f ) throws ScriptException {
+    protected void compileApiFile(File f) throws ScriptException {
         try {
             Reader in = new FileReader(f);
             addApiScript(compiler.compile(in), "file:" + f);
-        } catch( IOException e ) {
+        } catch (IOException e) {
             throw new ScriptException(e);
         }
     }
 
-    public void setBinding( String name, Object value ) {
+    public void setBinding(String name, Object value) {
         bindings.put(name, value);
     }
 
-    public Object getBinding( String name ) {
+    public Object getBinding(String name) {
         return bindings.get(name);
     }
 
     public void initializeApi() {
-        for( CompiledScript script : api ) {
+        for (CompiledScript script : api) {
             try {
                 script.eval(bindings);
-            } catch( ScriptException e ) {
+            } catch (ScriptException e) {
                 throw new RuntimeException("Error running:" + script + " from:" + sources.get(script), e);
             }
         }
         initialized = true;
     }
 
-    public void loadStyleResource( String s ) {
-        if( !initialized ) {
+    public void loadStyleResource(String s) {
+        if (!initialized) {
             initializeApi();
         }
 
@@ -149,24 +151,24 @@ public class StyleLoader {
             int before = bindings.size();
             Object result = script.eval(bindings);
 
-            if( before != bindings.size() ) {
+            if (before != bindings.size()) {
                 //log.warn( "Binding count increased executing:" + s + "  keys:" + bindings.keySet() );
             }
-        } catch( ScriptException e ) {
+        } catch (ScriptException e) {
             throw new RuntimeException("Error running resource:" + s, e);
         }
     }
-    
-    public void loadStyle( URL u ) {
+
+    public void loadStyle(URL u) {
         try {
             loadStyle(u.toString(), new InputStreamReader(u.openStream()));
-        } catch( IOException e ) {
+        } catch (IOException e) {
             throw new RuntimeException("Error opening stream for:" + u, e);
         }
     }
-    
-    public void loadStyle( String name, Reader in ) {
-        if( !initialized ) {
+
+    public void loadStyle(String name, Reader in) {
+        if (!initialized) {
             initializeApi();
         }
 
@@ -176,10 +178,10 @@ public class StyleLoader {
             int before = bindings.size();
             Object result = script.eval(bindings);
 
-            if( before != bindings.size() ) {
+            if (before != bindings.size()) {
                 //log.warn( "Binding count increased executing:" + s + "  keys:" + bindings.keySet() );
             }
-        } catch( ScriptException e ) {
+        } catch (ScriptException e) {
             throw new RuntimeException("Error running resource:" + name, e);
         }
     }

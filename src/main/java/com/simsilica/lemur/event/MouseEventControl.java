@@ -34,46 +34,49 @@
 
 package com.simsilica.lemur.event;
 
-import java.util.*;
-import java.util.concurrent.*;
-
-import com.jme3.input.event.*;
-import com.jme3.renderer.*;
-import com.jme3.scene.control.*;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.AbstractControl;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
- *  A control that can be added to any Spatial to provide
- *  standard MouseListener/MouseEvent support.  The only requirement
- *  is that the Spatial must be somewhere in a hierarchy that has
- *  been provided to the MouseAppState or GuiGlobals class and that
- *  MouseAppState is active (either manually attached to the StateManager
- *  or done automatically by GuiGlobals.initialize())
+ * A control that can be added to any Spatial to provide
+ * standard MouseListener/MouseEvent support.  The only requirement
+ * is that the Spatial must be somewhere in a hierarchy that has
+ * been provided to the MouseAppState or GuiGlobals class and that
+ * MouseAppState is active (either manually attached to the StateManager
+ * or done automatically by GuiGlobals.initialize())
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class MouseEventControl extends AbstractControl {
 
-    private List<MouseListener> listeners = new CopyOnWriteArrayList<MouseListener>();
+    private final List<MouseListener> listeners = new CopyOnWriteArrayList<>();
 
     public MouseEventControl() {
     }
 
-    public MouseEventControl( MouseListener... listeners ) {
+    public MouseEventControl(MouseListener... listeners) {
         this.listeners.addAll(Arrays.asList(listeners));
     }
 
     /**
-     *  Convenience method that will add a MouseEventControl if it
-     *  doesn't exist, while adding the specified listeners.
+     * Convenience method that will add a MouseEventControl if it
+     * doesn't exist, while adding the specified listeners.
      */
-    public static void addListenersToSpatial( Spatial s, MouseListener... listeners ) {
-        if( s == null ) {
+    public static void addListenersToSpatial(Spatial s, MouseListener... listeners) {
+        if (s == null) {
             return;
         }
         MouseEventControl mec = s.getControl(MouseEventControl.class);
-        if( mec == null ) {
+        if (mec == null) {
             s.addControl(new MouseEventControl(listeners));
         } else {
             mec.listeners.addAll(Arrays.asList(listeners));
@@ -81,24 +84,22 @@ public class MouseEventControl extends AbstractControl {
     }
 
     /**
-     *  Convenience method that will remove the specified listeners
-     *  from a Spatial only if a MouseEventControl already exists.
+     * Convenience method that will remove the specified listeners
+     * from a Spatial only if a MouseEventControl already exists.
      */
-    public static void removeListenersFromSpatial( Spatial s, MouseListener... listeners ) {
-        if( s == null ) {
+    public static void removeListenersFromSpatial(Spatial s, MouseListener... listeners) {
+        if (s == null) {
             return;
         }
-        MouseEventControl mec = s.getControl(MouseEventControl.class);        
-        if( mec == null ) {
-            return;
-        } else {
+        MouseEventControl mec = s.getControl(MouseEventControl.class);
+        if (mec != null) {
             mec.listeners.removeAll(Arrays.asList(listeners));
         }
     }
-    
-    public <T extends MouseListener> T getMouseListener( Class<T> type ) {
-        for( MouseListener l : listeners ) {
-            if( l.getClass() == type ) {
+
+    public <T extends MouseListener> T getMouseListener(Class<T> type) {
+        for (MouseListener l : listeners) {
+            if (l.getClass() == type) {
                 return type.cast(l);
             }
         }
@@ -109,44 +110,44 @@ public class MouseEventControl extends AbstractControl {
         return listeners.isEmpty();
     }
 
-    public void addMouseListener( MouseListener l ) {
+    public void addMouseListener(MouseListener l) {
         listeners.add(l);
     }
 
-    public void removeMouseListener( MouseListener l ) {
+    public void removeMouseListener(MouseListener l) {
         listeners.remove(l);
     }
 
-    public void mouseButtonEvent( MouseButtonEvent event, Spatial target, Spatial capture ) {
-        for( MouseListener l : listeners ) {
+    public void mouseButtonEvent(MouseButtonEvent event, Spatial target, Spatial capture) {
+        for (MouseListener l : listeners) {
             l.mouseButtonEvent(event, target, capture);
         }
     }
 
-    public void mouseEntered( MouseMotionEvent event, Spatial target, Spatial capture ) {
-        for( MouseListener l : listeners ) {
+    public void mouseEntered(MouseMotionEvent event, Spatial target, Spatial capture) {
+        for (MouseListener l : listeners) {
             l.mouseEntered(event, target, capture);
         }
     }
 
-    public void mouseExited( MouseMotionEvent event, Spatial target, Spatial capture ) {
-        for( MouseListener l : listeners ) {
+    public void mouseExited(MouseMotionEvent event, Spatial target, Spatial capture) {
+        for (MouseListener l : listeners) {
             l.mouseExited(event, target, capture);
         }
     }
 
-    public void mouseMoved( MouseMotionEvent event, Spatial target, Spatial capture ) {
-        for( MouseListener l : listeners ) {
+    public void mouseMoved(MouseMotionEvent event, Spatial target, Spatial capture) {
+        for (MouseListener l : listeners) {
             l.mouseMoved(event, target, capture);
         }
     }
 
     @Override
-    protected void controlRender( RenderManager rm, ViewPort vp ) {
+    protected void controlRender(RenderManager rm, ViewPort vp) {
     }
 
     @Override
-    protected void controlUpdate( float tpf ) {
+    protected void controlUpdate(float tpf) {
     }
 }
 

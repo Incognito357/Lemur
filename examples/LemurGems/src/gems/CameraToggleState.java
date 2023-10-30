@@ -43,20 +43,17 @@ import com.simsilica.lemur.input.InputMapper;
 
 
 /**
- *  Toggles the CameraMovementState on and off with the space bar
- *  or other configured key combination.
- *  
- *  @author    Paul Speed
+ * Toggles the CameraMovementState on and off with the space bar
+ * or other configured key combination.
+ *
+ * @author Paul Speed
  */
 public class CameraToggleState extends BaseAppState {
 
-    public static final FunctionId F_CAMERA_TOGGLE = new FunctionId("Camera Toggle"); 
+    public static final FunctionId F_CAMERA_TOGGLE = new FunctionId("Camera Toggle");
 
     private InputMapper inputMapper;
 
-    public CameraToggleState() {
-    }
-    
     public void toggleCamera() {
         CameraMovementState state = getState(CameraMovementState.class);
         state.setEnabled(!state.isEnabled());
@@ -64,10 +61,10 @@ public class CameraToggleState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        
+
         // Setup the input mappings configured in the constructor
         inputMapper = GuiGlobals.getInstance().getInputMapper();
- 
+
         // Map the space bar to our function
         inputMapper.map(F_CAMERA_TOGGLE, KeyInput.KEY_SPACE);
     }

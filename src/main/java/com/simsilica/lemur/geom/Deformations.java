@@ -34,21 +34,23 @@
 
 package com.simsilica.lemur.geom;
 
-import com.jme3.math.*;
+import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
 
 /**
- *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Deformations {
 
-    public static Ramp ramp( int majorAxis, int minorAxis, float scale ) {
+    private Deformations() {}
+
+    public static Ramp ramp(int majorAxis, int minorAxis, float scale) {
         return new Ramp(majorAxis, minorAxis, scale);
     }
 
-    public static Cylindrical cylindrical( int majorAxis, int minorAxis,
-                                           Vector3f origin, float radius,
-                                           float start, float limit ) {
+    public static Cylindrical cylindrical(int majorAxis, int minorAxis,
+                                          Vector3f origin, float radius,
+                                          float start, float limit) {
         return new Cylindrical(majorAxis, minorAxis, origin, radius, start, limit);
     }
 
@@ -58,15 +60,13 @@ public class Deformations {
         private int minorAxis;
         private float scale;
 
-        public Ramp( int majorAxis, int minorAxis, float scale )
-        {
+        public Ramp(int majorAxis, int minorAxis, float scale) {
             this.majorAxis = majorAxis;
             this.minorAxis = minorAxis;
             this.scale = scale;
         }
 
-        public void deform( Vector3f vert, Vector3f normal )
-        {
+        public void deform(Vector3f vert, Vector3f normal) {
             float major = vert.get(majorAxis);
             float minor = vert.get(minorAxis);
             minor += major * scale;
@@ -90,8 +90,8 @@ public class Deformations {
         private float start;
         private float limit;
 
-        public Cylindrical( int majorAxis, int minorAxis, Vector3f origin, float radius,
-                            float start, float limit ) {
+        public Cylindrical(int majorAxis, int minorAxis, Vector3f origin, float radius,
+                           float start, float limit) {
             this.majorAxis = majorAxis;
             this.minorAxis = minorAxis;
             this.origin = origin;
@@ -100,64 +100,64 @@ public class Deformations {
             this.limit = limit;
         }
 
-        public void setOrigin( Vector3f origin ) {
-            this.origin = origin;
-        }
-
         public Vector3f getOrigin() {
             return origin;
         }
 
-        public void setRadius( float radius ) {
-            this.radius = radius;
+        public void setOrigin(Vector3f origin) {
+            this.origin = origin;
         }
 
         public float getRadius() {
             return radius;
         }
 
-        public void setStart( float start ) {
-            this.start = start;
+        public void setRadius(float radius) {
+            this.radius = radius;
         }
 
         public float getStart() {
             return start;
         }
 
-        public void setLimit( float limit ) {
-            this.limit = limit;
+        public void setStart(float start) {
+            this.start = start;
         }
 
         public float getLimit() {
             return limit;
         }
 
-        public void deform( Vector3f vert, Vector3f normal ) {
+        public void setLimit(float limit) {
+            this.limit = limit;
+        }
+
+        public void deform(Vector3f vert, Vector3f normal) {
             // Y will correspond to the perimeter of the circle
             // so that cos() and sin() make sense.
             float x = vert.get(minorAxis) - origin.get(minorAxis);
             float base = Math.min(origin.get(majorAxis), start);
             float y = vert.get(majorAxis) - base;
-            if( y < 0 )
+            if (y < 0)
                 return;
 
             float projection = 0;
-            if( y > limit ) {
+            if (y > limit) {
                 projection = y - limit;
                 y = limit;
             }
 
-            float rads = y / radius; //Math.abs(x); //radius;
+            float rads = y / radius;
 
             // When x is negative, we are actually on the
             // back side of the cylinder and normal projection
             // isn't really correct.
-            if( x < 0 ) {
+            if (x < 0) {
                 rads = FastMath.PI - rads;
             }
 
-            float xd = (float)Math.cos(rads);
-            float yd = (float)Math.sin(rads);
+            float xd = (float) Math.cos(rads);
+            float yd = (float) Math.sin(rads);
             float r = Math.abs(x);
 
             vert.set(minorAxis, origin.get(minorAxis) + xd * r);
@@ -176,7 +176,7 @@ public class Deformations {
             // normals will be 180 degrees off.  Even though we've
             // corrected the angle they'll still be projected backwards
             // if we don't flip that axis
-            if( x < 0 ) {
+            if (x < 0) {
                 xRight *= -1;
                 yRight *= -1;
                 xUp *= -1;
@@ -191,7 +191,7 @@ public class Deformations {
             normal.set(minorAxis, nx);
             normal.set(majorAxis, ny);
 
-            if( projection > 0 ) {
+            if (projection > 0) {
                 // Need to project out the vertex beyond what limit
                 // limited.  We can use our normal axes from above
                 float vx = vert.get(minorAxis) + xUp * projection;

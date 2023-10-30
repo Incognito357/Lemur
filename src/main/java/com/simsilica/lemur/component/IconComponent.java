@@ -34,37 +34,39 @@
 
 package com.simsilica.lemur.component;
 
-import java.util.Objects;
-
 import com.jme3.material.RenderState.BlendMode;
-import com.jme3.math.*;
-import com.jme3.scene.*;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
-
-import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.core.GuiMaterial;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.VAlignment;
+import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.core.GuiMaterial;
+
+import java.util.Objects;
 
 
 /**
- *  Presents an image as a stackable component that can
- *  either by anchored to the sides and take up component
- *  space or treated as an overlay.  If it is used as an overlay
- *  then it will not affect the preferred size of the overall
- *  component stack.
+ * Presents an image as a stackable component that can
+ * either by anchored to the sides and take up component
+ * space or treated as an overlay.  If it is used as an overlay
+ * then it will not affect the preferred size of the overall
+ * component stack.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public class IconComponent extends AbstractGuiComponent
-                           implements Cloneable, ColoredComponent {
+public class IconComponent extends AbstractGuiComponent implements Cloneable, ColoredComponent {
 
+    private final String imagePath; // really just for debugging
+    private final Vector2f iconScale;
+    private final boolean lit;
     private Geometry icon;
     private GuiMaterial material;
-    private String imagePath; // really just for debugging
     private Texture image;
     private ColorRGBA color;
     private float alpha = 1f;
@@ -75,33 +77,31 @@ public class IconComponent extends AbstractGuiComponent
     private HAlignment hAlign = HAlignment.Left;
     private VAlignment vAlign = VAlignment.Center;
     private Vector3f offset = null;
-    private Vector2f iconScale;
     private Vector2f iconSize;
     private boolean overlay = false;
-    private boolean lit = false;
 
-    public IconComponent( String imagePath ) {
+    public IconComponent(String imagePath) {
         this(imagePath, 1f, 0, 0, 0.01f, false);
     }
 
-    public IconComponent( String imagePath, float iconScale,
-                          float xMargin, float yMargin, float zOffset,
-                          boolean lit ) {
+    public IconComponent(String imagePath, float iconScale,
+                         float xMargin, float yMargin, float zOffset,
+                         boolean lit) {
         this(imagePath, new Vector2f(iconScale, iconScale), xMargin, yMargin,
-             zOffset, lit);
+                zOffset, lit);
     }
 
-    public IconComponent( String imagePath, Vector2f iconScale,
-                          float xMargin, float yMargin, float zOffset,
-                          boolean lit ) {
+    public IconComponent(String imagePath, Vector2f iconScale,
+                         float xMargin, float yMargin, float zOffset,
+                         boolean lit) {
         this(GuiGlobals.getInstance().loadTexture(imagePath, false, false),
-             iconScale, xMargin, yMargin, zOffset, lit);
+                iconScale, xMargin, yMargin, zOffset, lit);
     }
 
-    public IconComponent( Texture image, Vector2f iconScale,
-                          float xMargin, float yMargin, float zOffset,
-                          boolean lit ) {
-        if( image == null ) {
+    public IconComponent(Texture image, Vector2f iconScale,
+                         float xMargin, float yMargin, float zOffset,
+                         boolean lit) {
+        if (image == null) {
             throw new IllegalArgumentException("Image texture cannot be null");
         }
         // In the case where the 'imagePath' based constructors are called,
@@ -118,7 +118,7 @@ public class IconComponent extends AbstractGuiComponent
 
     @Override
     public IconComponent clone() {
-        IconComponent result = (IconComponent)super.clone();
+        IconComponent result = (IconComponent) super.clone();
         result.icon = null;
         result.material = material.clone();
         result.createIcon();
@@ -126,43 +126,37 @@ public class IconComponent extends AbstractGuiComponent
     }
 
     @Override
-    public void attach( GuiControl parent ) {
+    public void attach(GuiControl parent) {
         super.attach(parent);
-        if( icon != null ) {
+        if (icon != null) {
             getNode().attachChild(icon);
         }
     }
 
     @Override
-    public void detach( GuiControl parent ) {
-        if( icon != null ) {
+    public void detach(GuiControl parent) {
+        if (icon != null) {
             getNode().detachChild(icon);
         }
         super.detach(parent);
-    }
-
-    public void setImageTexture( Texture t ) {
-        this.image = t;
-        if( material != null ) {
-            material.setTexture(image);
-        }
     }
 
     public Texture getImageTexture() {
         return image;
     }
 
-    @Override
-    public void setColor( ColorRGBA c ) {
-        this.color = c;
-        resetColor();
+    public void setImageTexture(Texture t) {
+        this.image = t;
+        if (material != null) {
+            material.setTexture(image);
+        }
     }
 
     protected void resetColor() {
-        if( material == null ) {
+        if (material == null) {
             return;
         }
-        if( alpha >= 1 ) {
+        if (alpha >= 1) {
             // Just set it directly
             material.setColor(color);
         } else {
@@ -179,11 +173,8 @@ public class IconComponent extends AbstractGuiComponent
     }
 
     @Override
-    public void setAlpha( float f ) {
-        if( this.alpha == f ) {
-            return;
-        }
-        this.alpha = f;
+    public void setColor(ColorRGBA c) {
+        this.color = c;
         resetColor();
     }
 
@@ -192,40 +183,30 @@ public class IconComponent extends AbstractGuiComponent
         return alpha;
     }
 
-    public void setIconScale( float scale ) {
-        if( scale == this.iconScale.x && scale == this.iconScale.y ) {
+    @Override
+    public void setAlpha(float f) {
+        if (this.alpha == f) {
             return;
         }
-        setIconScale(new Vector2f(scale, scale));
-    }
-
-    public void setIconScale( Vector2f scale ) {
-        if( this.iconScale.equals(scale) )
-            return;
-        this.iconScale.set(scale);
-
-        // Not very efficient
-        createIcon();
-
-        invalidate();
+        this.alpha = f;
+        resetColor();
     }
 
     public Vector2f getIconScale() {
         return iconScale;
     }
 
-    /**
-     *  Forces the size of the icon to be the size specified regardless
-     *  of it's actual pixel size.  So if setIconSize(new Vector2f(64, 64)) is
-     *  used for an icon that is actually 32x32, it will be doubled in size.
-     *  The iconScale is applied after this scaling.
-     *  Set iconSize to null to go back to the actual image size.
-     */
-    public void setIconSize( Vector2f iconSize ) {
-        if( Objects.equals(this.iconSize, iconSize) ) {
+    public void setIconScale(float scale) {
+        if (scale == this.iconScale.x && scale == this.iconScale.y) {
             return;
         }
-        this.iconSize = iconSize;
+        setIconScale(new Vector2f(scale, scale));
+    }
+
+    public void setIconScale(Vector2f scale) {
+        if (this.iconScale.equals(scale))
+            return;
+        this.iconScale.set(scale);
 
         // Not very efficient
         createIcon();
@@ -237,21 +218,34 @@ public class IconComponent extends AbstractGuiComponent
         return iconSize;
     }
 
-    public void setHAlignment( HAlignment a ) {
-        if( hAlign == a )
+    /**
+     * Forces the size of the icon to be the size specified regardless
+     * of its actual pixel size.  So if setIconSize(new Vector2f(64, 64)) is
+     * used for an icon that is actually 32x32, it will be doubled in size.
+     * The iconScale is applied after this scaling.
+     * Set iconSize to null to go back to the actual image size.
+     */
+    public void setIconSize(Vector2f iconSize) {
+        if (Objects.equals(this.iconSize, iconSize)) {
             return;
-        hAlign = a;
-        resetAlignment();
+        }
+        this.iconSize = iconSize;
+
+        // Not very efficient
+        createIcon();
+
+        invalidate();
     }
 
     public HAlignment getHAlignment() {
         return hAlign;
     }
 
-    public void setVAlignment( VAlignment a ) {
-        if( vAlign == a )
+    public void setHAlignment(HAlignment a) {
+        if (hAlign == a) {
             return;
-        vAlign = a;
+        }
+        hAlign = a;
         resetAlignment();
     }
 
@@ -259,84 +253,94 @@ public class IconComponent extends AbstractGuiComponent
         return vAlign;
     }
 
-    public void setMargin( float x, float y ) {
+    public void setVAlignment(VAlignment a) {
+        if (vAlign == a) {
+            return;
+        }
+        vAlign = a;
+        resetAlignment();
+    }
+
+    public void setMargin(float x, float y) {
         this.xMargin = x;
         this.yMargin = y;
 
         invalidate();
     }
 
-    public void setMargin( Vector2f margin ) {
-        if( margin == null ) {
-            throw new IllegalArgumentException("Margin cannot be null");
-        }
-        setMargin(margin.x, margin.y);
-    }
-
     public Vector2f getMargin() {
         return new Vector2f(xMargin, yMargin);
     }
 
-    public void setZOffset( float z ) {
-        this.zOffset = z;
-        invalidate();
+    public void setMargin(Vector2f margin) {
+        if (margin == null) {
+            throw new IllegalArgumentException("Margin cannot be null");
+        }
+        setMargin(margin.x, margin.y);
     }
 
     public float getZOffset() {
         return zOffset;
     }
 
-    public void setOffset( Vector3f v ) {
-        this.offset = v;
+    public void setZOffset(float z) {
+        this.zOffset = z;
+        invalidate();
     }
 
     public Vector3f getOffset() {
         return offset;
     }
 
-    public void setOverlay( boolean f ) {
-        if( this.overlay == f )
-            return;
-        this.overlay = f;
-        invalidate();
+    public void setOffset(Vector3f v) {
+        this.offset = v;
     }
 
     public boolean isOverlay() {
         return overlay;
     }
 
-    /**
-     *  Sets the alphaDiscardThreshold for the image material.  If an
-     *  alpha value is below this threshold then it will be discarded
-     *  rather than being written to the color and zbuffers.  Set to 0
-     *  to disable.  Defaults to 0.
-     *
-     *  <p>Note: for 2D UIs this threshold is not necessary as 2D GUIs
-     *  will always sort purely back-to-front on Z.  For 3D UIs, this
-     *  setting may prevent visual artifacts from certain directions
-     *  for very transparent pixels (background showing through, etc.))</p>
-     */
-    public void setAlphaDiscard( float alphaDiscard ) {
-        if( this.alphaDiscard == alphaDiscard ) {
+    public void setOverlay(boolean f) {
+        if (this.overlay == f) {
             return;
         }
-        this.alphaDiscard = alphaDiscard;
-        if( material != null ) {
-            material.getMaterial().setFloat("AlphaDiscardThreshold", alphaDiscard);
-        }
+        this.overlay = f;
+        invalidate();
     }
 
     public float getAlphaDiscard() {
         return alphaDiscard;
     }
 
+    /**
+     * Sets the alphaDiscardThreshold for the image material.  If an
+     * alpha value is below this threshold then it will be discarded
+     * rather than being written to the color and zbuffers.  Set to 0
+     * to disable.  Defaults to 0.
+     *
+     * <p>Note: for 2D UIs this threshold is not necessary as 2D GUIs
+     * will always sort purely back-to-front on Z.  For 3D UIs, this
+     * setting may prevent visual artifacts from certain directions
+     * for very transparent pixels (background showing through, etc.))</p>
+     */
+    public void setAlphaDiscard(float alphaDiscard) {
+        if (this.alphaDiscard == alphaDiscard) {
+            return;
+        }
+        this.alphaDiscard = alphaDiscard;
+        if (material != null) {
+            material.getMaterial().setFloat("AlphaDiscardThreshold", alphaDiscard);
+        }
+    }
+
     public GuiMaterial getMaterial() {
         return material;
     }
 
-    public void calculatePreferredSize( Vector3f size ) {
-        if( overlay )
+    public void calculatePreferredSize(Vector3f size) {
+        if (overlay) {
             return;
+        }
 
         // The preferred size depends on the alignment and
         // the size of the image.
@@ -344,7 +348,7 @@ public class IconComponent extends AbstractGuiComponent
         float width = iconScale.x * imageSize.x + xMargin * 2;
         float height = iconScale.y * imageSize.y + yMargin * 2;
 
-        switch( vAlign ) {
+        switch (vAlign) {
             case Top:
             case Bottom:
                 // Both of these will add to the existing size
@@ -357,7 +361,7 @@ public class IconComponent extends AbstractGuiComponent
                 break;
         }
 
-        switch( hAlign ) {
+        switch (hAlign) {
             case Left:
             case Right:
                 // Both of these will add to the existing size
@@ -373,7 +377,7 @@ public class IconComponent extends AbstractGuiComponent
         size.z += Math.abs(zOffset);
     }
 
-    public void reshape( Vector3f pos, Vector3f size ) {
+    public void reshape(Vector3f pos, Vector3f size) {
         Vector2f imageSize = getEffectiveIconSize();
         float width = iconScale.x * imageSize.x;
         float height = iconScale.y * imageSize.y;
@@ -383,17 +387,17 @@ public class IconComponent extends AbstractGuiComponent
         float cx = 0;
         float cy = 0;
 
-        switch( hAlign ) {
+        switch (hAlign) {
             case Left:
                 cx = pos.x + boxWidth * 0.5f;
-                if( !overlay ) {
+                if (!overlay) {
                     pos.x += boxWidth;
                     size.x -= boxWidth;
                 }
                 break;
             case Right:
                 cx = (pos.x + size.x) - boxWidth * 0.5f;
-                if( !overlay ) {
+                if (!overlay) {
                     size.x -= boxWidth;
                 }
                 break;
@@ -402,17 +406,17 @@ public class IconComponent extends AbstractGuiComponent
                 break;
         }
 
-        switch( vAlign ) {
+        switch (vAlign) {
             case Top:
                 cy = pos.y - boxHeight * 0.5f;
-                if( !overlay ) {
+                if (!overlay) {
                     pos.y -= boxHeight;
                     size.y -= boxHeight;
                 }
                 break;
             case Bottom:
                 cy = (pos.y - size.y) + boxWidth * 0.5f;
-                if( !overlay ) {
+                if (!overlay) {
                     size.y -= boxHeight;
                 }
                 break;
@@ -422,7 +426,7 @@ public class IconComponent extends AbstractGuiComponent
         }
 
         icon.setLocalTranslation(cx - width * 0.5f, cy - height * 0.5f, pos.z);
-        if( offset != null ) {
+        if (offset != null) {
             icon.move(offset);
         }
 
@@ -442,7 +446,7 @@ public class IconComponent extends AbstractGuiComponent
         float height = iconScale.y * imageSize.y;
         Quad q = new Quad(width, height);
         icon = new Geometry("icon:" + imagePath, q);
-        if( material == null ) {
+        if (material == null) {
             material = GuiGlobals.getInstance().createMaterial(lit);
             material.setColor(color);
             material.setTexture(image);
@@ -459,16 +463,16 @@ public class IconComponent extends AbstractGuiComponent
         icon.setCullHint(CullHint.Always);
 
         // Just in case but it should never happen
-        if( isAttached() ) {
+        if (isAttached()) {
             getNode().attachChild(icon);
         }
     }
 
     protected Vector2f getEffectiveIconSize() {
-        if( iconSize != null ) {
+        if (iconSize != null) {
             return iconSize;
         }
-        if( image != null ) {
+        if (image != null) {
             return new Vector2f(image.getImage().getWidth(), image.getImage().getHeight());
         }
         return Vector2f.ZERO;

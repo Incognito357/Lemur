@@ -36,32 +36,43 @@ package com.simsilica.lemur;
 
 
 /**
- *  Specifies the overall type of fill for a distribution
- *  or layout.
+ * Specifies the overall type of fill for a distribution
+ * or layout.
  *
- *  None - indicates that none of the children will be stretched and
- *         there default size will always be used.
- *  Even - all children will get an even amount of stretching.  This does
- *         not mean that they are all the same size.  It means that
- *         any extra sizing is evenly distributed amongst all children.
- *  Proportional - children will get stretching based on their portion
- *         of the overal preferred size.  Instead of evenly distributing
- *         extra sizing, each child will get a proportional amount of
- *         the sizing based on their relative size.  If three children
- *         start out at 100, 50, and 50 and there are 10 extra units to
- *         go around then the first will get 5 and the other two will get
- *         2.5.
- *  ForcedEven - all children will be the same size, evenly distributed
- *         over the total container size.  Note: this may make children
- *         lay out smaller than their preferred size where they otherwise
- *         wouldn't be.
- *  First - the first child gets all of the extra space and all other children
- *          are preferred size.
- *  Last  - the last child gets all of the extra space and all other children
- *          are preferred size.
- *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public enum FillMode {
-    None, Even, Proportional, ForcedEven, First, Last
+    /**
+     * None of the children will be stretched and their default size will always be used.
+     */
+    None,
+    /**
+     * All children will get an even amount of stretching. This does not mean that they are all the same
+     * size. It means that any extra sizing is evenly distributed amongst all children.
+     */
+    Even,
+
+    /**
+     * Children will get stretching based on their portion of the overall preferred size. Instead of evenly
+     * distributing extra sizing, each child will get a proportional amount of the sizing based on their
+     * relative size. If three children start out at 100, 50, and 50 and there are 10 extra units to go
+     * around then the first will get 5 and the other two will get 2.5.
+     */
+    Proportional,
+
+    /**
+     * All children will be the same size, evenly distributed over the total container size. Note: this may
+     * make children lay out smaller than their preferred size where they otherwise wouldn't be.
+     */
+    ForcedEven,
+
+    /**
+     * The first child gets all of the extra space and all other children are preferred size.
+     */
+    First,
+
+    /**
+     * The last child gets all of the extra space and all other children are preferred size.
+     */
+    Last
 }

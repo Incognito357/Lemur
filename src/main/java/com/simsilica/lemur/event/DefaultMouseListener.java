@@ -34,63 +34,64 @@
 
 package com.simsilica.lemur.event;
 
-import com.jme3.input.event.*;
-import com.jme3.scene.*;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.scene.Spatial;
 
 
 /**
- *  A default implementation mouse listener that provides default
- *  implementations for all MouseListener methods.  In addition,
- *  the mouseButtonEvent() provides basic default click behavior
- *  calling an overridable click() method.  Default click detection
- *  uses a pixel-based threshold that can be specified on the constructor
- *  and is implemented with the overridable isClick() method.
+ * A default implementation mouse listener that provides default
+ * implementations for all MouseListener methods.  In addition,
+ * the mouseButtonEvent() provides basic default click behavior
+ * calling an overridable click() method.  Default click detection
+ * uses a pixel-based threshold that can be specified on the constructor
+ * and is implemented with the overridable isClick() method.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class DefaultMouseListener implements MouseListener {
 
+    private final int xClickThreshold;
+    private final int yClickThreshold;
     private int xDown;
     private int yDown;
-    private int xClickThreshold;
-    private int yClickThreshold;
 
     public DefaultMouseListener() {
         this(3, 3);
     }
 
-    public DefaultMouseListener( int xClickThreshold, int yClickThreshold ) {
+    public DefaultMouseListener(int xClickThreshold, int yClickThreshold) {
         this.xClickThreshold = xClickThreshold;
-        this.yClickThreshold = yClickThreshold;  
+        this.yClickThreshold = yClickThreshold;
     }
 
-    protected void click( MouseButtonEvent event, Spatial target, Spatial capture ) {
-    } 
+    protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
+    }
 
-    protected boolean isClick( MouseButtonEvent event, int xDown, int yDown ) {
+    protected boolean isClick(MouseButtonEvent event, int xDown, int yDown) {
         int x = event.getX();
         int y = event.getY();
-        return Math.abs(x-xDown) < xClickThreshold && Math.abs(y-yDown) < yClickThreshold;
+        return Math.abs(x - xDown) < xClickThreshold && Math.abs(y - yDown) < yClickThreshold;
     }
 
-    public void mouseButtonEvent( MouseButtonEvent event, Spatial target, Spatial capture ) {
+    public void mouseButtonEvent(MouseButtonEvent event, Spatial target, Spatial capture) {
         event.setConsumed();
 
-        if( event.isPressed() ) {
+        if (event.isPressed()) {
             xDown = event.getX();
             yDown = event.getY();
-        } else if( isClick(event, xDown, yDown) ) {
+        } else if (isClick(event, xDown, yDown)) {
             click(event, target, capture);
         }
     }
 
-    public void mouseEntered( MouseMotionEvent event, Spatial target, Spatial capture ) {
+    public void mouseEntered(MouseMotionEvent event, Spatial target, Spatial capture) {
     }
 
-    public void mouseExited( MouseMotionEvent event, Spatial target, Spatial capture ) {
+    public void mouseExited(MouseMotionEvent event, Spatial target, Spatial capture) {
     }
 
-    public void mouseMoved( MouseMotionEvent event, Spatial target, Spatial capture ) {
+    public void mouseMoved(MouseMotionEvent event, Spatial target, Spatial capture) {
     }
 }
 

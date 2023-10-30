@@ -34,8 +34,6 @@
 
 package com.simsilica.lemur.component;
 
-import java.util.*;
-
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Axis;
@@ -43,56 +41,60 @@ import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.core.GuiLayout;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 /**
- *  A layout that manages children similar to Swing's BoxLayout.
- *  Components are arranged along an Axis and the children are
- *  stretched to fit the maximum component width.  This is similar
- *  to a single column or single row SpringGridLayout and in the
- *  future may be deprecated in lieu of that class.
+ * A layout that manages children similar to Swing's BoxLayout.
+ * Components are arranged along an Axis and the children are
+ * stretched to fit the maximum component width.  This is similar
+ * to a single column or single row SpringGridLayout and in the
+ * future may be deprecated in lieu of that class.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public class BoxLayout extends AbstractGuiComponent
-                       implements GuiLayout, Cloneable {
+public class BoxLayout extends AbstractGuiComponent implements GuiLayout, Cloneable {
+    private final Axis axis;
+    private final FillMode fill;
     private GuiControl parent;
-    private Axis axis;
-    private FillMode fill;
-    private List<Node> children = new ArrayList<Node>();
-    private List<Vector3f> preferredSizes = new ArrayList<Vector3f>();
+    private List<Node> children = new ArrayList<>();
+    private List<Vector3f> preferredSizes = new ArrayList<>();
     private Vector3f lastPreferredSize;
 
     public BoxLayout() {
         this(Axis.Y, FillMode.Even);
     }
 
-    public BoxLayout( Axis axis, FillMode fill ) {
+    public BoxLayout(Axis axis, FillMode fill) {
         this.axis = axis;
         this.fill = fill;
     }
 
     @Override
     public BoxLayout clone() {
-        BoxLayout result = (BoxLayout)super.clone();
+        BoxLayout result = (BoxLayout) super.clone();
         result.parent = null;
-        result.children = new ArrayList<Node>();
-        result.preferredSizes = new ArrayList<Vector3f>();
+        result.children = new ArrayList<>();
+        result.preferredSizes = new ArrayList<>();
         result.lastPreferredSize = null;
         return result;
     }
 
     @Override
     protected void invalidate() {
-        if( parent != null ) {
+        if (parent != null) {
             parent.invalidate();
         }
     }
 
-    public void calculatePreferredSize( Vector3f size ) {
+    public void calculatePreferredSize(Vector3f size) {
         // Calculate the size we'd like to be to let
         // all of the children have space
         Vector3f pref = new Vector3f();
         preferredSizes.clear();
-        for( Node n : children ) {
+        for (Node n : children) {
             Vector3f v = n.getControl(GuiControl.class).getPreferredSize();
 
             preferredSizes.add(v.clone());
@@ -100,7 +102,7 @@ public class BoxLayout extends AbstractGuiComponent
             // We do a little trickery here by adding the
             // axis direction to the returned preferred size.
             // That way we can just "max" the whole thing.
-            switch( axis ) {
+            switch (axis) {
                 case X:
                     v.x += pref.x;
                     break;
@@ -141,7 +143,7 @@ public class BoxLayout extends AbstractGuiComponent
 
         float axisPrefTotal = 0;
         float axisSizeTotal = 0;
-        switch( axis ) {
+        switch (axis) {
             case X:
                 axisPrefTotal = lastPreferredSize.x;
                 axisSizeTotal = size.x;
@@ -158,14 +160,14 @@ public class BoxLayout extends AbstractGuiComponent
 
 
         Vector3f p = pos.clone();
-        for( int i = 0; i < children.size(); i++ ) {
+        for (int i = 0; i < children.size(); i++) {
             Node n = children.get(i);
             Vector3f pref = preferredSizes.get(i).clone();
 
             // So the child size will depend on axis and fill
             float axisPref = 0;
             float axisSize = 0;
-            switch( axis ) {
+            switch (axis) {
                 case X:
                     axisPref = pref.x;
                     axisSize = size.x;
@@ -189,7 +191,7 @@ public class BoxLayout extends AbstractGuiComponent
                     break;
             }
 
-            switch( fill ) {
+            switch (fill) {
                 case None:
                     axisSize = axisPref;
                     break;
@@ -198,7 +200,7 @@ public class BoxLayout extends AbstractGuiComponent
                     // that they are forced to be the same size.  So
                     // we take the total difference and divide it evenly
                     // among the children.
-                    axisSize = axisPref + (axisSizeTotal - axisPrefTotal)/children.size();
+                    axisSize = axisPref + (axisSizeTotal - axisPrefTotal) / children.size();
                     break;
                 case Proportional:
                     // All children expand proportional to their relation
@@ -214,7 +216,7 @@ public class BoxLayout extends AbstractGuiComponent
 
             // Now set back the axis-specific size and adjust
             // position for the next component
-            switch( axis ) {
+            switch (axis) {
                 case X:
                     pref.x = axisSize;
                     p.x += axisSize;
@@ -234,15 +236,15 @@ public class BoxLayout extends AbstractGuiComponent
         }
     }
 
-    public <T extends Node> T addChild( T n, Object... constraints ) {
-        if( n.getControl( GuiControl.class ) == null )
-            throw new IllegalArgumentException( "Child is not GUI element." );
-        if( constraints != null && constraints.length > 0 )
-            throw new IllegalArgumentException( "Box layout does not take constraints." );
+    public <T extends Node> T addChild(T n, Object... constraints) {
+        if (n.getControl(GuiControl.class) == null)
+            throw new IllegalArgumentException("Child is not GUI element.");
+        if (constraints != null && constraints.length > 0)
+            throw new IllegalArgumentException("Box layout does not take constraints.");
 
         children.add(n);
 
-        if( parent != null ) {
+        if (parent != null) {
             // We are attached
             parent.getNode().attachChild(n);
         }
@@ -251,34 +253,34 @@ public class BoxLayout extends AbstractGuiComponent
         return n;
     }
 
-    public void removeChild( Node n ) {
-        if( !children.remove(n) )
+    public void removeChild(Node n) {
+        if (!children.remove(n))
             return; // we didn't have it as a child anyway
-        if( parent != null ) {
+        if (parent != null) {
             parent.getNode().detachChild(n);
         }
         invalidate();
     }
 
     @Override
-    public void attach( GuiControl parent ) {
+    public void attach(GuiControl parent) {
         this.parent = parent;
         Node self = parent.getNode();
-        for( Node n : children ) {
+        for (Node n : children) {
             self.attachChild(n);
         }
     }
 
     @Override
-    public void detach( GuiControl parent ) {
+    public void detach(GuiControl parent) {
         this.parent = null;
         // Have to make a copy to avoid concurrent mod exceptions
         // now that the containers are smart enough to call remove
         // when detachChild() is called.  A small side-effect.
         // Possibly a better way to do this?  Disable loop-back removal
         // somehow?
-        Collection<Node> copy = new ArrayList<Node>(children);    
-        for( Node n : copy ) {
+        Collection<Node> copy = new ArrayList<>(children);
+        for (Node n : copy) {
             n.removeFromParent();
         }
     }
@@ -288,19 +290,19 @@ public class BoxLayout extends AbstractGuiComponent
     }
 
     public void clearChildren() {
-        if( parent != null ) {
+        if (parent != null) {
             // Have to make a copy to avoid concurrent mod exceptions
             // now that the containers are smart enough to call remove
             // when detachChild() is called.  A small side-effect.
             // Possibly a better way to do this?  Disable loop-back removal
             // somehow?
-            Collection<Node> copy = new ArrayList<Node>(children);    
-            for( Node n : copy ) {
+            Collection<Node> copy = new ArrayList<>(children);
+            for (Node n : copy) {
                 parent.getNode().detachChild(n);
             }
         }
         children.clear();
-        invalidate();        
+        invalidate();
     }
 
 }

@@ -36,47 +36,39 @@
 
 package com.simsilica.lemur.event;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.slf4j.*;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.input.MouseInput;
-import com.jme3.math.Vector2f;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
- *  Consolidates the PickEventSession management for doing
- *  scene picking.  This is the base class for the MouseAppState
- *  and the TouchAppState.
+ * Consolidates the PickEventSession management for doing
+ * scene picking.  This is the base class for the MouseAppState
+ * and the TouchAppState.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public abstract class BasePickState extends BaseAppState
-                                    implements PickState {
+public abstract class BasePickState extends BaseAppState implements PickState {
+    private static final long sampleFrequency = 1000000000 / 60; // 60 fps
     static Logger log = LoggerFactory.getLogger(BasePickState.class);
-
+    /**
+     * The session that tracks the state of pick events from one
+     * event frame to the next.
+     */
+    private final PickEventSession session = new PickEventSession();
+    /**
+     * Keeps track of the owners interested in picking being enabled
+     * as well as how many times they have requested picking.
+     */
+    private final Map<Object, Integer> owners = new HashMap<>();
     private boolean includeDefaultNodes = true;
-
-    private long sampleFrequency = 1000000000 / 60; // 60 fps
     private long lastSample = 0;
-
-    /**
-     *  The session that tracks the state of pick events from one
-     *  event frame to the next.
-     */
-    private PickEventSession session = new PickEventSession();
-
-    /**
-     *  Keeps track of the owners interested in picking being enabled
-     *  as well as how many times they have requested picking.
-     */
-    private Map<Object, Integer> owners = new HashMap<>();
     private int totalRequests = 0;
 
     protected BasePickState() {
@@ -87,75 +79,74 @@ public abstract class BasePickState extends BaseAppState
     }
 
     /**
-     *  Signifies that the specified owner needs the pick state to be enabled.
+     * Signifies that the specified owner needs the pick state to be enabled.
      */
     @Override
-    public void requestEnabled( Object owner ) {
-        if( log.isTraceEnabled() ) {
-            log.trace("requestEnabled(" + owner + ")");
+    public void requestEnabled(Object owner) {
+        if (log.isTraceEnabled()) {
+            log.trace("requestEnabled({})", owner);
         }
-        Integer existing = owners.get(owner);
-        if( existing == null ) {
-            owners.put(owner, 1);            
-        } else {
-            owners.put(owner, existing + 1);
-        }
+        owners.merge(owner, 1, Integer::sum);
         totalRequests++;
-        if( log.isTraceEnabled() ) {
-            log.trace("request: Total enabled requests:" + totalRequests);
+        if (log.isTraceEnabled()) {
+            log.trace("request: Total enabled requests:{}", totalRequests);
         }
         setEnabled(true);
     }
-    
+
     /**
-     *  Signifies that the specified owner no longer needs the pick state to be enabled.
-     *  Will return true if the state is still enabled (because of other requests) or
-     *  false if the state is now disabled.
+     * Signifies that the specified owner no longer needs the pick state to be enabled.
+     * Will return true if the state is still enabled (because of other requests) or
+     * false if the state is now disabled.
      */
     @Override
-    public boolean releaseEnabled( Object owner ) {
-        if( log.isTraceEnabled() ) {
-            log.trace("releaseEnabled(" + owner + ")");
+    public boolean releaseEnabled(Object owner) {
+        if (log.isTraceEnabled()) {
+            log.trace("releaseEnabled({})", owner);
         }
         Integer existing = owners.get(owner);
-        if( existing == null || existing == 0 ) {
+        if (existing == null || existing == 0) {
             throw new IllegalArgumentException("Invalid owner, no requests pending");
-        }        
-        if( existing == 1 ) {
+        }
+        if (existing == 1) {
             owners.remove(owner);
         } else {
-            owners.put(owner, existing-1);
+            owners.put(owner, existing - 1);
         }
         totalRequests--;
-        if( log.isTraceEnabled() ) {
-            log.trace("release: Total enabled requests:" + totalRequests);
+        if (log.isTraceEnabled()) {
+            log.trace("release: Total enabled requests:{}", totalRequests);
         }
-        if( totalRequests < 0 ) {
-            log.error("Received more releases than requests, totalRequests:" + totalRequests + " at release of owner:" + owner);
-        }
-        setEnabled(totalRequests > 0);
-        return isEnabled();
-    }
-    
-    @Override
-    public boolean hasRequestedEnabled( Object owner ) {    
-        Integer existing = owners.get(owner);
-        return existing != null && existing > 0;
-    }    
-    
-    @Override    
-    public boolean resetEnabled() {
-        if( log.isTraceEnabled() ) {
-            log.trace("reset: Total enabled requests:" + totalRequests);
+        if (totalRequests < 0) {
+            log.error("Received more releases than requests, totalRequests:{} at release of owner:{}", totalRequests, owner);
         }
         setEnabled(totalRequests > 0);
         return isEnabled();
     }
 
-    public void setIncludeDefaultCollisionRoots( boolean b ) {
+    @Override
+    public boolean hasRequestedEnabled(Object owner) {
+        Integer existing = owners.get(owner);
+        return existing != null && existing > 0;
+    }
+
+    @Override
+    public boolean resetEnabled() {
+        if (log.isTraceEnabled()) {
+            log.trace("release: Total enabled requests:{}", totalRequests);
+        }
+        setEnabled(totalRequests > 0);
+        return isEnabled();
+    }
+
+    public boolean getIncludeDefaultCollisionRoots() {
+        return includeDefaultNodes;
+    }
+
+    public void setIncludeDefaultCollisionRoots(boolean b) {
         this.includeDefaultNodes = b;
-        if( isInitialized() ) {
-            if( b ) {
+        if (isInitialized()) {
+            if (b) {
                 addCollisionRoot(getApplication().getGuiViewPort(), PICK_LAYER_GUI);
                 addCollisionRoot(getApplication().getViewPort(), PICK_LAYER_SCENE);
             } else {
@@ -165,62 +156,58 @@ public abstract class BasePickState extends BaseAppState
         }
     }
 
-    public boolean getIncludeDefaultCollisionRoots() {
-        return includeDefaultNodes;
-    }
-
     @Deprecated
-    public ViewPort findViewPort( Spatial s ) {
+    public ViewPort findViewPort(Spatial s) {
         return session.findViewPort(s);
     }
 
-    public void addCollisionRoot( ViewPort viewPort ) {
+    public void addCollisionRoot(ViewPort viewPort) {
         session.addCollisionRoot(viewPort);
     }
 
-    public void addCollisionRoot( ViewPort viewPort, String layer ) {
+    public void addCollisionRoot(ViewPort viewPort, String layer) {
         session.addCollisionRoot(viewPort, layer);
     }
 
-    public void addCollisionRoot( Spatial root, ViewPort viewPort ) {
+    public void addCollisionRoot(Spatial root, ViewPort viewPort) {
         session.addCollisionRoot(root, viewPort);
     }
 
-    public void addCollisionRoot( Spatial root, ViewPort viewPort, String layer ) {
+    public void addCollisionRoot(Spatial root, ViewPort viewPort, String layer) {
         session.addCollisionRoot(root, viewPort, layer);
     }
 
-    public void removeCollisionRoot( ViewPort viewPort ) {
+    public void removeCollisionRoot(ViewPort viewPort) {
         session.removeCollisionRoot(viewPort);
     }
 
-    public void removeCollisionRoot( Spatial root ) {
+    public void removeCollisionRoot(Spatial root) {
         session.removeCollisionRoot(root);
-    }
-
-    /**
-     *  Sets the order in which the pick layers will be checked for collisions.
-     *  The default ordering is PICK_LAYER_GUI then PICK_LAYER_SCENE.
-     */
-    public void setPickLayerOrder( String... layers ) {
-        session.setPickLayerOrder(layers);
     }
 
     public String[] getPickLayerOrder() {
         return session.getPickLayerOrder();
     }
 
+    /**
+     * Sets the order in which the pick layers will be checked for collisions.
+     * The default ordering is PICK_LAYER_GUI then PICK_LAYER_SCENE.
+     */
+    public void setPickLayerOrder(String... layers) {
+        session.setPickLayerOrder(layers);
+    }
+
     @Override
-    protected void initialize( Application app ) {
-        if( includeDefaultNodes ) {
+    protected void initialize(Application app) {
+        if (includeDefaultNodes) {
             addCollisionRoot(getApplication().getGuiViewPort(), PICK_LAYER_GUI);
             addCollisionRoot(getApplication().getViewPort(), PICK_LAYER_SCENE);
         }
     }
 
     @Override
-    protected void cleanup( Application app ) {
-        if( includeDefaultNodes ) {
+    protected void cleanup(Application app) {
+        if (includeDefaultNodes) {
             removeCollisionRoot(app.getGuiViewPort());
             removeCollisionRoot(app.getViewPort());
         }
@@ -237,11 +224,11 @@ public abstract class BasePickState extends BaseAppState
     }
 
     @Override
-    public void update( float tpf ) {
+    public void update(float tpf) {
         super.update(tpf);
 
         long time = System.nanoTime();
-        if( time - lastSample < sampleFrequency )
+        if (time - lastSample < sampleFrequency)
             return;
         lastSample = time;
 

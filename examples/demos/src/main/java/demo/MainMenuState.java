@@ -54,45 +54,60 @@ import com.simsilica.lemur.event.*;
 import com.jme3.input.event.*;
 
 /**
- *
- *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class MainMenuState extends BaseAppState {
 
-    static Logger log = LoggerFactory.getLogger(MainMenuState.class);
-
     public static Class[] DEMOS = {
-        OptionPanelDemoState.class,
-        PopupPanelDemoState.class,
-        DragAndDropDemoState.class,
-        WordWrapDemoState.class,
-        TextEntryDemoState.class,
-        FormattedTextEntryDemoState.class,
-        ListBoxDemoState.class,
-        IconDemoState.class,
-        TextAlignmentDemoState.class,
-        TabbedPanelDemoState.class,
-        DragDemoState.class,
-        ViewPortDemoState.class,
-        DynamicInsetsState.class,
-        PanelAlphaDemoState.class
+            OptionPanelDemoState.class,
+            PopupPanelDemoState.class,
+            DragAndDropDemoState.class,
+            WordWrapDemoState.class,
+            TextEntryDemoState.class,
+            FormattedTextEntryDemoState.class,
+            ListBoxDemoState.class,
+            IconDemoState.class,
+            TextAlignmentDemoState.class,
+            TabbedPanelDemoState.class,
+            DragDemoState.class,
+            ViewPortDemoState.class,
+            DynamicInsetsState.class,
+            PanelAlphaDemoState.class
     };
-
+    static Logger log = LoggerFactory.getLogger(MainMenuState.class);
     private Container mainWindow;
     private List<ToggleChild> toggles = new ArrayList<>();
 
-    public MainMenuState() {
+    private static String classToName(Class type) {
+        String n = type.getSimpleName();
+        if (n.endsWith("DemoState")) {
+            n = n.substring(0, n.length() - "DemoState".length());
+        } else if (n.endsWith("State")) {
+            n = n.substring(0, n.length() - "State".length());
+        }
+
+        boolean lastLower = false;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n.length(); i++) {
+            char c = n.charAt(i);
+            if (lastLower && Character.isUpperCase(c)) {
+                sb.append(" ");
+            } else if (Character.isLowerCase(c)) {
+                lastLower = true;
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     /**
-     *  For states that close themselves, this lets the master list know that the
-     *  particular child demo is no longer open.  Basically, this lets the checkbox
-     *  update.
+     * For states that close themselves, this lets the master list know that the
+     * particular child demo is no longer open.  Basically, this lets the checkbox
+     * update.
      */
-    public void closeChild( AppState child ) {
-        for( ToggleChild toggle : toggles ) {
-            if( toggle.child == child ) {
+    public void closeChild(AppState child) {
+        for (ToggleChild toggle : toggles) {
+            if (toggle.child == child) {
                 toggle.close();
             }
         }
@@ -103,12 +118,12 @@ public class MainMenuState extends BaseAppState {
         return height / 720f;
     }
 
-    protected void showError( String title, String error ) {
+    protected void showError(String title, String error) {
         getState(OptionPanelState.class).show(title, error);
     }
 
     @Override
-    protected void initialize( Application app ) {
+    protected void initialize(Application app) {
         mainWindow = new Container();
 
         Label title = mainWindow.addChild(new Label("Lemur Demos"));
@@ -118,7 +133,7 @@ public class MainMenuState extends BaseAppState {
         Container actions = mainWindow.addChild(new Container());
         actions.setInsets(new Insets3f(10, 10, 0, 10));
 
-        for( Class demo : DEMOS ) {
+        for (Class demo : DEMOS) {
             ToggleChild toggle = new ToggleChild(demo);
             toggles.add(toggle);
             Checkbox cb = actions.addChild(new Checkbox(toggle.getName()));
@@ -167,12 +182,12 @@ public class MainMenuState extends BaseAppState {
     }
 
     @Override
-    protected void cleanup( Application app ) {
+    protected void cleanup(Application app) {
     }
 
     @Override
     protected void onEnable() {
-        Node gui = ((DemoLauncher)getApplication()).getGuiNode();
+        Node gui = ((DemoLauncher) getApplication()).getGuiNode();
         gui.attachChild(mainWindow);
         GuiGlobals.getInstance().requestFocus(mainWindow);
     }
@@ -182,35 +197,13 @@ public class MainMenuState extends BaseAppState {
         mainWindow.removeFromParent();
     }
 
-    private static String classToName( Class type ) {
-        String n = type.getSimpleName();
-        if( n.endsWith("DemoState") ) {
-            n = n.substring(0, n.length() - "DemoState".length());
-        } else if( n.endsWith("State") ) {
-            n = n.substring(0, n.length() - "State".length());
-        }
-
-        boolean lastLower = false;
-        StringBuilder sb = new StringBuilder();
-        for( int i = 0; i < n.length(); i++ ) {
-            char c = n.charAt(i);
-            if( lastLower && Character.isUpperCase(c) ) {
-                sb.append(" ");
-            } else if( Character.isLowerCase(c) ) {
-                lastLower = true;
-            }
-            sb.append(c);
-        }
-        return sb.toString();
-    }
-
     private class ToggleChild implements Command<Button> {
         private String name;
         private Checkbox check;
         private Class type;
         private AppState child;
 
-        public ToggleChild( Class type ) {
+        public ToggleChild(Class type) {
             this.type = type;
             this.name = classToName(type);
         }
@@ -219,10 +212,10 @@ public class MainMenuState extends BaseAppState {
             return name;
         }
 
-        public void execute( Button button ) {
-            this.check = (Checkbox)button;
+        public void execute(Button button) {
+            this.check = (Checkbox) button;
             System.out.println("Click:" + check);
-            if( check.isChecked() ) {
+            if (check.isChecked()) {
                 open();
             } else {
                 close();
@@ -230,23 +223,23 @@ public class MainMenuState extends BaseAppState {
         }
 
         public void open() {
-            if( child != null ) {
+            if (child != null) {
                 // Already open
                 return;
             }
             try {
-                child = (AppState)type.newInstance();
+                child = (AppState) type.newInstance();
                 getStateManager().attach(child);
-            } catch( Exception e ) {
+            } catch (Exception e) {
                 showError("Error for demo:" + type.getSimpleName(), e.toString());
             }
         }
 
         public void close() {
-            if( check != null ) {
+            if (check != null) {
                 check.setChecked(false);
             }
-            if( child != null ) {
+            if (child != null) {
                 getStateManager().detach(child);
                 child = null;
             }

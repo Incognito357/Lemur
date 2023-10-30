@@ -34,21 +34,21 @@
 
 package com.simsilica.lemur.style;
 
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
- *  The attribute settings for a particular style selector.
+ * The attribute settings for a particular style selector.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Attributes {
 
-    private Styles parent;
-    private Map<String, Object> values = new HashMap<String, Object>();
+    private final Styles parent;
+    private final Map<String, Object> values = new HashMap<>();
 
-    public Attributes( Styles parent ) {
+    public Attributes(Styles parent) {
         this.parent = parent;
     }
 
@@ -56,18 +56,18 @@ public class Attributes {
         return values;
     }
 
-    protected void applyNew( Attributes atts ) {
+    protected void applyNew(Attributes atts) {
 
         // Note: applyNew is called in highest to lowest priority.
         //       Things that fill the values map now should override
         //       later things.
 
-        for( Map.Entry<String,Object> e : atts.values.entrySet() ) {
+        for (Map.Entry<String, Object> e : atts.values.entrySet()) {
             Object existing = values.get(e.getKey());
-            if( existing instanceof Map && e.getValue() instanceof Map ) {
+            if (existing instanceof Map && e.getValue() instanceof Map) {
                 // Need to merge the old and the new
-                values.put(e.getKey(), mergeMap((Map)existing, (Map)e.getValue()));
-            } else if( existing == null && !values.containsKey(e.getKey()) ) {
+                values.put(e.getKey(), mergeMap((Map<String, Object>) existing, (Map<String, Object>) e.getValue()));
+            } else if (existing == null && !values.containsKey(e.getKey())) {
                 // Null check above is not enough because the map might have a
                 // null value that should override subsequent attempts to
                 // set the value.
@@ -77,13 +77,10 @@ public class Attributes {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected Map mergeMap( Map high, Map low ) {
-        Map result = new HashMap();
-        result.putAll(high);
-        for( Object o : low.entrySet() ) {
-            Map.Entry e = (Map.Entry)o;
-            if( !result.containsKey(e.getKey()) ) {
+    protected Map<String, Object> mergeMap(Map<String, Object> high, Map<String, Object> low) {
+        Map<String, Object> result = new HashMap<>(high);
+        for (Map.Entry<String, Object> e : low.entrySet()) {
+            if (!result.containsKey(e.getKey())) {
                 result.put(e.getKey(), e.getValue());
             }
         }
@@ -91,13 +88,13 @@ public class Attributes {
     }
 
     /**
-     *  Like applyNew except that it returns a new Attributes object
-     *  and leaves the original intact if a merge is necessary.
-     *  If the specified attributes to merge are empty then this
-     *  attributes object is returned.
+     * Like applyNew except that it returns a new Attributes object
+     * and leaves the original intact if a merge is necessary.
+     * If the specified attributes to merge are empty then this
+     * attributes object is returned.
      */
-    protected Attributes merge( Attributes atts ) {
-        if( atts.isEmpty() ) {
+    protected Attributes merge(Attributes atts) {
+        if (atts.isEmpty()) {
             return this;
         }
         Attributes result = new Attributes(parent);
@@ -110,33 +107,33 @@ public class Attributes {
         return values.isEmpty();
     }
 
-    public boolean hasAttribute( String key ) {
+    public boolean hasAttribute(String key) {
         return values.containsKey(key);
     }
 
-    public void set( String attribute, Object value ) {
-        set( attribute, value, true );
+    public void set(String attribute, Object value) {
+        set(attribute, value, true);
     }
 
-    public void set( String attribute, Object value, boolean overwrite ) {
-        if( !overwrite && values.containsKey(attribute) )
+    public void set(String attribute, Object value, boolean overwrite) {
+        if (!overwrite && values.containsKey(attribute))
             return;
-        values.put( attribute, value );
+        values.put(attribute, value);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T get( String attribute ) {
-        return (T)values.get(attribute);
+    public <T> T get(String attribute) {
+        return (T) values.get(attribute);
     }
 
-    public <T> T get( String attribute, Class<T> type ) {
+    public <T> T get(String attribute, Class<T> type) {
         return get(attribute, type, true);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T get( String attribute, Class<T> type, boolean lookupDefault ) {
+    public <T> T get(String attribute, Class<T> type, boolean lookupDefault) {
         Object result = values.get(attribute);
-        if( result == null && lookupDefault ) {
+        if (result == null && lookupDefault) {
             result = parent.getDefault(type);
         }
         // Normally type.cast(result) would work here and allow us to get
@@ -146,7 +143,7 @@ public class Attributes {
         // type is float.  Probably there is some additional coercion to be
         // done here if we wanted to be properly type safe but things are seemingly
         // working ok at the moment and that's a pretty deep time-sink.
-        return (T)result;
+        return (T) result;
     }
 
     @Override

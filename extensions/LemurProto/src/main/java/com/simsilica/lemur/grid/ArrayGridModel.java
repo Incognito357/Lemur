@@ -45,8 +45,8 @@ import com.simsilica.lemur.core.VersionedReference;
  *  @author    Paul Speed
  */
 public class ArrayGridModel<T> implements GridModel<T> {
-    private T[][] array;
-    private int rows;
+    private final T[][] array;
+    private final int rows;
     private int cols;
     private long version;
     
@@ -95,7 +95,7 @@ public class ArrayGridModel<T> implements GridModel<T> {
 
     @Override
     public VersionedReference<GridModel<T>> createReference() {
-        return new VersionedReference<GridModel<T>>(this);
+        return new VersionedReference<>(this);
     }
 }
 

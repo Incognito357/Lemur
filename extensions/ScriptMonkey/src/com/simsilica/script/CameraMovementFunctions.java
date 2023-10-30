@@ -48,6 +48,8 @@ import com.simsilica.lemur.input.InputState;
  */
 public class CameraMovementFunctions {
 
+    private CameraMovementFunctions() {}
+
     public static final String GROUP_MOVEMENT = "Movement";
 
     public static final FunctionId F_Y_LOOK = new FunctionId(GROUP_MOVEMENT, "Y Look");

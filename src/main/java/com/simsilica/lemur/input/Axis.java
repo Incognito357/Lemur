@@ -99,9 +99,7 @@ public class Axis {
         if( o == null || o.getClass() != getClass() )
             return false;
         Axis other = (Axis)o;
-        if( !Objects.equals(id, other.id) )
-            return false;
-        return true;
+        return Objects.equals(id, other.id);
     }
 
     @Override

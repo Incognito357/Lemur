@@ -43,31 +43,24 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
+
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 
 /**
- *  A mesh implementation that creates a box with a specified
- *  number of slices, masking off one or more sides.  Separate
- *  slice counts can be provided for x,y,z axes and any or all
- *  of the sides can be turns on or off.  In other words, this
- *  can be used directly as a Box implementation with more
- *  triangles (subdivided) or it can be used as a subdivided
- *  Quad if only one side it specified.
+ * A mesh implementation that creates a box with a specified
+ * number of slices, masking off one or more sides.  Separate
+ * slice counts can be provided for x,y,z axes and any or all
+ * of the sides can be turns on or off.  In other words, this
+ * can be used directly as a Box implementation with more
+ * triangles (subdivided) or it can be used as a subdivided
+ * Quad if only one side it specified.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class MBox extends Mesh implements Savable, Cloneable {
-
-    public static final int TOP_MASK = 0x1;
-    public static final int BOTTOM_MASK = 0x2;
-    public static final int FRONT_MASK = 0x4;
-    public static final int BACK_MASK = 0x8;
-    public static final int LEFT_MASK = 0x10;
-    public static final int RIGHT_MASK = 0x20;
-    public static final int ALL_MASK = 0x3f;
 
     private static final int TOP = 0;
     private static final int BOTTOM = 1;
@@ -75,36 +68,41 @@ public class MBox extends Mesh implements Savable, Cloneable {
     private static final int BACK = 3;
     private static final int LEFT = 4;
     private static final int RIGHT = 5;
-
-    private static Vector3f normals[] = {
-            new Vector3f(0,1,0),
-            new Vector3f(0,-1,0),
-            new Vector3f(0,0,1),
-            new Vector3f(0,0,-1),
-            new Vector3f(-1,0,0),
-            new Vector3f(1,0,0)
-        };
-    private static Vector3f tangents[] = {
-            new Vector3f(1,0,0),
-            new Vector3f(1,0,0),
-            new Vector3f(1,0,0),
-            new Vector3f(-1,0,0),
-            new Vector3f(0,0,1),
-            new Vector3f(0,0,-1)
-        };
-    private static Vector3f binormals[] = {
-            new Vector3f(0,0,-1),
-            new Vector3f(0,0,1),
-            new Vector3f(0,1,0),
-            new Vector3f(0,1,0),
-            new Vector3f(0,1,0),
-            new Vector3f(0,1,0)
-        };
-
+    private static final Vector3f[] normals = {
+            new Vector3f(0, 1, 0),
+            new Vector3f(0, -1, 0),
+            new Vector3f(0, 0, 1),
+            new Vector3f(0, 0, -1),
+            new Vector3f(-1, 0, 0),
+            new Vector3f(1, 0, 0)
+    };
+    private static final Vector3f[] tangents = {
+            new Vector3f(1, 0, 0),
+            new Vector3f(1, 0, 0),
+            new Vector3f(1, 0, 0),
+            new Vector3f(-1, 0, 0),
+            new Vector3f(0, 0, 1),
+            new Vector3f(0, 0, -1)
+    };
+    private static final Vector3f[] binormals = {
+            new Vector3f(0, 0, -1),
+            new Vector3f(0, 0, 1),
+            new Vector3f(0, 1, 0),
+            new Vector3f(0, 1, 0),
+            new Vector3f(0, 1, 0),
+            new Vector3f(0, 1, 0)
+    };
+    public static final int TOP_MASK = 0x1;
+    public static final int BOTTOM_MASK = 0x2;
+    public static final int FRONT_MASK = 0x4;
+    public static final int BACK_MASK = 0x8;
+    public static final int LEFT_MASK = 0x10;
+    public static final int RIGHT_MASK = 0x20;
+    public static final int ALL_MASK = 0x3f;
     private Vector3f extents = new Vector3f();
     private int[] slices = new int[3];
     private int sideMask;
-    
+
     /**
      * Serialization only. Do not use.
      */
@@ -112,14 +110,14 @@ public class MBox extends Mesh implements Savable, Cloneable {
         super();
     }
 
-    public MBox( float xExtent, float yExtent, float zExtent,
-                 int xSlices, int ySlices, int zSlices ) {
+    public MBox(float xExtent, float yExtent, float zExtent,
+                int xSlices, int ySlices, int zSlices) {
         this(xExtent, yExtent, zExtent, xSlices, ySlices, zSlices, ALL_MASK);
     }
 
-    public MBox( float xExtent, float yExtent, float zExtent,
-                 int xSlices, int ySlices, int zSlices,
-                 int sideMask ) {
+    public MBox(float xExtent, float yExtent, float zExtent,
+                int xSlices, int ySlices, int zSlices,
+                int sideMask) {
         this.sideMask = sideMask;
         extents.set(xExtent, yExtent, zExtent);
         slices[0] = xSlices;
@@ -128,19 +126,19 @@ public class MBox extends Mesh implements Savable, Cloneable {
 
         refreshGeometry();
     }
-    
+
     public Vector3f getExtents() {
         return extents;
     }
-    
-    public void resize( Vector3f extents ) {
+
+    public void resize(Vector3f extents) {
         this.extents.set(extents);
         refreshGeometry();
     }
 
     @Override
     public MBox clone() {
-        MBox result = (MBox)super.deepClone();
+        MBox result = (MBox) super.deepClone();
         result.extents = extents.clone();
         result.slices = slices.clone();
         return result;
@@ -175,27 +173,27 @@ public class MBox extends Mesh implements Savable, Cloneable {
         int vertCount = 0;
         int triCount = 0;
 
-        if( (sideMask & TOP_MASK) != 0 ) {
+        if ((sideMask & TOP_MASK) != 0) {
             vertCount += upVertCount;
             triCount += upTriCount;
         }
-        if( (sideMask & BOTTOM_MASK) != 0 ) {
+        if ((sideMask & BOTTOM_MASK) != 0) {
             vertCount += upVertCount;
             triCount += upTriCount;
         }
-        if( (sideMask & FRONT_MASK) != 0 ) {
+        if ((sideMask & FRONT_MASK) != 0) {
             vertCount += frontVertCount;
             triCount += frontTriCount;
         }
-        if( (sideMask & BACK_MASK) != 0 ) {
+        if ((sideMask & BACK_MASK) != 0) {
             vertCount += frontVertCount;
             triCount += frontTriCount;
         }
-        if( (sideMask & LEFT_MASK) != 0 ) {
+        if ((sideMask & LEFT_MASK) != 0) {
             vertCount += sideVertCount;
             triCount += sideTriCount;
         }
-        if( (sideMask & RIGHT_MASK) != 0 ) {
+        if ((sideMask & RIGHT_MASK) != 0) {
             vertCount += sideVertCount;
             triCount += sideTriCount;
         }
@@ -206,29 +204,29 @@ public class MBox extends Mesh implements Savable, Cloneable {
         ShortBuffer index = BufferUtils.createShortBuffer(triCount * 3);
 
         int lastIndex = 0;
-        if( (sideMask & TOP_MASK) != 0 ) {
+        if ((sideMask & TOP_MASK) != 0) {
             lastIndex = fillSide(lastIndex, TOP, 0, xVertCount, 2, zVertCount, 1,
-                                 verts, norms, texes, index);
+                    verts, norms, texes, index);
         }
-        if( (sideMask & BOTTOM_MASK) != 0 ) {
+        if ((sideMask & BOTTOM_MASK) != 0) {
             lastIndex = fillSide(lastIndex, BOTTOM, 0, xVertCount, 2, zVertCount, 1,
-                                 verts, norms, texes, index);
+                    verts, norms, texes, index);
         }
-        if( (sideMask & FRONT_MASK) != 0 ) {
+        if ((sideMask & FRONT_MASK) != 0) {
             lastIndex = fillSide(lastIndex, FRONT, 0, xVertCount, 1, yVertCount, 2,
-                                 verts, norms, texes, index);
+                    verts, norms, texes, index);
         }
-        if( (sideMask & BACK_MASK) != 0 ) {
+        if ((sideMask & BACK_MASK) != 0) {
             lastIndex = fillSide(lastIndex, BACK, 0, xVertCount, 1, yVertCount, 2,
-                                 verts, norms, texes, index);
+                    verts, norms, texes, index);
         }
-        if( (sideMask & LEFT_MASK) != 0 ) {
+        if ((sideMask & LEFT_MASK) != 0) {
             lastIndex = fillSide(lastIndex, LEFT, 2, zVertCount, 1, yVertCount, 0,
-                                  verts, norms, texes, index);
+                    verts, norms, texes, index);
         }
-        if( (sideMask & RIGHT_MASK) != 0 ) {
-            lastIndex = fillSide(lastIndex, RIGHT, 2, zVertCount, 1, yVertCount, 0,
-                                 verts, norms, texes, index);
+        if ((sideMask & RIGHT_MASK) != 0) {
+            fillSide(lastIndex, RIGHT, 2, zVertCount, 1, yVertCount, 0,
+                    verts, norms, texes, index);
         }
 
         index.flip();
@@ -248,23 +246,22 @@ public class MBox extends Mesh implements Savable, Cloneable {
 
     }
 
-    protected float[] spread( float min, float max, int count ) {
+    protected float[] spread(float min, float max, int count) {
         float[] result = new float[count];
         float delta = (max - min);
         float step = 1.0f / (count - 1); // 2 verts is 1 step
 
-        for( int i = 0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             result[i] = min + (delta * i * step);
         }
         return result;
     }
 
-    protected int fillSide( int lastIndex, int side,
-                            int colAxis, int colCount,
-                            int rowAxis, int rowCount, int otherAxis,
-                            FloatBuffer verts, FloatBuffer norms,
-                            FloatBuffer texes, ShortBuffer index )
-    {
+    protected int fillSide(int lastIndex, int side,
+                           int colAxis, int colCount,
+                           int rowAxis, int rowCount, int otherAxis,
+                           FloatBuffer verts, FloatBuffer norms,
+                           FloatBuffer texes, ShortBuffer index) {
         // Waste some space because I don't care too much
         Vector3f normal = normals[side];
         Vector3f tangent = tangents[side];
@@ -282,12 +279,12 @@ public class MBox extends Mesh implements Savable, Cloneable {
         pos.set(otherAxis, normal.get(otherAxis) * extents.get(otherAxis));
 
         int lastBaseIndex = 0;
-        for( int j = 0; j < rowCount; j++ ) {
+        for (int j = 0; j < rowCount; j++) {
             pos.set(rowAxis, rowVals[j]);
 
             int baseIndex = lastIndex + j * colCount;
 
-            for( int i = 0; i < colCount; i++ ) {
+            for (int i = 0; i < colCount; i++) {
                 pos.set(colAxis, colVals[i]);
 
                 verts.put(pos.x);
@@ -298,10 +295,10 @@ public class MBox extends Mesh implements Savable, Cloneable {
                 norms.put(normal.y);
                 norms.put(normal.z);
 
-                texes.put((float)i/(colCount-1));
-                texes.put((float)j/(rowCount-1));
+                texes.put((float) i / (colCount - 1));
+                texes.put((float) j / (rowCount - 1));
 
-                if( j > 0 && i < colCount - 1 ) {
+                if (j > 0 && i < colCount - 1) {
                     // From the second row on, we can emit indexes
                     // 2---3   baseIndex+
                     // | / |
@@ -310,12 +307,12 @@ public class MBox extends Mesh implements Savable, Cloneable {
                     // 0, 1, 3 ... which is really lbi, lbi+, bi+1
                     // 0, 3, 2 ... lbi, bi+1, bi
                     //
-                    index.put((short)lastBaseIndex);
-                    index.put((short)(lastBaseIndex + 1));
-                    index.put((short)(baseIndex + 1));
-                    index.put((short)lastBaseIndex);
-                    index.put((short)(baseIndex + 1));
-                    index.put((short)baseIndex);
+                    index.put((short) lastBaseIndex);
+                    index.put((short) (lastBaseIndex + 1));
+                    index.put((short) (baseIndex + 1));
+                    index.put((short) lastBaseIndex);
+                    index.put((short) (baseIndex + 1));
+                    index.put((short) baseIndex);
 
                     baseIndex++;
                     lastBaseIndex++;
@@ -327,7 +324,7 @@ public class MBox extends Mesh implements Savable, Cloneable {
 
         return lastIndex + colCount * rowCount;
     }
-    
+
     @Override
     public void read(JmeImporter e) throws IOException {
         super.read(e);

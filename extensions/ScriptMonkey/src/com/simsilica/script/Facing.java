@@ -41,37 +41,36 @@ import org.codehaus.groovy.runtime.typehandling.GroovyCastException;
 
 
 /**
- *  Enumeration of some standard cardinal orientations.
+ * Enumeration of some standard cardinal orientations.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public enum Facing
-{
+public enum Facing {
     North(new Quaternion().fromAngles(0, FastMath.PI, 0)),
     South(new Quaternion()),
     East(new Quaternion().fromAngles(0, FastMath.HALF_PI, 0)),
     West(new Quaternion().fromAngles(0, -FastMath.HALF_PI, 0)),
     Up(new Quaternion().fromAngles(-FastMath.HALF_PI, 0, 0)),
     Down(new Quaternion().fromAngles(FastMath.HALF_PI, 0, 0));
-    
+
     private Quaternion rotation;
-    
-    private Facing( Quaternion rotation ) {
+
+    private Facing(Quaternion rotation) {
         this.rotation = rotation;
     }
- 
+
     public <T> T asType(Class<T> type) {
-        if( type == Quaternion.class ) {
-            return (T)rotation;
-        } else if( type == Vector3f.class ) {
-            return (T)rotation.mult(Vector3f.UNIT_Z);
-        } else if( type == String.class ) {
-            return (T)toString(); 
+        if (type == Quaternion.class) {
+            return (T) rotation;
+        } else if (type == Vector3f.class) {
+            return (T) rotation.mult(Vector3f.UNIT_Z);
+        } else if (type == String.class) {
+            return (T) toString();
         } else {
             throw new GroovyCastException(this, type);
         }
-    } 
-    
+    }
+
     public Quaternion getRotation() {
         return rotation;
     }

@@ -35,7 +35,6 @@
 package com.simsilica.lemur.component;
 
 import com.jme3.scene.Node;
-
 import com.simsilica.lemur.core.GuiComponent;
 import com.simsilica.lemur.core.GuiControl;
 

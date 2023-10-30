@@ -34,25 +34,24 @@
 
 package com.simsilica.lemur;
 
-import com.simsilica.lemur.style.StyleDefaults;
-import com.simsilica.lemur.style.Attributes;
-import com.simsilica.lemur.style.ElementId;
-import com.simsilica.lemur.style.StyleAttribute;
-import com.simsilica.lemur.style.Styles;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-
-import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.component.TextComponent;
 import com.simsilica.lemur.core.GuiComponent;
+import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.style.Attributes;
+import com.simsilica.lemur.style.ElementId;
+import com.simsilica.lemur.style.StyleAttribute;
+import com.simsilica.lemur.style.StyleDefaults;
+import com.simsilica.lemur.style.Styles;
 
 
 /**
- *  A standard GUI element for displaying text with an optional
- *  shadow.
+ * A standard GUI element for displaying text with an optional
+ * shadow.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Label extends Panel {
 
@@ -62,75 +61,67 @@ public class Label extends Panel {
     public static final String LAYER_TEXT = "text";
     public static final String LAYER_SHADOW_TEXT = "shadowText";
 
-    private TextComponent text;
+    private final TextComponent text;
+    private final Vector3f shadowOffset = new Vector3f(1, -1, -1);
     private TextComponent shadow;
-    private Vector3f shadowOffset = new Vector3f(1,-1,-1);
 
-    public Label( String s ) {
-        this( s, true, new ElementId(ELEMENT_ID), null );
+    public Label(String s) {
+        this(s, true, new ElementId(ELEMENT_ID), null);
     }
 
-    public Label( String s, String style ) {
-        this( s, true, new ElementId(ELEMENT_ID), style );
+    public Label(String s, String style) {
+        this(s, true, new ElementId(ELEMENT_ID), style);
     }
 
-    public Label( String s, ElementId elementId ) {
-        this( s, true, elementId, null );
-    }
-    
-    public Label( String s, ElementId elementId, String style ) {
-        this( s, true, elementId, style );
+    public Label(String s, ElementId elementId) {
+        this(s, true, elementId, null);
     }
 
-    protected Label( String s, boolean applyStyles, ElementId elementId, String style ) {
+    public Label(String s, ElementId elementId, String style) {
+        this(s, true, elementId, style);
+    }
+
+    protected Label(String s, boolean applyStyles, ElementId elementId, String style) {
         super(false, elementId, style);
 
         // Set our layers
-        getControl(GuiControl.class).setLayerOrder(LAYER_INSETS, 
-                                                   LAYER_BORDER, 
-                                                   LAYER_BACKGROUND,
-                                                   LAYER_ICON,
-                                                   LAYER_SHADOW_TEXT,
-                                                   LAYER_TEXT);
+        getControl(GuiControl.class).setLayerOrder(LAYER_INSETS,
+                LAYER_BORDER,
+                LAYER_BACKGROUND,
+                LAYER_ICON,
+                LAYER_SHADOW_TEXT,
+                LAYER_TEXT);
 
         // Retrieve the font before creation so that if the font is
         // customized by the style then we don't end up creating a
         // BitmapText object just to throw it away when a new font
         // is set right after.  It's a limitation of BitmapText that
-        // can't have it's font changed post-creation.
+        // can't have its font changed post-creation.
         Styles styles = GuiGlobals.getInstance().getStyles();
         BitmapFont font = styles.getAttributes(elementId.getId(), style).get("font", BitmapFont.class);
-        this.text = new TextComponent(s, font);
+        text = new TextComponent(s, font);
         text.setLayer(3);
 
         getControl(GuiControl.class).setComponent(LAYER_TEXT, text);
 
-        if( applyStyles ) {
+        if (applyStyles) {
             styles.applyStyles(this, elementId, style);
         }
     }
 
     @StyleDefaults(ELEMENT_ID)
-    public static void initializeDefaultStyles( Attributes attrs ) {
-    }
-
-    @StyleAttribute(value="text", lookupDefault=false)
-    public void setText( String s ) {
-        text.setText(s);
-        if( shadow != null ) {
-            shadow.setText(s);
-        }
+    public static void initializeDefaultStyles(Attributes attrs) {
     }
 
     public String getText() {
         return text == null ? null : text.getText();
     }
 
-    @StyleAttribute(value="textVAlignment", lookupDefault=false)
-    public void setTextVAlignment( VAlignment a ) {
-        text.setVAlignment(a);
-        if( shadow != null ) {
-            shadow.setVAlignment(a);
+    @StyleAttribute(value = "text", lookupDefault = false)
+    public void setText(String s) {
+        text.setText(s);
+        if (shadow != null) {
+            shadow.setText(s);
         }
     }
 
@@ -138,11 +129,11 @@ public class Label extends Panel {
         return text.getVAlignment();
     }
 
-    @StyleAttribute(value="textHAlignment", lookupDefault=false)
-    public void setTextHAlignment( HAlignment a ) {
-        text.setHAlignment(a);
-        if( shadow != null ) {
-            shadow.setHAlignment(a);
+    @StyleAttribute(value = "textVAlignment", lookupDefault = false)
+    public void setTextVAlignment(VAlignment a) {
+        text.setVAlignment(a);
+        if (shadow != null) {
+            shadow.setVAlignment(a);
         }
     }
 
@@ -150,28 +141,29 @@ public class Label extends Panel {
         return text.getHAlignment();
     }
 
-    /**
-     *  Sets the maximum width of the label.  If the text is longer
-     *  than this width then it will be wrapped and the label will
-     *  grow vertically (in a way that the layout's can use for proper
-     *  positioning).
-     */
-    @StyleAttribute(value="maxWidth", lookupDefault=false)
-    public void setMaxWidth( float f ) {
-        text.setMaxWidth(f);
-        if( shadow != null ) {
-            shadow.setMaxWidth(f);
+    @StyleAttribute(value = "textHAlignment", lookupDefault = false)
+    public void setTextHAlignment(HAlignment a) {
+        text.setHAlignment(a);
+        if (shadow != null) {
+            shadow.setHAlignment(a);
         }
     }
-    
+
     public float getMaxWidth() {
         return text.getMaxWidth();
     }
 
-    public void setFont( BitmapFont font ) {
-        text.setFont(font);
-        if( shadow != null ) {
-            shadow.setFont(font);
+    /**
+     * Sets the maximum width of the label.  If the text is longer
+     * than this width then it will be wrapped and the label will
+     * grow vertically (in a way that the layout's can use for proper
+     * positioning).
+     */
+    @StyleAttribute(value = "maxWidth", lookupDefault = false)
+    public void setMaxWidth(float f) {
+        text.setMaxWidth(f);
+        if (shadow != null) {
+            shadow.setMaxWidth(f);
         }
     }
 
@@ -179,32 +171,31 @@ public class Label extends Panel {
         return text.getFont();
     }
 
-    @StyleAttribute("color")
-    public void setColor( ColorRGBA color ) {
-        text.setColor(color);
+    public void setFont(BitmapFont font) {
+        text.setFont(font);
+        if (shadow != null) {
+            shadow.setFont(font);
+        }
     }
 
     public ColorRGBA getColor() {
         return text == null ? null : text.getColor();
     }
 
-    @StyleAttribute("fontSize")
-    public void setFontSize( float f ) {
-        text.setFontSize(f);
-        if( shadow != null ) {
-            shadow.setFontSize(f);
-        }
+    @StyleAttribute("color")
+    public void setColor(ColorRGBA color) {
+        text.setColor(color);
     }
 
     public float getFontSize() {
         return text == null ? 0 : text.getFontSize();
     }
 
-    @StyleAttribute("shadowOffset")
-    public void setShadowOffset( Vector3f offset ) {
-        shadowOffset.set(offset);
-        if( shadow != null ) {
-            shadow.setOffset(offset.x, offset.y, offset.z);
+    @StyleAttribute("fontSize")
+    public void setFontSize(float f) {
+        text.setFontSize(f);
+        if (shadow != null) {
+            shadow.setFontSize(f);
         }
     }
 
@@ -212,11 +203,27 @@ public class Label extends Panel {
         return shadowOffset;
     }
 
-    @StyleAttribute(value="shadowColor", lookupDefault=false)
-    public void setShadowColor( ColorRGBA color ) {
-        if( shadow == null ) {
-            if( color == null )
+    @StyleAttribute("shadowOffset")
+    public void setShadowOffset(Vector3f offset) {
+        shadowOffset.set(offset);
+        if (shadow != null) {
+            shadow.setOffset(offset.x, offset.y, offset.z);
+        }
+    }
+
+    public ColorRGBA getShadowColor() {
+        if (shadow == null) {
+            return null;
+        }
+        return shadow.getColor();
+    }
+
+    @StyleAttribute(value = "shadowColor", lookupDefault = false)
+    public void setShadowColor(ColorRGBA color) {
+        if (shadow == null) {
+            if (color == null) {
                 return;
+            }
 
             // Else we need to create the shadow
             this.shadow = new TextComponent(getText(), getFont());
@@ -227,7 +234,7 @@ public class Label extends Panel {
             shadow.setVAlignment(text.getVAlignment());
             shadow.setMaxWidth(text.getMaxWidth());
             getControl(GuiControl.class).setComponent(LAYER_SHADOW_TEXT, shadow);
-        } else if( color == null ) {
+        } else if (color == null) {
             // Need to remove it
             getControl(GuiControl.class).removeComponent(shadow);
             shadow = null;
@@ -237,21 +244,15 @@ public class Label extends Panel {
         shadow.setColor(color);
     }
 
-    public ColorRGBA getShadowColor() {
-        if( shadow == null )
-            return null;
-        return shadow.getColor();
-    }
-
-    @StyleAttribute(value="icon", lookupDefault=false)
-    public void setIcon( GuiComponent icon ) {        
-        getControl(GuiControl.class).setComponent(LAYER_ICON, icon);
-    }
-
     public GuiComponent getIcon() {
         return getControl(GuiControl.class).getComponent(LAYER_ICON);
     }
-    
+
+    @StyleAttribute(value = "icon", lookupDefault = false)
+    public void setIcon(GuiComponent icon) {
+        getControl(GuiControl.class).setComponent(LAYER_ICON, icon);
+    }
+
     @Override
     public String toString() {
         return getClass().getName() + "[text=" + getText() + ", color=" + getColor() + ", elementId=" + getElementId() + "]";

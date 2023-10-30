@@ -36,11 +36,11 @@ package com.simsilica.lemur.input;
 
 
 /**
- *  Implementations of this interface can register to receive values for
- *  active analog inputs.
+ * Implementations of this interface can register to receive values for
+ * active analog inputs.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public interface AnalogFunctionListener {
-    public void valueActive( FunctionId func, double value, double tpf );
+    void valueActive(FunctionId func, double value, double tpf);
 }

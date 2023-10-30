@@ -34,99 +34,101 @@
 
 package com.simsilica.lemur.event;
 
-import com.jme3.input.event.*;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.math.Vector2f;
-import com.jme3.scene.*;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Command;
 
 
 /**
- *  A MouseListener implementation that will track the hover
- *  state over entered and exited objects and Command&lt;Spatial&gt;
- *  when a 'hover' state exists over a particular Spatial that
- *  has this listener registered.
+ * A MouseListener implementation that will track the hover
+ * state over entered and exited objects and Command&lt;Spatial&gt;
+ * when a 'hover' state exists over a particular Spatial that
+ * has this listener registered.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class HoverMouseListener<T extends Spatial> extends DefaultMouseListener {
 
-    private Command<T> command; 
-    private long hoverStart; 
-    private double triggerTime;
-    private Spatial lastSpatial; 
-    private Vector2f lastPosition = new Vector2f();
+    private final Command<T> command;
+    private final double triggerTime;
+    private final Vector2f lastPosition = new Vector2f();
+    private long hoverStart;
+    private Spatial lastSpatial;
     private MouseMotionEvent lastEvent;
     private boolean hoverSent;
 
     public HoverMouseListener(Command<T> command) {
         this(3.0, command);
     }
-    
-    public HoverMouseListener( double triggerTime, Command<T> command ) {
+
+    public HoverMouseListener(double triggerTime, Command<T> command) {
         this.triggerTime = triggerTime;
         this.command = command;
-    } 
+    }
 
     @Override
-    public void mouseButtonEvent( MouseButtonEvent event, Spatial target, Spatial capture ) {
+    public void mouseButtonEvent(MouseButtonEvent event, Spatial target, Spatial capture) {
         reset(event.getX(), event.getY(), target);
     }
 
     @Override
-    public void mouseEntered( MouseMotionEvent event, Spatial target, Spatial capture ) {        
+    public void mouseEntered(MouseMotionEvent event, Spatial target, Spatial capture) {
     }
 
     @Override
-    public void mouseExited( MouseMotionEvent event, Spatial target, Spatial capture ) {
+    public void mouseExited(MouseMotionEvent event, Spatial target, Spatial capture) {
     }
 
     @Override
-    public void mouseMoved( MouseMotionEvent event, Spatial target, Spatial capture ) {
- 
-        if( lastEvent == event )
+    public void mouseMoved(MouseMotionEvent event, Spatial target, Spatial capture) {
+
+        if (lastEvent == event) {
             return;
-        lastEvent = event;               
-               
-        if( lastSpatial != target ) {
+        }
+        lastEvent = event;
+
+        if (lastSpatial != target) {
             reset(event.getX(), event.getY(), target);
             return;
         }
         double x = event.getX() - lastPosition.x;
         double y = event.getY() - lastPosition.y;
         double dSq = x * x + y * y;
-        if( dSq > 4 ) { 
+        if (dSq > 4) {
             // 2 pixels radius
             reset(event.getX(), event.getY(), target);
             return;
         }
-        
-        if( hoverSent ) {
+
+        if (hoverSent) {
             return;
         }
-        
+
         // Else check time
         long time = System.currentTimeMillis();
-        if( (time - hoverStart) / 1000.0 > triggerTime ) {
+        if ((time - hoverStart) / 1000.0 > triggerTime) {
             executeCommand(target);
             hoverSent = true;
-        }        
+        }
     }
- 
+
     // Simply to allow us to isolate the generics warning suppression
     @SuppressWarnings("unchecked")
-    protected void executeCommand( Spatial target ) {
-        command.execute((T)target);
+    protected void executeCommand(Spatial target) {
+        command.execute((T) target);
     }
-    
-    protected void reset( float x, float y, Spatial s ) {
+
+    protected void reset(float x, float y, Spatial s) {
         hoverStart = System.currentTimeMillis();
         lastSpatial = s;
         lastPosition.set(x, y);
-        if( hoverSent ) {
+        if (hoverSent) {
             // Send the reset
             command.execute(null);
         }
-        hoverSent = false;            
+        hoverSent = false;
     }
 }
 

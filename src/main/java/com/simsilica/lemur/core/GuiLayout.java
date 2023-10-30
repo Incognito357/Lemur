@@ -35,19 +35,24 @@
 package com.simsilica.lemur.core;
 
 import com.jme3.scene.Node;
+
 import java.util.Collection;
 
 
 /**
- *  A specific kind of GuiComponent that can manage the layout
- *  of a set of child GuiControl-holding nodes.
+ * A specific kind of GuiComponent that can manage the layout
+ * of a set of child GuiControl-holding nodes.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public interface GuiLayout extends GuiComponent {
-    public <T extends Node> T addChild( T n, Object... constraints );
-    public void removeChild( Node n );
-    public Collection<Node> getChildren();
-    public void clearChildren();
-    public GuiLayout clone();
+    <T extends Node> T addChild(T n, Object... constraints);
+
+    void removeChild(Node n);
+
+    Collection<Node> getChildren();
+
+    void clearChildren();
+
+    GuiLayout clone();
 }

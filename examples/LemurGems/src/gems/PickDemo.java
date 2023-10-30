@@ -49,24 +49,24 @@ import com.simsilica.lemur.event.DefaultMouseListener;
 import com.simsilica.lemur.event.MouseEventControl;
 
 /**
- *  The PickDemo application for demonstrating Lemur-based scene picking.
+ * The PickDemo application for demonstrating Lemur-based scene picking.
  *
- *  @author pspeed
+ * @author pspeed
  */
 public class PickDemo extends SimpleApplication {
+
+    public PickDemo() {
+        super(new StatsAppState(), new CameraMovementState(), new CameraToggleState());
+    }
 
     public static void main(String[] args) {
         PickDemo app = new PickDemo();
         app.start();
     }
 
-    public PickDemo() {
-        super(new StatsAppState(), new CameraMovementState(), new CameraToggleState());
-    }
-
     @Override
     public void simpleInitApp() {
- 
+
         // Initialize Lemur subsystems and setup the default
         // camera controls.   
         GuiGlobals.initialize(this);
@@ -75,7 +75,7 @@ public class PickDemo extends SimpleApplication {
         stateManager.getState(CameraMovementState.class).setEnabled(false);
 
         // Now create the simple test scene
-        for( int i = 0; i < 5; i++ ) {    
+        for (int i = 0; i < 5; i++) {
             Box b = new Box(1, 1, 1);
             Geometry geom = new Geometry("Box", b);
 
@@ -88,29 +88,29 @@ public class PickDemo extends SimpleApplication {
             MouseEventControl.addListenersToSpatial(geom,
                     new DefaultMouseListener() {
                         @Override
-                        protected void click( MouseButtonEvent event, Spatial target, Spatial capture ) {
-                            Material m = ((Geometry)target).getMaterial();
+                        protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
+                            Material m = ((Geometry) target).getMaterial();
                             m.setColor("Color", ColorRGBA.Red);
-                            if( event.getButtonIndex() == MouseInput.BUTTON_LEFT ) {
+                            if (event.getButtonIndex() == MouseInput.BUTTON_LEFT) {
                                 target.move(0, 0.1f, 0);
                             } else {
                                 target.move(0, -0.1f, 0);
-                            }                            
+                            }
                         }
-                    
+
                         @Override
-                        public void mouseEntered( MouseMotionEvent event, Spatial target, Spatial capture ) {
-                            Material m = ((Geometry)target).getMaterial();
+                        public void mouseEntered(MouseMotionEvent event, Spatial target, Spatial capture) {
+                            Material m = ((Geometry) target).getMaterial();
                             m.setColor("Color", ColorRGBA.Yellow);
                         }
 
                         @Override
-                        public void mouseExited( MouseMotionEvent event, Spatial target, Spatial capture ) {
-                            Material m = ((Geometry)target).getMaterial();
+                        public void mouseExited(MouseMotionEvent event, Spatial target, Spatial capture) {
+                            Material m = ((Geometry) target).getMaterial();
                             m.setColor("Color", ColorRGBA.Blue);
-                        }                        
+                        }
                     });
-            
+
 
             rootNode.attachChild(geom);
         }

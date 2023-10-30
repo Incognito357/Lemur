@@ -34,8 +34,6 @@
 
 package com.simsilica.lemur;
 
-import org.slf4j.*;
-
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.TextureKey;
@@ -51,68 +49,69 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Spatial;
 import com.jme3.system.JmeContext.Type;
 import com.jme3.texture.Texture;
-
 import com.simsilica.lemur.anim.AnimationState;
 import com.simsilica.lemur.core.GuiMaterial;
-import com.simsilica.lemur.core.UnshadedMaterialAdapter;
 import com.simsilica.lemur.core.LightingMaterialAdapter;
-import com.simsilica.lemur.event.KeyListener;
+import com.simsilica.lemur.core.UnshadedMaterialAdapter;
 import com.simsilica.lemur.event.KeyInterceptState;
+import com.simsilica.lemur.event.KeyListener;
 import com.simsilica.lemur.event.MouseAppState;
-import com.simsilica.lemur.event.PickState;
 import com.simsilica.lemur.event.PopupState;
 import com.simsilica.lemur.event.TouchAppState;
 import com.simsilica.lemur.focus.FocusManagerState;
 import com.simsilica.lemur.focus.FocusNavigationState;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.Styles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 
 /**
- *  A utility class that sets up some default global behavior for
- *  the default GUI elements and provides some common access to
- *  things like the AssetManager.
+ * A utility class that sets up some default global behavior for
+ * the default GUI elements and provides some common access to
+ * things like the AssetManager.
  *
- *  <p>When initialized, GuiGlobals will keep a reference to the
- *  AssetManager for use in creating materials, loading fonts, and so
- *  on.  It will also:
- *  <ul>
- *  <li>Setup the KeyInterceptState for allowing edit fields to intercept
- *      key events ahead of the regular input processing.</li>
- *  <li>Initialize InputMapper to provide advanced controller input processing.</li>
- *  <li>Setup the MouseAppState to provide default mouse listener and picking
- *      support for registered pick roots.</li>
- *  <li>Setup the FocusManagerState that keeps track of the currently
- *      focused component and makes sure transition methods are properly called.</li>
- *  <li>Setup the default styles.</li>
- *  <li>Sets up the layer based geometry comparators for the default app
- *      viewport.</li>
- *  </ul>
+ * <p>When initialized, GuiGlobals will keep a reference to the
+ * AssetManager for use in creating materials, loading fonts, and so
+ * on.  It will also:
+ * <ul>
+ * <li>Setup the KeyInterceptState for allowing edit fields to intercept
+ *     key events ahead of the regular input processing.</li>
+ * <li>Initialize InputMapper to provide advanced controller input processing.</li>
+ * <li>Setup the MouseAppState to provide default mouse listener and picking
+ *     support for registered pick roots.</li>
+ * <li>Setup the FocusManagerState that keeps track of the currently
+ *     focused component and makes sure transition methods are properly called.</li>
+ * <li>Setup the default styles.</li>
+ * <li>Sets up the layer based geometry comparators for the default app
+ *     viewport.</li>
+ * </ul>
  *
- *  <p>For applications that wish to customize the behavior of GuiGlobals,
- *  it is possible to set a custom subclass instead of initializing the
- *  default implemenation.  Examples of reasons do do this might include
- *  using custom materials instead of the default JME materials or otherwise
- *  customizing the initialization setup.</p>
+ * <p>For applications that wish to customize the behavior of GuiGlobals,
+ * it is possible to set a custom subclass instead of initializing the
+ * default implemenation.  Examples of reasons do do this might include
+ * using custom materials instead of the default JME materials or otherwise
+ * customizing the initialization setup.</p>
+ * <p>
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class GuiGlobals {
 
-    static Logger log = LoggerFactory.getLogger(GuiGlobals.class);
-
+    private static final Logger log = LoggerFactory.getLogger(GuiGlobals.class);
+    static final float GAMMA = 2.2f;
     private static GuiGlobals instance;
-
-    private AssetManager assets;
-    private InputMapper  inputMapper;
+    private final AssetManager assets;
+    private final String iconBase;
+    private final Styles styles;
+    private InputMapper inputMapper;
     private KeyInterceptState keyInterceptor;
     private MouseAppState mouseState;
     private TouchAppState touchState;
@@ -120,49 +119,26 @@ public class GuiGlobals {
     private FocusNavigationState focusNavState;
     private AnimationState animationState;
     private PopupState popupState;
-    private String iconBase;
-
-    private Styles styles;
-
     private boolean gammaEnabled;
 
-    public static void initialize( Application app ) {
-        setInstance(new GuiGlobals(app));
-    }
-
-    public static void setInstance( GuiGlobals globals ) {
-        instance = globals;
-        log.info( "Initializing GuiGlobals with:" + globals );
-        instance.logBuildInfo();
-    }
-
-    public static GuiGlobals getInstance() {
-        return instance;
-    }
-
-    protected boolean isHeadless( Application app ) {
-        Type type = app.getContext().getType(); 
-        return type == Type.Headless; // || type == Type.OffscreenSurface;
-    }
-
-    protected GuiGlobals( Application app ) {
+    protected GuiGlobals(Application app) {
         this.assets = app.getAssetManager();
-        
-        if( isHeadless(app) ) {
+
+        if (isHeadless(app)) {
             // Do only minimal initialization... and nothing requiring
             // input, a screen, etc.
             styles = new Styles();
             setDefaultStyles();
 
-            iconBase = getClass().getPackage().getName().replace( '.', '/' ) + "/icons";
-            
+            iconBase = getClass().getPackage().getName().replace('.', '/') + "/icons";
+
             return;
         }
-         
+
         this.keyInterceptor = new KeyInterceptState(app);
-        
+
         // For now, pick either mouse or touch based on the
-        // availability of touch.  It's an either/or at the 
+        // availability of touch.  It's an either/or at the
         // moment but the rest of the code is setup to support
         // both at once should we ever want to support touch
         // devices that also may have a mouse connected.
@@ -171,7 +147,7 @@ public class GuiGlobals {
         } else {
             this.touchState = new TouchAppState(app);
         }
-        
+
         this.inputMapper = new InputMapper(app.getInputManager());
         this.focusState = new FocusManagerState();
         this.focusNavState = new FocusNavigationState(inputMapper, focusState);
@@ -185,16 +161,16 @@ public class GuiGlobals {
         // c) so that we might disable them properly even at runtime
         //    if the user kills or replaces the nav state
         focusState.setFocusNavigationState(focusNavState);
-        
+
         app.getStateManager().attach(keyInterceptor);
-        
-        if( mouseState != null ) {
+
+        if (mouseState != null) {
             app.getStateManager().attach(mouseState);
         }
-        if( touchState != null ) {
+        if (touchState != null) {
             app.getStateManager().attach(touchState);
         }
-        
+
         app.getStateManager().attach(focusState);
         app.getStateManager().attach(focusNavState);
         app.getStateManager().attach(animationState);
@@ -203,45 +179,41 @@ public class GuiGlobals {
         styles = new Styles();
         setDefaultStyles();
 
-        iconBase = getClass().getPackage().getName().replace( '.', '/' ) + "/icons";
+        iconBase = getClass().getPackage().getName().replace('.', '/') + "/icons";
 
         ViewPort main = app.getViewPort();
         setupGuiComparators(main);
-        
-        // By default all of our app picking states are enabled so we should
+
+        // By default, all of our app picking states are enabled, so we should
         // make a 'formal' request.
         setCursorEventsEnabled(true);
-        
+
         gammaEnabled = app.getContext().getSettings().isGammaCorrection();
     }
 
-    protected AssetManager getAssetManager() {
-        return assets;
-    }
- 
-    protected String getIconBase() {
-        return iconBase;
+    public static void initialize(Application app) {
+        setInstance(new GuiGlobals(app));
     }
 
-    protected void logBuildInfo() {
-        try {
-            String build = getResourceFileAsString("lemur.build.date");
-            log.info("Lemur build date:{}", build);
-        } catch( Exception e ) {
-            log.error("Error reading build info", e);
-        }
+    public static GuiGlobals getInstance() {
+        return instance;
+    }
+
+    public static void setInstance(GuiGlobals globals) {
+        instance = globals;
+        log.info("Initializing GuiGlobals with:{}", globals);
+        instance.logBuildInfo();
     }
 
     /**
      * Reads given resource file as a string.
      *
-     * @param fileName path to the resource file
      * @return the file's contents
      * @throws IOException if read fails for any reason
      */
-    private static String getResourceFileAsString(String fileName) throws IOException {
+    private static String getResourceFileAsString() throws IOException {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        try (InputStream is = classLoader.getResourceAsStream(fileName)) {
+        try (InputStream is = classLoader.getResourceAsStream("lemur.build.date")) {
             if (is == null) return null;
             try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
                  BufferedReader reader = new BufferedReader(isr)) {
@@ -250,17 +222,39 @@ public class GuiGlobals {
         }
     }
 
-    public void setupGuiComparators( ViewPort view ) {
+    protected boolean isHeadless(Application app) {
+        Type type = app.getContext().getType();
+        return type == Type.Headless;
+    }
+
+    protected AssetManager getAssetManager() {
+        return assets;
+    }
+
+    protected String getIconBase() {
+        return iconBase;
+    }
+
+    protected void logBuildInfo() {
+        try {
+            String build = getResourceFileAsString();
+            log.info("Lemur build date:{}", build);
+        } catch (Exception e) {
+            log.error("Error reading build info", e);
+        }
+    }
+
+    public void setupGuiComparators(ViewPort view) {
         RenderQueue rq = view.getQueue();
 
         rq.setGeometryComparator(Bucket.Opaque,
-                                 new LayerComparator(rq.getGeometryComparator(Bucket.Opaque), -1));
+                new LayerComparator(rq.getGeometryComparator(Bucket.Opaque), -1));
         rq.setGeometryComparator(Bucket.Transparent,
-                                 new LayerComparator(rq.getGeometryComparator(Bucket.Transparent), -1));
+                new LayerComparator(rq.getGeometryComparator(Bucket.Transparent), -1));
         rq.setGeometryComparator(Bucket.Translucent,
-                                 new LayerComparator(rq.getGeometryComparator(Bucket.Translucent), -1));
+                new LayerComparator(rq.getGeometryComparator(Bucket.Translucent), -1));
         rq.setGeometryComparator(Bucket.Gui,
-                                 new LayerComparator(rq.getGeometryComparator(Bucket.Gui), -1));
+                new LayerComparator(rq.getGeometryComparator(Bucket.Gui), -1));
     }
 
     protected void setDefaultStyles() {
@@ -282,11 +276,11 @@ public class GuiGlobals {
     public AnimationState getAnimationState() {
         return animationState;
     }
-    
+
     public PopupState getPopupState() {
         return popupState;
     }
-    
+
     public FocusManagerState getFocusManagerState() {
         return focusState;
     }
@@ -296,31 +290,27 @@ public class GuiGlobals {
     }
 
     /**
-     *  Goes through all of the font page materials and sets
-     *  alpha test and alpha fall-off.
+     * Goes through all of the font page materials and sets
+     * alpha test and alpha fall-off.
      */
-    public void fixFont( BitmapFont font ) {
-        for( int i = 0; i < font.getPageSize(); i++ ) {
+    public void fixFont(BitmapFont font) {
+        for (int i = 0; i < font.getPageSize(); i++) {
             Material m = font.getPage(i);
-            // AlphaTest and AlphaFalloff are deprecated in favor of the material
-            // parameter... in fact in current JME there are no-ops.
-            //m.getAdditionalRenderState().setAlphaTest(true);
-            //m.getAdditionalRenderState().setAlphaFallOff(0.1f);
             m.setFloat("AlphaDiscardThreshold", 0.1f);
         }
     }
 
-    private Texture getTexture( Material mat, String name ) {
+    private Texture getTexture(Material mat, String name) {
         MatParam mp = mat.getParam(name);
-        if( mp == null ) {
+        if (mp == null) {
             return null;
         }
-        return (Texture)mp.getValue();
+        return (Texture) mp.getValue();
     }
 
-    public void lightFont( BitmapFont font ) {
+    public void lightFont(BitmapFont font) {
         Material[] pages = new Material[font.getPageSize()];
-        for( int i = 0; i < pages.length; i++ ) {
+        for (int i = 0; i < pages.length; i++) {
             Material original = font.getPage(i);
             Material m = new Material(assets, "Common/MatDefs/Light/Lighting.j3md");
             m.setTexture("DiffuseMap", getTexture(original, "ColorMap"));
@@ -329,46 +319,46 @@ public class GuiGlobals {
         font.setPages(pages);
     }
 
-    public BitmapFont loadFont( String path ) {
+    public BitmapFont loadFont(String path) {
         BitmapFont result = assets.loadFont(path);
         fixFont(result);
         return result;
     }
 
-    public GuiMaterial createMaterial( boolean lit ) {
-        if( lit ) {
+    public GuiMaterial createMaterial(boolean lit) {
+        if (lit) {
             return new LightingMaterialAdapter(new Material(assets, "Common/MatDefs/Light/Lighting.j3md"));
         } else {
             return new UnshadedMaterialAdapter(new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md"));
         }
     }
 
-    public GuiMaterial createMaterial( ColorRGBA color, boolean lit ) {
+    public GuiMaterial createMaterial(ColorRGBA color, boolean lit) {
         GuiMaterial mat = createMaterial(lit);
         mat.setColor(color);
         return mat;
     }
 
-    public GuiMaterial createMaterial( Texture texture, boolean lit ) {
+    public GuiMaterial createMaterial(Texture texture, boolean lit) {
         GuiMaterial mat = createMaterial(lit);
         mat.setTexture(texture);
         return mat;
     }
 
-    public Texture loadDefaultIcon( String name ) {
+    public Texture loadDefaultIcon(String name) {
         return loadTexture(iconBase + "/" + name, false, false);
     }
 
-    public Texture loadTexture( String path, boolean repeat, boolean generateMips ) {
+    public Texture loadTexture(String path, boolean repeat, boolean generateMips) {
         TextureKey key = new TextureKey(path);
         key.setGenerateMips(generateMips);
 
         Texture t = assets.loadTexture(key);
-        if( t == null ) {
+        if (t == null) {
             throw new RuntimeException("Error loading texture:" + path);
         }
 
-        if( repeat ) {
+        if (repeat) {
             t.setWrap(Texture.WrapMode.Repeat);
         } else {
             // JME has deprecated Clamp and defaults to EdgeClamp.
@@ -379,44 +369,42 @@ public class GuiGlobals {
         return t;
     }
 
-    static final float GAMMA = 2.2f;
-
     /**
-     *  Creates a color from the specified RGBA values as if they were in SRGB space,
-     *  depending on whether gamma correction is enabled or disabled.  If there is no
-     *  gamma correction then the RGBA values are interpretted literally.  If gamma
-     *  correction is enabled then the values are converted to linear space before
-     *  returning.  
-     */     
-    public ColorRGBA srgbaColor( float r, float g, float b, float a ) {
-        if( gammaEnabled ) {
+     * Creates a color from the specified RGBA values as if they were in SRGB space,
+     * depending on whether gamma correction is enabled or disabled.  If there is no
+     * gamma correction then the RGBA values are interpretted literally.  If gamma
+     * correction is enabled then the values are converted to linear space before
+     * returning.
+     */
+    public ColorRGBA srgbaColor(float r, float g, float b, float a) {
+        if (gammaEnabled) {
             // Note: unlike JME's seAsSrgb() method, when converting from SRGB
             //   space this method will also convert the alpha as it seems to matter in color
             //   matching.
-            // ...except it didn't always work.  
+            // ...except it didn't always work.
             //return new ColorRGBA().setAsSrgb(r, g, b, (float)Math.pow(a, GAMMA));
-            return new ColorRGBA().setAsSrgb(r, g, b, a); 
+            return new ColorRGBA().setAsSrgb(r, g, b, a);
         } else {
             return new ColorRGBA(r, g, b, a);
         }
     }
 
     /**
-     *  Creates a color from the specified RGBA values as if they were in SRGB space,
-     *  depending on whether gamma correction is enabled or disabled.  If there is no
-     *  gamma correction then the RGBA values are interpretted literally.  If gamma
-     *  correction is enabled then the values are converted to linear space before
-     *  returning. 
+     * Creates a color from the specified RGBA values as if they were in SRGB space,
+     * depending on whether gamma correction is enabled or disabled.  If there is no
+     * gamma correction then the RGBA values are interpretted literally.  If gamma
+     * correction is enabled then the values are converted to linear space before
+     * returning.
      */
-    public ColorRGBA srgbaColor( ColorRGBA srgbColor ) {
-        return srgbaColor(srgbColor.r, srgbColor.g, srgbColor.b, srgbColor.a);  
+    public ColorRGBA srgbaColor(ColorRGBA srgbColor) {
+        return srgbaColor(srgbColor.r, srgbColor.g, srgbColor.b, srgbColor.a);
     }
 
-    public void requestFocus( Spatial s ) {
+    public void requestFocus(Spatial s) {
         focusState.setFocus(s);
     }
 
-    public void releaseFocus( Spatial s ) {
+    public void releaseFocus(Spatial s) {
         focusState.releaseFocus(s);
     }
 
@@ -424,149 +412,149 @@ public class GuiGlobals {
         return focusState.getFocus();
     }
 
-    public void addKeyListener( KeyListener l ) {
+    public void addKeyListener(KeyListener l) {
         keyInterceptor.addKeyListener(l);
     }
 
-    public void removeKeyListener( KeyListener l ) {
+    public void removeKeyListener(KeyListener l) {
         keyInterceptor.removeKeyListener(l);
     }
 
     @Deprecated
-    public ViewPort getCollisionViewPort( Spatial s ) {
-        if( mouseState != null ) {
+    public ViewPort getCollisionViewPort(Spatial s) {
+        if (mouseState != null) {
             return mouseState.findViewPort(s);
         }
-        if( touchState != null ) {
+        if (touchState != null) {
             return touchState.findViewPort(s);
-        } 
+        }
         return null;
     }
 
     /**
-     *  Indicates that the specified owner requires the cursor
-     *  to be enabled.  This is a way of letting multiple separate
-     *  UI elements manage their need for the cursor.  If one
-     *  particular object indicates that it no longer has a need for
-     *  the cursor then it can be disabled if no other owners
-     *  require it.  This makes it easier to automatically manage
-     *  the enabled/disabled state of the picking behavior in the
-     *  face of complicated UIs.
+     * Indicates that the specified owner requires the cursor
+     * to be enabled.  This is a way of letting multiple separate
+     * UI elements manage their need for the cursor.  If one
+     * particular object indicates that it no longer has a need for
+     * the cursor then it can be disabled if no other owners
+     * require it.  This makes it easier to automatically manage
+     * the enabled/disabled state of the picking behavior in the
+     * face of complicated UIs.
      */
-    public void requestCursorEnabled( Object owner ) {
-        if( mouseState != null ) {
+    public void requestCursorEnabled(Object owner) {
+        if (mouseState != null) {
             mouseState.requestEnabled(owner);
         }
-        if( touchState != null ) {
+        if (touchState != null) {
             touchState.requestEnabled(owner);
         }
-        if( focusNavState != null ) {            
-            focusNavState.setEnabled(isCursorEventsEnabled());       
+        if (focusNavState != null) {
+            focusNavState.setEnabled(isCursorEventsEnabled());
         }
     }
- 
+
     /**
-     *  Releases a previous cursor request for the specified
-     *  sowner.  Returns true if the cursor is still enabled
-     *  after this call.
-     */    
-    public boolean releaseCursorEnabled( Object owner ) {
+     * Releases a previous cursor request for the specified
+     * sowner.  Returns true if the cursor is still enabled
+     * after this call.
+     */
+    public boolean releaseCursorEnabled(Object owner) {
         boolean result = false;
-        if( mouseState != null ) {
-            if( mouseState.releaseEnabled(owner) ) {
+        if (mouseState != null) {
+            if (mouseState.releaseEnabled(owner)) {
                 result = true;
             }
         }
-        if( touchState != null ) {
-            if( touchState.releaseEnabled(owner) ) {
+        if (touchState != null) {
+            if (touchState.releaseEnabled(owner)) {
                 result = true;
             }
         }
-        if( focusNavState != null ) {            
-            focusNavState.setEnabled(result);       
+        if (focusNavState != null) {
+            focusNavState.setEnabled(result);
         }
         return result;
     }
-    
+
     /**
-     *  Returns true if the specified owner has an active cursor
-     *  enabled request pending.
+     * Returns true if the specified owner has an active cursor
+     * enabled request pending.
      */
-    public boolean hasRequestedCursorEnabled( Object owner ) {
-        if( mouseState != null ) {
+    public boolean hasRequestedCursorEnabled(Object owner) {
+        if (mouseState != null) {
             return mouseState.hasRequestedEnabled(owner);
         }
-        if( touchState != null ) {
+        if (touchState != null) {
             return touchState.hasRequestedEnabled(owner);
         }
         return false;
     }
- 
+
     /**
-     *  @deprecated Use setCursorEventsEnabled() instead.
+     * The same as setCursorEventsEnabled(f) except that this will force
+     * the cursor enabled state even if there are pending requests otherwise.
+     * This can be a way to force the enabled/disabled state in the case
+     * where an application has not converted to the new request/release
+     * approach and/or has a specific need where counting requests will not
+     * work.
      */
-    @Deprecated
-    public void setMouseEventsEnabled( boolean f ) {
-        setCursorEventsEnabled(f);
-    }
-    
-    public void setCursorEventsEnabled( boolean f ) {
-        setCursorEventsEnabled(f, false);
-    }
-    
-    /**
-     *  The same as setCursorEventsEnabled(f) except that this will force
-     *  the cursor enabled state even if there are pending requests otherwise.
-     *  This can be a way to force the enabled/disabled state in the case
-     *  where an application has not converted to the new request/release
-     *  approach and/or has a specific need where counting requests will not
-     *  work.
-     */
-    public void setCursorEventsEnabled( boolean f, boolean force ) {
-        if( force ) {
-            if( mouseState != null ) {
+    public void setCursorEventsEnabled(boolean f, boolean force) {
+        if (force) {
+            if (mouseState != null) {
                 mouseState.setEnabled(f);
             }
-            if( touchState != null ) {
+            if (touchState != null) {
                 touchState.setEnabled(f);
             }
-            if( focusNavState != null ) {
+            if (focusNavState != null) {
                 focusNavState.setEnabled(f);
             }
         } else {
             // In an attempt to be backwards compatible with the new
             // request/release paradigm, we will consider set/get like
             // a request with GuiGlobals as the owner.
-            if( f ) {
+            if (f) {
                 requestCursorEnabled(this);
-            } else if( hasRequestedCursorEnabled(this) ) {        
+            } else if (hasRequestedCursorEnabled(this)) {
                 releaseCursorEnabled(this);
             }
         }
     }
 
     /**
-     *  @deprecated Use isCursorEventsEnabled() instead.
+     * @deprecated Use isCursorEventsEnabled() instead.
      */
     @Deprecated
     public boolean isMouseEventsEnabled() {
-        return isCursorEventsEnabled(); 
+        return isCursorEventsEnabled();
     }
-    
+
+    /**
+     * @deprecated Use setCursorEventsEnabled() instead.
+     */
+    @Deprecated
+    public void setMouseEventsEnabled(boolean f) {
+        setCursorEventsEnabled(f);
+    }
+
     public boolean isCursorEventsEnabled() {
-        if( mouseState != null ) {
+        if (mouseState != null) {
             return mouseState.isEnabled();
-        } else if( touchState != null ) {
+        } else if (touchState != null) {
             return touchState.isEnabled();
         } else {
             return false;
-        }        
+        }
+    }
+
+    public void setCursorEventsEnabled(boolean f) {
+        setCursorEventsEnabled(f, false);
     }
 
     @Deprecated
-    public Vector3f getScreenCoordinates( Spatial relativeTo, Vector3f pos ) {
+    public Vector3f getScreenCoordinates(Spatial relativeTo, Vector3f pos) {
         ViewPort vp = getCollisionViewPort(relativeTo);
-        if( vp == null ) {
+        if (vp == null) {
             throw new RuntimeException("Could not find viewport for:" + relativeTo);
         }
 
@@ -574,7 +562,7 @@ public class GuiGlobals {
         pos = relativeTo.localToWorld(pos, null);
 
         Camera cam = vp.getCamera();
-        if( cam.isParallelProjection() ) {
+        if (cam.isParallelProjection()) {
             return pos.clone();
         }
 

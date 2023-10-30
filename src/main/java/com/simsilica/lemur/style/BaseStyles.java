@@ -35,61 +35,66 @@
 package com.simsilica.lemur.style;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- *  Easy access to some built in style resources.
+ * Easy access to some built in style resources.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class BaseStyles {
 
-    static Logger log = LoggerFactory.getLogger(BaseStyles.class);
-
+    private static final Logger log = LoggerFactory.getLogger(BaseStyles.class);
     public static final String GLASS = "glass";
     public static final String GLASS_STYLE_RESOURCE = "com/simsilica/lemur/style/base/glass-styles.groovy";
 
+    private BaseStyles() {
+    }
+
     /**
-     *  Loads the glass style and any glass style extensions found on 
-     *  the classpath.
+     * Loads the glass style and any glass style extensions found on
+     * the classpath.
      */
     public static void loadGlassStyle() {
         // Find all of the glass style resources
         loadStyleResources(GLASS_STYLE_RESOURCE);
     }
-    
-    public static void loadStyleResources( String resource ) {
- 
-        if( resource.startsWith("/") ) {
+
+    public static void loadStyleResources(String resource) {
+
+        if (resource.startsWith("/")) {
             resource = resource.substring(1);
         }
-        log.info("loadStyleResource(" + resource + ")");
-        
+        log.info("loadStyleResource({})", resource);
+
         StyleLoader loader = new StyleLoader();
-        
+
         // Attempt to load the class-local resource first... ie:
         // our version
         URL baseResource = BaseStyles.class.getResource("/" + resource);
-        log.info("Loading base resource:" + baseResource);        
+        log.info("Loading base resource:{}", baseResource);
         loader.loadStyle(baseResource);
- 
-        log.info("Loading extension resources for:" + resource);
+
+        log.info("Loading extension resources for:{}", resource);
         ClassLoader cl = BaseStyles.class.getClassLoader();
         try {
-            for( Enumeration en = cl.getResources(resource); en.hasMoreElements(); ) {
-                URL u = (URL)en.nextElement();
-                if( u.equals(baseResource) ) {
+            for (Enumeration<URL> en = cl.getResources(resource); en.hasMoreElements(); ) {
+                URL u = en.nextElement();
+                if (u.toURI().equals(baseResource.toURI())) {
                     continue;
                 }
-                log.info("Loading extension resource:" + u);
+                log.info("Loading extension resource:{}", u);
                 loader.loadStyle(u);
             }
-        } catch( IOException e ) {
-            throw new RuntimeException("Error retreiving resources:" + resource, e);
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException("Error retrieving resources:" + resource, e);
         }
     }
 

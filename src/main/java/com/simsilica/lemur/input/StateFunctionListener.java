@@ -36,12 +36,12 @@ package com.simsilica.lemur.input;
 
 
 /**
- *  Implementations of this interface can register
- *  to receive state change information for a logical
- *  FunctionId.
+ * Implementations of this interface can register
+ * to receive state change information for a logical
+ * FunctionId.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public interface StateFunctionListener {
-    public void valueChanged( FunctionId func, InputState value, double tpf );
+    void valueChanged(FunctionId func, InputState value, double tpf);
 }
