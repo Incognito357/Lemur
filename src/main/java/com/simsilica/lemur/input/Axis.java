@@ -34,8 +34,8 @@
 
 package com.simsilica.lemur.input;
 
-import com.google.common.base.Objects;
 
+import java.util.Objects;
 
 /**
  *  Represents a logical anglog input axis that can be used
@@ -99,7 +99,7 @@ public class Axis {
         if( o == null || o.getClass() != getClass() )
             return false;
         Axis other = (Axis)o;
-        if( !Objects.equal(id, other.id) )
+        if( !Objects.equals(id, other.id) )
             return false;
         return true;
     }

@@ -36,13 +36,10 @@
 
 package com.simsilica.lemur.dnd;
 
-import com.google.common.base.MoreObjects;
-
 import com.jme3.collision.CollisionResult;
 import com.jme3.math.Vector2f;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
-
 import com.simsilica.lemur.event.AbstractCursorEvent;
 
 /**
@@ -94,16 +91,16 @@ public class DragEvent {
     public Spatial getTarget() {
         return cursorEvent.getTarget();
     }
- 
-    @Override   
+
+    @Override
     public String toString() {
-        return MoreObjects.toStringHelper(getClass().getSimpleName())
-            .add("session", session)
-            .add("location", "[" + getX() + ", " + getY() + "]")
-            .add("collision", getCollision())
-            .add("viewPort", getViewPort())
-            .add("target", getTarget())
-            .toString(); 
+        return getClass().getSimpleName() + "{" +
+                "session=" + session +
+                ", location=[" + getX() + ", " + getY() + "]" +
+                ", collision=" + getCollision() +
+                ", viewPort=" + getViewPort() +
+                ", target=" + getTarget() +
+                '}';
     }
 }
 

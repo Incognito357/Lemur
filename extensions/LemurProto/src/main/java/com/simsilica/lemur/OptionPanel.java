@@ -178,7 +178,7 @@ public class OptionPanel extends Panel {
                 if( !(n instanceof Button) ) {
                     continue;
                 }
-                ((Button)n).removeClickCommands(listener);
+                ((Button)n).removeClickCommand(listener);
             }
         }
         this.options = options;               
@@ -189,7 +189,7 @@ public class OptionPanel extends Panel {
         
         for( Action a : options ) {
             ActionButton button = new ActionButton(a, getElementId().child("button"), getStyle());
-            button.addClickCommands(listener);
+            button.addClickCommand(listener);
             buttons.addChild(button);
         }
     }

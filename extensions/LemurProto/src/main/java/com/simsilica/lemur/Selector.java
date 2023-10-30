@@ -36,23 +36,32 @@
 
 package com.simsilica.lemur;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.slf4j.*;
-
-import com.google.common.base.Function;
-
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
-
-import com.simsilica.lemur.core.*;
-import com.simsilica.lemur.component.*;
-import com.simsilica.lemur.event.*;
-import com.simsilica.lemur.list.*;
-import com.simsilica.lemur.style.*;
+import com.simsilica.lemur.component.BorderLayout;
+import com.simsilica.lemur.core.AbstractGuiControlListener;
+import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.core.VersionedHolder;
+import com.simsilica.lemur.core.VersionedList;
+import com.simsilica.lemur.core.VersionedReference;
+import com.simsilica.lemur.event.CursorButtonEvent;
+import com.simsilica.lemur.event.CursorEventControl;
+import com.simsilica.lemur.event.DefaultCursorListener;
+import com.simsilica.lemur.event.PopupState;
+import com.simsilica.lemur.list.SelectionModel;
+import com.simsilica.lemur.style.Attributes;
+import com.simsilica.lemur.style.ElementId;
+import com.simsilica.lemur.style.StyleAttribute;
+import com.simsilica.lemur.style.StyleDefaults;
+import com.simsilica.lemur.style.Styles;
 import com.simsilica.lemur.value.DefaultValueRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 
 
 /**
@@ -153,7 +162,7 @@ public class Selector<T> extends Panel {
 
         this.listBox = new ListBox<>(model, valueRenderer, elementId.child("list"), style);
         listBox.setSelectionModel(selection);
-        listBox.addClickCommands(selectListener);
+        listBox.addClickCommand(selectListener);
         this.modelRef = listBox.getModel().createReference();
         this.selectionRef = listBox.getSelectionModel().createSelectionReference();
         boundSelection();
@@ -174,7 +183,7 @@ public class Selector<T> extends Panel {
         popup.getControl(GuiControl.class).addUpdateListener(autoCloseListener);
 
         this.expander = new Button(null, true, elementId.child(EXPANDER_ID), style);
-        expander.addClickCommands(clickListener);
+        expander.addClickCommand(clickListener);
 
         layout.addChild(BorderLayout.Position.East, expander);
 
@@ -445,7 +454,7 @@ public class Selector<T> extends Panel {
         }
     }
 
-    private class SelectListener implements Command<ListBox> {
+    private class SelectListener implements Command<ListBox<T>> {
         public void execute( ListBox list ) {
             collapse();
         }

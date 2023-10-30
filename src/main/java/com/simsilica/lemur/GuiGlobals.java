@@ -34,9 +34,6 @@
 
 package com.simsilica.lemur;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-
 import org.slf4j.*;
 
 import com.jme3.app.Application;
@@ -69,6 +66,14 @@ import com.simsilica.lemur.focus.FocusManagerState;
 import com.simsilica.lemur.focus.FocusNavigationState;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.Styles;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 
 /**
@@ -220,11 +225,28 @@ public class GuiGlobals {
 
     protected void logBuildInfo() {
         try {
-            java.net.URL u = Resources.getResource("lemur.build.date");
-            String build = Resources.toString(u, Charsets.UTF_8);
-            log.info("Lemur build date:" + build);
+            String build = getResourceFileAsString("lemur.build.date");
+            log.info("Lemur build date:{}", build);
         } catch( Exception e ) {
             log.error("Error reading build info", e);
+        }
+    }
+
+    /**
+     * Reads given resource file as a string.
+     *
+     * @param fileName path to the resource file
+     * @return the file's contents
+     * @throws IOException if read fails for any reason
+     */
+    private static String getResourceFileAsString(String fileName) throws IOException {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        try (InputStream is = classLoader.getResourceAsStream(fileName)) {
+            if (is == null) return null;
+            try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+                 BufferedReader reader = new BufferedReader(isr)) {
+                return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            }
         }
     }
 

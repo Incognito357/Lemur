@@ -103,7 +103,7 @@ public class RollupPanel extends Panel {
 
     @SuppressWarnings("unchecked") // because Java doesn't like var-arg generics
     protected final void setupCommands() {
-        title.addClickCommands(new ToggleOpenCommand());
+        title.addClickCommand(new ToggleOpenCommand());
     }
 
     /**

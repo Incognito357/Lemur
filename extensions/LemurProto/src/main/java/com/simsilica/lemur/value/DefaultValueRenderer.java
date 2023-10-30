@@ -36,14 +36,12 @@
 
 package com.simsilica.lemur.value;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
-
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.ValueRenderer;
 import com.simsilica.lemur.style.ElementId;
-import com.simsilica.lemur.style.Styles;
+
+import java.util.function.Function;
 
 /**
  *

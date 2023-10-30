@@ -29,7 +29,7 @@ dependencies {
     runtimeOnly  "org.codehaus.groovy:groovy-all:2.4.5"
 
     // Standard utility stuff
-    implementation 'com.google.guava:guava:19.0'
+    implementation 'com.google.guava:guava:32.1.2-jre'
     implementation 'org.slf4j:slf4j-api:1.7.13'
     runtimeOnly  'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
     runtimeOnly  'org.apache.logging.log4j:log4j-core:2.5'

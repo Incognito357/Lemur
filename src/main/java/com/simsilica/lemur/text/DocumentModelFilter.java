@@ -37,8 +37,7 @@
 package com.simsilica.lemur.text;
 
 import java.util.Objects;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 import com.simsilica.lemur.core.VersionedReference;
 

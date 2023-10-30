@@ -36,18 +36,21 @@
 
 package com.simsilica.lemur.value;
 
-import java.util.Objects;
-
-import org.slf4j.*;
-
-import com.google.common.base.Function;
-
-import com.simsilica.lemur.*;
+import com.simsilica.lemur.Panel;
+import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.ValueEditor;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.core.VersionedReference;
-import com.simsilica.lemur.focus.*;
-import com.simsilica.lemur.text.*; 
-import com.simsilica.lemur.style.ElementId; 
+import com.simsilica.lemur.focus.FocusChangeEvent;
+import com.simsilica.lemur.focus.FocusChangeListener;
+import com.simsilica.lemur.style.ElementId;
+import com.simsilica.lemur.text.DocumentModel;
+import com.simsilica.lemur.text.DocumentModelFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  *  Uses a text field and a pair of object-string and string-object

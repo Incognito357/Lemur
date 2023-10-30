@@ -36,14 +36,13 @@
 
 package com.simsilica.lemur;
 
-import com.google.common.base.Objects;
 import com.simsilica.lemur.core.GuiComponent;
 import com.simsilica.lemur.core.VersionedObject;
 import com.simsilica.lemur.core.VersionedReference;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *  A combination of a command and some attributes
@@ -164,7 +163,7 @@ public abstract class Action implements VersionedObject<Action>, Command<Button>
      */
     public void putValue( String key, Object value ) {
         Object existing = properties.put(key, value);
-        if( !Objects.equal(existing, value) ) {
+        if( !Objects.equals(existing, value) ) {
             incrementVersion();
         }        
     }

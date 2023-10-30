@@ -36,10 +36,9 @@
 
 package com.simsilica.lemur;
 
-import com.google.common.base.Function;
-
-import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.value.DefaultValueRenderer;
+
+import java.util.function.Function;
 
 /**
  *  Factory methods for creating standard/common ValueRenderers. 
@@ -57,7 +56,7 @@ public class ValueRenderers {
     }
     
     // Some useful toString functions
-    public static Function<Object, String> toString( String nullValue ) {
+    public static Function<Object, String> toString(String nullValue ) {
         return new SafeToString(nullValue);
     }
     

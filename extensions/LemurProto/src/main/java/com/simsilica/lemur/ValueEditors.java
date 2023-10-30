@@ -36,10 +36,10 @@
 
 package com.simsilica.lemur;
 
-import com.google.common.base.Function;
-
-import com.simsilica.lemur.value.TextFieldValueEditor;
 import com.simsilica.lemur.text.TextFilters;
+import com.simsilica.lemur.value.TextFieldValueEditor;
+
+import java.util.function.Function;
 
 /**
  *  Factory methods for creating standard/common ValueEditors. 

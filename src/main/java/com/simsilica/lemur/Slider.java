@@ -187,8 +187,8 @@ public class Slider extends Panel {
     }
     @SuppressWarnings("unchecked") // because Java doesn't like var-arg generics
     protected final void setupCommands() {
-        increment.addClickCommands(new ChangeValueCommand(1));
-        decrement.addClickCommands(new ChangeValueCommand(-1));
+        increment.addClickCommand(new ChangeValueCommand(1));
+        decrement.addClickCommand(new ChangeValueCommand(-1));
     }
 
     @StyleDefaults(ELEMENT_ID)

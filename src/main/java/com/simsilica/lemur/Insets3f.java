@@ -34,9 +34,9 @@
 
 package com.simsilica.lemur;
 
-import com.google.common.base.Objects;
-
 import com.jme3.math.Vector3f;
+
+import java.util.Objects;
 
 
 /**
@@ -86,16 +86,16 @@ public class Insets3f implements Cloneable {
         if( o == null || o.getClass() != getClass() )
             return false;
         Insets3f other = (Insets3f)o;
-        if( !Objects.equal(min, other.min) )
+        if( !Objects.equals(min, other.min) )
             return false;
-        if( !Objects.equal(max, other.max) )
+        if( !Objects.equals(max, other.max) )
             return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(min, max);
+        return Objects.hash(min, max);
     }
 
     @Override

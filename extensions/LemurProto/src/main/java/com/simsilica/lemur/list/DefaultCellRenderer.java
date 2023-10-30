@@ -36,11 +36,11 @@
 
 package com.simsilica.lemur.list;
 
-import com.google.common.base.Function;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.style.ElementId;
-import com.simsilica.lemur.style.Styles;
+
+import java.util.function.Function;
 
 
 /**

@@ -46,6 +46,7 @@ import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.IconComponent;
 import com.jme3.math.ColorRGBA;
 
+import java.util.Collections;
 
 
 /**
@@ -103,9 +104,8 @@ public class Checkbox extends Button {
         setupCommands();
     }
 
-    @SuppressWarnings("unchecked") // because Java doesn't like var-arg generics
     protected final void setupCommands() {
-        addCommands(ButtonAction.Click, Checkbox.TOGGLE_COMMAND);
+        addCommand(ButtonAction.Click, Checkbox.TOGGLE_COMMAND);
     }
 
     @StyleDefaults(ELEMENT_ID)

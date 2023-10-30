@@ -34,8 +34,6 @@
 
 package com.simsilica.lemur.event;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.jme3.input.MouseInput;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -44,6 +42,7 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Spatial;
 
+import java.util.function.Function;
 
 /**
  *  Work in progress.
@@ -57,7 +56,7 @@ public class DragHandler extends DefaultCursorListener {
     private boolean consumeDrags = false;
     private boolean consumeDrops = false;
 
-    private Function<Spatial, Spatial> draggableLocator = Functions.identity();
+    private Function<Spatial, Spatial> draggableLocator = x -> x;
 
     public DragHandler() {
     }

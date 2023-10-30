@@ -40,53 +40,37 @@ import java.util.concurrent.*;
 import com.simsilica.lemur.Command;
 
 /**
- *  A general mapping of source to some list of Command objects.  This
- *  can be useful for things like action maps and so forth, where some
- *  action type gets mapped to caller configured commands.
+ * A general mapping of source to some list of Command objects.  This
+ * can be useful for things like action maps and so forth, where some
+ * action type gets mapped to caller configured commands.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public class CommandMap<S,K> extends HashMap<K, List<Command<? super S>>> {
-    private S source;
+public class CommandMap<S, K> extends HashMap<K, List<Command<S>>> {
+    private final transient S source;
 
-    public CommandMap( S source ) {
+    public CommandMap(S source) {
         this.source = source;
     }
 
-    public void runCommands( K key ) {
-        List<Command<? super S>> list = get(key, false);
-        if( list == null )
+    public void runCommands(K key) {
+        List<Command<S>> list = computeIfAbsent(key, k -> new CopyOnWriteArrayList<>());
+        if (list == null)
             return;
-        for( Command<? super S> c : list ) {
+        for (Command<S> c : list) {
             c.execute(source);
         }
     }
 
-    // A non-varargs version so that single argument callers don't get
-    // confronted by the var-arg unchecked error.
-    public void addCommands( K key, Command<? super S> command ) {
-        get(key, true).add(command);
+    public void addCommand(K key, Command<S> command) {
+        computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()).add(command);
     }
 
-    @SuppressWarnings("unchecked") // because Java doesn't like var-arg generics
-    public void addCommands( K key, Command<? super S>... commands ) {
-        addCommands(key, Arrays.asList(commands));
-    }
-
-    public void addCommands( K key, Collection<Command<? super S>> commands ) {
-        if( commands == null ) {
-            get(key, true).clear();
+    public void addCommands(K key, Collection<Command<S>> commands) {
+        if (commands == null) {
+            computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()).clear();
             return;
         }
-        get(key, true).addAll(commands);
-    }
-
-    public List<Command<? super S>> get( K key, boolean create ) {
-        List<Command<? super S>> result = super.get(key);
-        if( result == null && create ) {
-            result = new CopyOnWriteArrayList<Command<? super S>>();
-            super.put(key, result);
-        }
-        return result;
+        computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()).addAll(commands);
     }
 }

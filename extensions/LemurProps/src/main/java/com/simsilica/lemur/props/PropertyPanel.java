@@ -54,6 +54,7 @@ import com.simsilica.lemur.core.VersionedObject;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.style.Styles;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -62,8 +63,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 /**
  *  A panel that supports adding reflected property and
@@ -79,8 +78,8 @@ public class PropertyPanel extends Panel
                            
     private BorderLayout layout;
     private Container container;
-    private List<AbstractProperty> properties = new ArrayList<AbstractProperty>();
-    private AbstractProperty[] propertyArray;
+    private List<AbstractProperty<?>> properties = new ArrayList<>();
+    private AbstractProperty<?>[] propertyArray;
 
     private Object enabledBean;
     private Checkbox enabledCheckbox;
@@ -114,7 +113,7 @@ public class PropertyPanel extends Panel
         }
     }
  
-    protected AbstractProperty[] getArray() {
+    protected AbstractProperty<?>[] getArray() {
         if( propertyArray == null ) {
             propertyArray = new AbstractProperty[properties.size()];
             propertyArray = properties.toArray(propertyArray);
@@ -129,7 +128,7 @@ public class PropertyPanel extends Panel
      *  UI.
      */
     public void refresh() {
-        for( AbstractProperty p : getArray() ) {
+        for( AbstractProperty<?> p : getArray() ) {
             p.refresh();
         }
     }
@@ -174,7 +173,7 @@ public class PropertyPanel extends Panel
         }
     }
  
-    protected void addProperty( AbstractProperty p ) {
+    protected <T> void addProperty( AbstractProperty<T> p ) {
         p.initialize(container);
         properties.add(p);
         propertyArray = null;
@@ -184,7 +183,7 @@ public class PropertyPanel extends Panel
         if( enabledCheckbox == null ) {
             // Perform setup
             enabledCheckbox = new Checkbox("", enabledModel, getElementId().child("enabled.checkbox"), getStyle());            
-            enabledModel.setChecked((Boolean)getPropertyValue(enabledProperty, enabledBean));                         
+            enabledModel.setChecked(getPropertyValue(enabledProperty, enabledBean));
         } else {
             setPropertyValue(enabledProperty, enabledBean, enabledModel.isChecked());
         }
@@ -215,61 +214,61 @@ public class PropertyPanel extends Panel
     }
  
     public Property<Boolean> addBooleanProperty( String name, Object bean, String property ) {
-        BooleanProperty p = new BooleanProperty(name, new PropertyAccess(bean, property));
+        BooleanProperty p = new BooleanProperty(name, new PropertyAccess<>(bean, property));
         addProperty(p);
         return p;
     }
     
     public Property<Float> addFloatProperty( String name, Object bean, String property, float min, float max, float step ) {
-        FloatProperty p = new FloatProperty(name, new PropertyAccess(bean, property), min, max, step);
+        FloatProperty p = new FloatProperty(name, new PropertyAccess<>(bean, property), min, max, step);
         addProperty(p);
         return p;
     }
 
     public Property<Double> addDoubleProperty( String name, Object bean, String property, double min, double max, double step ) {
-        DoubleProperty p = new DoubleProperty(name, new PropertyAccess(bean, property), min, max, step);
+        DoubleProperty p = new DoubleProperty(name, new PropertyAccess<>(bean, property), min, max, step);
         addProperty(p);
         return p;
     }
 
     public Property<Integer> addIntProperty( String name, Object bean, String proprety, int min, int max, int step ) {
-        IntProperty p = new IntProperty(name, new PropertyAccess(bean, proprety), min, max, step);      
+        IntProperty p = new IntProperty(name, new PropertyAccess<>(bean, proprety), min, max, step);
         addProperty(p);
         return p;
     }
 
-    public Property<Enum> addEnumProperty( String name, Object bean, String property ) {
-        EnumProperty p = new EnumProperty(name, new PropertyAccess(bean, property));
+    public <T extends Enum<?>> Property<T> addEnumProperty( String name, Object bean, String property ) {
+        EnumProperty<T> p = new EnumProperty<>(name, new PropertyAccess<>(bean, property));
         addProperty(p);
         return p;
     }
     
     public Property<Boolean> addBooleanField( String name, Object bean, String field ) {
-        BooleanProperty p = new BooleanProperty(name, new FieldAccess(bean, field));
+        BooleanProperty p = new BooleanProperty(name, new FieldAccess<>(bean, field));
         addProperty(p);
         return p;
     }
     
     public Property<Float> addFloatField( String name, Object bean, String field, float min, float max, float step ) {
-        FloatProperty p = new FloatProperty(name, new FieldAccess(bean, field), min, max, step);
+        FloatProperty p = new FloatProperty(name, new FieldAccess<>(bean, field), min, max, step);
         addProperty(p);
         return p;
     }
     
     public Property<Double> addDoubleField( String name, Object bean, String field, double min, double max, double step ) {
-        DoubleProperty p = new DoubleProperty(name, new FieldAccess(bean, field), min, max, step);
+        DoubleProperty p = new DoubleProperty(name, new FieldAccess<>(bean, field), min, max, step);
         addProperty(p);
         return p;
     }
 
     public Property<Integer> addIntField( String name, Object bean, String field, int min, int max, int step ) {
-        IntProperty p = new IntProperty(name, new FieldAccess(bean, field), min, max, step);
+        IntProperty p = new IntProperty(name, new FieldAccess<>(bean, field), min, max, step);
         addProperty(p);
         return p;
     }
     
-    public Property<Enum> addEnumField( String name, Object bean, String field ) {
-        EnumProperty p = new EnumProperty(name, new FieldAccess(bean, field));
+    public <T extends Enum<?>> Property<T> addEnumField( String name, Object bean, String field ) {
+        EnumProperty<T> p = new EnumProperty<>(name, new FieldAccess<>(bean, field));
         addProperty(p);
         return p;
     }
@@ -277,7 +276,7 @@ public class PropertyPanel extends Panel
     @Override
     public void updateLogicalState( float tpf ) {
         super.updateLogicalState(tpf);
-        for( AbstractProperty p : getArray() ) {
+        for( AbstractProperty<?> p : getArray() ) {
             p.update();
         }
     }
@@ -359,7 +358,7 @@ public class PropertyPanel extends Panel
     protected interface Access<T> {
         public void setValue( T value );
         public T getValue();
-        public Class getType();
+        public Class<T> getType();
     }
  
     protected class PropertyAccess<T> implements Access<T> {
@@ -385,8 +384,8 @@ public class PropertyPanel extends Panel
         }
 
         @Override        
-        public Class getType() {
-            return pd.getPropertyType();
+        public Class<T> getType() {
+            return (Class<T>)pd.getPropertyType();
         }
     }
  
@@ -413,12 +412,12 @@ public class PropertyPanel extends Panel
         }
         
         @Override        
-        public Class getType() {
-            return fd.getType();
+        public Class<T> getType() {
+            return (Class<T>)fd.getType();
         }
     }
-    
-    protected abstract class AbstractProperty<T> implements Property<T> {
+
+    protected abstract static class AbstractProperty<T> implements Property<T> {
         private String name;
         private Access<T> access;
         
@@ -575,7 +574,7 @@ public class PropertyPanel extends Panel
         @Override
         public void update() {
             if( value.update() ) {
-                super.setValue((double)model.getValue());
+                super.setValue(model.getValue());
                 updateText();
             }
         }
@@ -640,20 +639,20 @@ public class PropertyPanel extends Panel
         }
     }
     
-    protected class EnumProperty extends AbstractProperty<Enum> {
+    protected class EnumProperty<T extends Enum<?>> extends AbstractProperty<T> {
         private Label label;
         private Label valueText;
         private Slider slider;
         private RangedValueModel model;
         private VersionedReference<Double> value;
-        private Class type;
-        private Enum[] values;
+        private Class<T> type;
+        private T[] values;
         
-        public EnumProperty( String name, Access<Enum> access ) {
+        public EnumProperty( String name, Access<T> access ) {
             super(name, access);
  
             this.type = access.getType();
-            this.values = (Enum[])type.getEnumConstants();  
+            this.values = type.getEnumConstants();
  
             this.model = new DefaultRangedValueModel( 0, values.length - 1, 0 );
         }

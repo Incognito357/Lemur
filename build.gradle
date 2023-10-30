@@ -19,7 +19,6 @@ publishing.publications.library(MavenPublication).pom {
 dependencies {
     api "org.jmonkeyengine:jme3-core:$jmeVersion"
 
-    implementation 'com.google.guava:guava:19.0'
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
 }
 

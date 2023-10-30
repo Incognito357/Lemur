@@ -75,7 +75,7 @@ public class ActionButton extends Button {
 
     @SuppressWarnings("unchecked") // because Java doesn't like var-arg generics
     protected final void setupCommands() {
-        addClickCommands(new ClickCommand());
+        addClickCommand(new ClickCommand());
     } 
  
     /**

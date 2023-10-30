@@ -36,8 +36,6 @@ package com.simsilica.lemur.input;
 
 import java.util.*;
 
-import com.google.common.base.Objects;
-
 
 /**
  *  A logical function identifier that can be used to map
@@ -103,9 +101,9 @@ public class FunctionId {
         if( o == null || o.getClass() != getClass() )
             return false;
         FunctionId other = (FunctionId)o;
-        if( !Objects.equal(id, other.id) )
+        if( !Objects.equals(id, other.id) )
             return false;
-        if( !Objects.equal(group, other.group) )
+        if( !Objects.equals(group, other.group) )
             return false;
         return true;
     }

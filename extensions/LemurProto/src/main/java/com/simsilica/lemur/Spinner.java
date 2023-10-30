@@ -165,17 +165,9 @@ public class Spinner<T> extends Panel {
         this.previous = buttons.addChild(new Button(null, elementId.child(DOWN_ID), style));        
  
         next.getControl(GuiControl.class).setFocusable(false);        
-        next.addClickCommands(new Command<Button>() {
-                public void execute( Button source ) {
-                    nextValue();
-                }
-            });
+        next.addClickCommand(source -> nextValue());
         previous.getControl(GuiControl.class).setFocusable(false);        
-        previous.addClickCommands(new Command<Button>() {
-                public void execute( Button source ) {
-                    previousValue();
-                }
-            });
+        previous.addClickCommand(source -> previousValue());
         
         setModel(model);                
     }

@@ -36,10 +36,8 @@
 
 package com.simsilica.lemur.text;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  *  A collection of convenience filters for input and output.
@@ -52,7 +50,7 @@ public class TextFilters {
     private static IsLetter IS_LETTER = new IsLetter();
     private static Function<Character, Character> ALPHA = charFilter(IS_LETTER);
     private static Function<Character, Character> NUMERIC = charFilter(IS_DIGIT);
-    private static Function<Character, Character> ALPHA_NUMERIC = charFilter(Predicates.or(IS_DIGIT, IS_LETTER));
+    private static Function<Character, Character> ALPHA_NUMERIC = charFilter(IS_DIGIT.or(IS_LETTER));
     private static ToLowerCase TO_LOWER_CASE = new ToLowerCase(); 
     private static ToUpperCase TO_UPPER_CASE = new ToUpperCase(); 
     
@@ -159,7 +157,7 @@ public class TextFilters {
      *  is in Character.isLetterOrDigit().
      */
     public static Predicate<Character> isLetterOrDigit() {
-        return Predicates.or(isLetter(), isDigit());
+        return isLetter().or(isDigit());
     }
     
     /**
@@ -233,7 +231,7 @@ public class TextFilters {
         }
         
         public Character apply( Character c ) {
-            return predicate.apply(c) ? c : null;
+            return predicate.test(c) ? c : null;
         } 
     }
  
@@ -250,13 +248,13 @@ public class TextFilters {
     } 
     
     private static class IsDigit implements Predicate<Character> {
-        public boolean apply( Character c ) {
+        public boolean test( Character c ) {
             return Character.isDigit(c);
         }
     }
        
     private static class IsLetter implements Predicate<Character> {
-        public boolean apply( Character c ) {
+        public boolean test( Character c ) {
             return Character.isLetter(c);
         }
     }
@@ -268,7 +266,7 @@ public class TextFilters {
             this.chars = chars;
         }
     
-        public boolean apply( Character c ) {
+        public boolean test( Character c ) {
             for( char check : chars ) {
                 if( c.charValue() == check ) {
                     return true;

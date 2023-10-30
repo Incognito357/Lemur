@@ -37,18 +37,15 @@
 package com.simsilica.lemur.core;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException; 
-
-import com.google.common.collect.Iterators;
+import java.util.NoSuchElementException;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import com.simsilica.lemur.focus.FocusManagerState; 
-import com.simsilica.lemur.focus.FocusNavigationState; 
-import com.simsilica.lemur.focus.FocusTarget; 
-import com.simsilica.lemur.focus.FocusTraversal; 
-import com.simsilica.lemur.focus.FocusTraversal.TraversalDirection;
+import com.simsilica.lemur.focus.FocusManagerState;
+import com.simsilica.lemur.focus.FocusNavigationState;
+import com.simsilica.lemur.focus.FocusTarget;
+import com.simsilica.lemur.focus.FocusTraversal;
 
 /**
  *  Wraps a standard GuiLayout to provide basic default focus
@@ -128,24 +125,40 @@ public class FocusTraversalAdapter implements FocusTraversal {
     }
  
     protected Spatial getFirst() {
-        Spatial first = Iterators.get(new ChildIterator(TraversalDirection.PageHome), 0, null);
-        return first;     
+        ChildIterator it = new ChildIterator(TraversalDirection.PageHome);
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
     }
     
     protected Spatial getLast() {
-        return Iterators.getLast(new ChildIterator(TraversalDirection.PageEnd), null);
+        ChildIterator it = new ChildIterator(TraversalDirection.PageEnd);
+        Spatial cur = null;
+        while (it.hasNext()) {
+            cur = it.next();
+        }
+        return cur;
     }
     
-    protected Spatial getNext( Spatial from ) {    
-        Spatial next = Iterators.get(new ChildIterator(from, null, TraversalDirection.PageHome), 0, null);
+    protected Spatial getNext( Spatial from ) {
+        ChildIterator it = new ChildIterator(from, null, TraversalDirection.PageHome);
+        Spatial next = null;
+        if (it.hasNext()) {
+            next= it.next();
+        }
         if( next == null && focusRoot ) {
             next = getFirst();
         }
         return next;
     }
     
-    protected Spatial getPrevious( Spatial from ) {       
-        Spatial previous = Iterators.getLast(new ChildIterator(null, from, TraversalDirection.PageEnd), null);
+    protected Spatial getPrevious( Spatial from ) {
+        ChildIterator it = new ChildIterator(null, from, TraversalDirection.PageEnd);
+        Spatial previous = null;
+        while (it.hasNext()) {
+            previous = it.next();
+        }
         if( previous == null && focusRoot ) {
             previous = getLast();
         }

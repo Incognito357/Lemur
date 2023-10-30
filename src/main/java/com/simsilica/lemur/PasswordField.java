@@ -36,14 +36,14 @@
 
 package com.simsilica.lemur;
 
-import com.google.common.base.Predicate;
-
 import com.jme3.font.BitmapFont;
 
 import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.style.StyleAttribute;
 import com.simsilica.lemur.style.Styles;
 import com.simsilica.lemur.text.*;
+
+import java.util.function.Predicate;
 
 /**
  *  A special TextField implementation that displays an obscured version
