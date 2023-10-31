@@ -136,10 +136,12 @@ public class InputDevice {
             return button;
         }
 
+        @Override
         public int hashCode() {
             return Objects.hash(device, button);
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o == this) {
                 return true;
@@ -185,10 +187,12 @@ public class InputDevice {
             return axis;
         }
 
+        @Override
         public int hashCode() {
             return Objects.hash(device, axis);
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o == this) {
                 return true;

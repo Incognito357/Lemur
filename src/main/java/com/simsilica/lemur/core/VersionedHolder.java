@@ -36,12 +36,12 @@ package com.simsilica.lemur.core;
 
 
 /**
- *  A utility implementation of a simple VersionedObject wrapper
- *  object.  This provides easy support for a VersionedObject especially
- *  in cases where a referring class will have several  separately
- *  versioned values.
+ * A utility implementation of a simple VersionedObject wrapper
+ * object.  This provides easy support for a VersionedObject especially
+ * in cases where a referring class will have several  separately
+ * versioned values.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class VersionedHolder<T> implements VersionedObject<T> {
 
@@ -61,24 +61,24 @@ public class VersionedHolder<T> implements VersionedObject<T> {
     }
 
     /**
-     *  Sets a new value to the refenced object and increments the version.
+     * Sets a new value to the refenced object and increments the version.
      */
-    public void setObject( T value ) {
+    public void setObject(T value) {
         this.value = value;
         incrementVersion();
     }
 
     /**
-     *  Sets a new value to the refenced object only if has changed.
-     *  An value is considered changed if oldValue != newValue and 
-     *  oldValue.equals(newValue) returns false.  Returns true if the 
-     *  object was actually changed.
+     * Sets a new value to the refenced object only if has changed.
+     * An value is considered changed if oldValue != newValue and
+     * oldValue.equals(newValue) returns false.  Returns true if the
+     * object was actually changed.
      */
-    public boolean updateObject( T value ) {
-        if( this.value == value ) {
+    public boolean updateObject(T value) {
+        if (this.value == value) {
             return false;
         }
-        if( this.value != null && this.value.equals(value) ) {
+        if (this.value != null && this.value.equals(value)) {
             return false;
         }
         setObject(value);
@@ -86,10 +86,10 @@ public class VersionedHolder<T> implements VersionedObject<T> {
     }
 
     /**
-     *  Manually increments the version causing VersionedReferences to
-     *  see this object as changed.  This is useful in cases where it
-     *  is known that the object's fields have changed in some way the
-     *  VersionedReference holders might care about. 
+     * Manually increments the version causing VersionedReferences to
+     * see this object as changed.  This is useful in cases where it
+     * is known that the object's fields have changed in some way the
+     * VersionedReference holders might care about.
      */
     public void incrementVersion() {
         version++;
@@ -102,6 +102,6 @@ public class VersionedHolder<T> implements VersionedObject<T> {
 
     @Override
     public VersionedReference<T> createReference() {
-        return new VersionedReference<T>(this);
+        return new VersionedReference<>(this);
     }
 }

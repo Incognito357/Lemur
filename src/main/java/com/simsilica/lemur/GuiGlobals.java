@@ -139,7 +139,7 @@ public class GuiGlobals {
 
         // For now, pick either mouse or touch based on the
         // availability of touch.  It's an either/or at the
-        // moment but the rest of the code is setup to support
+        // moment but the rest of the code is set up to support
         // both at once should we ever want to support touch
         // devices that also may have a mouse connected.
         if (app.getContext().getTouchInput() == null) {
@@ -459,16 +459,9 @@ public class GuiGlobals {
      * after this call.
      */
     public boolean releaseCursorEnabled(Object owner) {
-        boolean result = false;
-        if (mouseState != null) {
-            if (mouseState.releaseEnabled(owner)) {
-                result = true;
-            }
-        }
-        if (touchState != null) {
-            if (touchState.releaseEnabled(owner)) {
-                result = true;
-            }
+        boolean result = mouseState != null && mouseState.releaseEnabled(owner);
+        if (touchState != null && touchState.releaseEnabled(owner)) {
+            result = true;
         }
         if (focusNavState != null) {
             focusNavState.setEnabled(result);

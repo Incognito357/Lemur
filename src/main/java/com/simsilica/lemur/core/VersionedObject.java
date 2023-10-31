@@ -36,27 +36,27 @@ package com.simsilica.lemur.core;
 
 
 /**
- *  Implemented by objects that provided a versioned view
- *  of a value.  Callers can create VersionedReferences and
- *  then easily detect when the value has changed.
+ * Implemented by objects that provided a versioned view
+ * of a value.  Callers can create VersionedReferences and
+ * then easily detect when the value has changed.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public interface VersionedObject<T> {
-    
-    /**
-     *  Returns the current version of the versioned object.
-     */
-    public long getVersion(); 
 
     /**
-     *  Returns the object that is being versioned.
+     * Returns the current version of the versioned object.
      */
-    public T getObject();
+    long getVersion();
 
     /**
-     *  Creates a new VersionedReference that can be used to monitor
-     *  when this object changes.
+     * Returns the object that is being versioned.
      */
-    public VersionedReference<T> createReference();
+    T getObject();
+
+    /**
+     * Creates a new VersionedReference that can be used to monitor
+     * when this object changes.
+     */
+    VersionedReference<T> createReference();
 }

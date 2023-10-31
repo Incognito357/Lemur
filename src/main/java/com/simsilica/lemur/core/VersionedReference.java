@@ -36,70 +36,71 @@ package com.simsilica.lemur.core;
 
 
 /**
- *  Tracks an update version of a VersionedObject and can
- *  provide basic change tracking for a caller.  Calling code
- *  can hold a VersionedReference to some value and call
- *  update() to update the local version field and detect
- *  if the version has changed since the last check.
+ * Tracks an update version of a VersionedObject and can
+ * provide basic change tracking for a caller.  Calling code
+ * can hold a VersionedReference to some value and call
+ * update() to update the local version field and detect
+ * if the version has changed since the last check.
  *
- *  <p>This is an upside-down way of doing change notification
- *  that does not have the event overhead or listener-leak
- *  potential of a typical event/listener framework.  It is
- *  not appropriate for all cases but can be used in cases
- *  where values are often changed frequently and/or it's ok
- *  to ignore stacks of events in favor of the latest value.
- *  Common applications are things like sliders, document models,
- *  etc. for which some view will update itself only when the
- *  watched object changes, but otherwise doesn't care about
- *  the specific granularity of events.</p>
+ * <p>This is an upside-down way of doing change notification
+ * that does not have the event overhead or listener-leak
+ * potential of a typical event/listener framework.  It is
+ * not appropriate for all cases but can be used in cases
+ * where values are often changed frequently and/or it's ok
+ * to ignore stacks of events in favor of the latest value.
+ * Common applications are things like sliders, document models,
+ * etc. for which some view will update itself only when the
+ * watched object changes, but otherwise doesn't care about
+ * the specific granularity of events.</p>
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class VersionedReference<T> {
-    private VersionedObject<T> object;
-    private long lastVersion = -1;
+    private final VersionedObject<T> object;
+    private long lastVersion;
 
-    public VersionedReference( VersionedObject<T> object ) {
+    public VersionedReference(VersionedObject<T> object) {
         this.object = object;
         this.lastVersion = object.getVersion();
     }
 
     /**
-     *  Returns the version of the referenced object that last
-     *  time update() was called.
+     * Returns the version of the referenced object that last
+     * time update() was called.
      */
     public long getLastVersion() {
         return lastVersion;
     }
- 
+
     /**
-     *  Returns the current version of the referenced object.
-     */   
+     * Returns the current version of the referenced object.
+     */
     public long getObjectVersion() {
         return object.getVersion();
     }
 
     /**
-     *  Returns true if the current version of the object
-     *  differs from the version the last time update() was called.
+     * Returns true if the current version of the object
+     * differs from the version the last time update() was called.
      */
     public boolean needsUpdate() {
         return lastVersion != object.getVersion();
     }
 
     /**
-     *  Updates the referenced version to the current version and
-     *  returns true if the referenced version was changed.
+     * Updates the referenced version to the current version and
+     * returns true if the referenced version was changed.
      */
     public boolean update() {
-        if( lastVersion == object.getVersion() )
+        if (lastVersion == object.getVersion()) {
             return false;
+        }
         lastVersion = object.getVersion();
         return true;
     }
 
     /**
-     *  Returns the current version of the referenced object.
+     * Returns the current version of the referenced object.
      */
     public T get() {
         return object.getObject();

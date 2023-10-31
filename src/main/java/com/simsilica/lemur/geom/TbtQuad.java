@@ -34,14 +34,14 @@
 
 package com.simsilica.lemur.geom;
 
-import com.jme3.math.*;
+import com.jme3.math.Vector2f;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer.Type;
 
 /**
- *  A three-by-three quad that can stretch textures in useful
- *  ways.  The vertexes are arranged with the 10 outer vertexes
- *  first and then the 4 inner vertexes.
+ * A three-by-three quad that can stretch textures in useful
+ * ways.  The vertexes are arranged with the 10 outer vertexes
+ * first and then the 4 inner vertexes.
  *
  * <p>The texture is split up into a three-by-three grid in this fashion:
  *
@@ -61,7 +61,7 @@ import com.jme3.scene.VertexBuffer.Type;
  *    +---+--------------+-------+
  *       x1             x2
  * </pre>
- *
+ * <p>
  * Arrows indicate the direction in which each grid cell will stretch to fill
  * the area given by the component.<br>
  * All coordinates are relative to the lower-left border.
@@ -81,8 +81,7 @@ import com.jme3.scene.VertexBuffer.Type;
  *
  * @author Paul Speed, Joachim "Toolforger" Durchholz (Javadoc)
  */
-public class TbtQuad extends Mesh
-                     implements Cloneable {
+public class TbtQuad extends Mesh implements Cloneable {
 
     // Internally, we need to keep track of the
     // overall size of the quad as well as where
@@ -96,17 +95,17 @@ public class TbtQuad extends Mesh
     private float[] horzTexCoords;
     private float[] vertTexCoords;
 
-    public TbtQuad( float width, float height ) {
+    public TbtQuad(float width, float height) {
         this.size = new Vector2f(width, height);
         this.imageSize = new Vector2f(width, height);
-        this.horzFolds = new float[] { width/3f, 2 * width/3f };
-        this.vertFolds = new float[] { height/3f, 2 * height/3f };
-        this.horzTexCoords = new float[] { 0, 1/3f, 2/3f, 1 };
-        this.vertTexCoords = new float[] { 0, 1/3f, 2/3f, 1 };
+        this.horzFolds = new float[]{width / 3f, 2 * width / 3f};
+        this.vertFolds = new float[]{height / 3f, 2 * height / 3f};
+        this.horzTexCoords = new float[]{0, 1 / 3f, 2 / 3f, 1};
+        this.vertTexCoords = new float[]{0, 1 / 3f, 2 / 3f, 1};
         refreshGeometry();
     }
 
-    public TbtQuad( float width, float height, int x1, int y1, int x2, int y2, int imageWidth, int imageHeight, float imageScale ) {
+    public TbtQuad(float width, float height, int x1, int y1, int x2, int y2, int imageWidth, int imageHeight, float imageScale) {
         this.size = new Vector2f(width, height);
 
         // x1, y1 and x2, y2 are the insets sort of.
@@ -119,22 +118,22 @@ public class TbtQuad extends Mesh
         float iw = imageWidth * imageScale;
         float ih = imageHeight * imageScale;
         this.imageSize = new Vector2f(iw, ih);
-        this.horzFolds = new float[] { imageScale * x1, imageScale * x2 };
-        this.vertFolds = new float[] { imageScale * y1, imageScale * y2 };
+        this.horzFolds = new float[]{imageScale * x1, imageScale * x2};
+        this.vertFolds = new float[]{imageScale * y1, imageScale * y2};
 
         // Slide the far end necessary to make the proper width
         // and height
         horzFolds[1] += width - iw;
         vertFolds[1] += height - ih;
 
-        this.horzTexCoords = new float[] { 0, (float)x1/imageWidth, (float)x2/imageWidth, 1 };
-        this.vertTexCoords = new float[] { 0, (float)y1/imageHeight, (float)y2/imageHeight, 1 };
+        this.horzTexCoords = new float[]{0, (float) x1 / imageWidth, (float) x2 / imageWidth, 1};
+        this.vertTexCoords = new float[]{0, (float) y1 / imageHeight, (float) y2 / imageHeight, 1};
         refreshGeometry();
     }
 
     @Override
     public TbtQuad clone() {
-        TbtQuad result = (TbtQuad)super.deepClone();
+        TbtQuad result = (TbtQuad) super.deepClone();
         result.size = size.clone();
         result.imageSize = imageSize.clone();
         result.horzFolds = horzFolds.clone();
@@ -148,8 +147,8 @@ public class TbtQuad extends Mesh
         return size;
     }
 
-    public void updateSize( float width, float height ) {
-        if( size.x == width && size.y == height )
+    public void updateSize(float width, float height) {
+        if (size.x == width && size.y == height)
             return;
 
         // Put back the size adjustment we made in the first place
@@ -178,90 +177,90 @@ public class TbtQuad extends Mesh
         // Note: some of the corners are flipped to better support extrusion
         // if the caller desires to pull up the center quad.
 
-        setBuffer(Type.Index, 3, new short[] {
-                                        0, 1, 12,
-                                        0, 12, 11,
-                                        1, 2, 13,
-                                        1, 13, 12,
-                                        2, 3, 13,
-                                        3, 4, 13,
-                                        13, 4, 5,
-                                        13, 5, 14,
-                                        14, 5, 6,
-                                        14, 6, 7,
-                                        15, 14, 7,
-                                        15, 7, 8,
-                                        10, 15, 9,
-                                        15, 8, 9,
-                                        11, 12, 15,
-                                        11, 15, 10,
+        setBuffer(Type.Index, 3, new short[]{
+                0, 1, 12,
+                0, 12, 11,
+                1, 2, 13,
+                1, 13, 12,
+                2, 3, 13,
+                3, 4, 13,
+                13, 4, 5,
+                13, 5, 14,
+                14, 5, 6,
+                14, 6, 7,
+                15, 14, 7,
+                15, 7, 8,
+                10, 15, 9,
+                15, 8, 9,
+                11, 12, 15,
+                11, 15, 10,
 
-                                        // The center
-                                        12, 13, 14,
-                                        12, 14, 15
-                                    });
+                // The center
+                12, 13, 14,
+                12, 14, 15
+        });
 
-        setBuffer(Type.Position, 3, new float[] {
-                                        0, 0, 0,
-                                        horzFolds[0], 0, 0,
-                                        horzFolds[1], 0, 0,
-                                        size.x, 0, 0,
-                                        size.x, vertFolds[0], 0,
-                                        size.x, vertFolds[1], 0,
-                                        size.x, size.y, 0,
-                                        horzFolds[1], size.y, 0,
-                                        horzFolds[0], size.y, 0,
-                                        0, size.y, 0,
-                                        0, vertFolds[1], 0,
-                                        0, vertFolds[0], 0,
+        setBuffer(Type.Position, 3, new float[]{
+                0, 0, 0,
+                horzFolds[0], 0, 0,
+                horzFolds[1], 0, 0,
+                size.x, 0, 0,
+                size.x, vertFolds[0], 0,
+                size.x, vertFolds[1], 0,
+                size.x, size.y, 0,
+                horzFolds[1], size.y, 0,
+                horzFolds[0], size.y, 0,
+                0, size.y, 0,
+                0, vertFolds[1], 0,
+                0, vertFolds[0], 0,
 
-                                        // The center
-                                        horzFolds[0], vertFolds[0], 0,
-                                        horzFolds[1], vertFolds[0], 0,
-                                        horzFolds[1], vertFolds[1], 0,
-                                        horzFolds[0], vertFolds[1], 0
-                                    });
-        setBuffer(Type.TexCoord, 2, new float[] {
-                                        horzTexCoords[0], vertTexCoords[0],
-                                        horzTexCoords[1], vertTexCoords[0],
-                                        horzTexCoords[2], vertTexCoords[0],
-                                        horzTexCoords[3], vertTexCoords[0],
-                                        horzTexCoords[3], vertTexCoords[1],
-                                        horzTexCoords[3], vertTexCoords[2],
-                                        horzTexCoords[3], vertTexCoords[3],
-                                        horzTexCoords[2], vertTexCoords[3],
-                                        horzTexCoords[1], vertTexCoords[3],
-                                        horzTexCoords[0], vertTexCoords[3],
-                                        horzTexCoords[0], vertTexCoords[2],
-                                        horzTexCoords[0], vertTexCoords[1],
+                // The center
+                horzFolds[0], vertFolds[0], 0,
+                horzFolds[1], vertFolds[0], 0,
+                horzFolds[1], vertFolds[1], 0,
+                horzFolds[0], vertFolds[1], 0
+        });
+        setBuffer(Type.TexCoord, 2, new float[]{
+                horzTexCoords[0], vertTexCoords[0],
+                horzTexCoords[1], vertTexCoords[0],
+                horzTexCoords[2], vertTexCoords[0],
+                horzTexCoords[3], vertTexCoords[0],
+                horzTexCoords[3], vertTexCoords[1],
+                horzTexCoords[3], vertTexCoords[2],
+                horzTexCoords[3], vertTexCoords[3],
+                horzTexCoords[2], vertTexCoords[3],
+                horzTexCoords[1], vertTexCoords[3],
+                horzTexCoords[0], vertTexCoords[3],
+                horzTexCoords[0], vertTexCoords[2],
+                horzTexCoords[0], vertTexCoords[1],
 
-                                        // The center
-                                        horzTexCoords[1], vertTexCoords[1],
-                                        horzTexCoords[2], vertTexCoords[1],
-                                        horzTexCoords[2], vertTexCoords[2],
-                                        horzTexCoords[1], vertTexCoords[2]
-                                    });
+                // The center
+                horzTexCoords[1], vertTexCoords[1],
+                horzTexCoords[2], vertTexCoords[1],
+                horzTexCoords[2], vertTexCoords[2],
+                horzTexCoords[1], vertTexCoords[2]
+        });
 
-        setBuffer(Type.Normal, 3, new float[] {
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
+        setBuffer(Type.Normal, 3, new float[]{
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
 
-                                        // The center
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1
-                                    });
+                // The center
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1
+        });
 
         updateBound();
     }

@@ -34,32 +34,30 @@
 
 package com.simsilica.lemur;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Spatial;
-
+import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.core.CommandMap;
 import com.simsilica.lemur.core.GuiControl;
-import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.event.DefaultMouseListener;
+import com.simsilica.lemur.event.FocusMouseListener;
+import com.simsilica.lemur.event.MouseEventControl;
 import com.simsilica.lemur.focus.FocusChangeEvent;
 import com.simsilica.lemur.focus.FocusChangeListener;
 import com.simsilica.lemur.focus.FocusNavigationFunctions;
 import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
-import com.simsilica.lemur.style.StyleDefaults;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.style.StyleAttribute;
+import com.simsilica.lemur.style.StyleDefaults;
 import com.simsilica.lemur.style.Styles;
-import com.simsilica.lemur.event.DefaultMouseListener;
-import com.simsilica.lemur.event.FocusMouseListener;
-import com.simsilica.lemur.event.MouseEventControl;
+
+import java.util.List;
+import java.util.Map;
 
 
 /**

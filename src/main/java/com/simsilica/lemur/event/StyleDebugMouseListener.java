@@ -35,35 +35,32 @@
 package com.simsilica.lemur.event;
 
 import com.jme3.input.MouseInput;
-import com.jme3.input.event.*;
-import com.jme3.scene.*;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
- *  A MouseListener implementation that can be used to debug
- *  style hierarchies.  If this listener is added to a spatial
- *  then clicking the spatial will dump its element ID and
- *  style name to the console.
+ * A MouseListener implementation that can be used to debug
+ * style hierarchies.  If this listener is added to a spatial
+ * then clicking the spatial will dump its element ID and
+ * style name to the console.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class StyleDebugMouseListener extends DefaultMouseListener {
-
-    public static final StyleDebugMouseListener INSTANCE = new StyleDebugMouseListener();
+    private static final Logger logger = LoggerFactory.getLogger(StyleDebugMouseListener.class);
 
     public StyleDebugMouseListener() {
     }
 
     @Override
-    protected void click( MouseButtonEvent event, Spatial target, Spatial capture ) {
-        if( event.getButtonIndex() == MouseInput.BUTTON_MIDDLE ) {
-            if( target instanceof Panel ) {
-                Panel p = (Panel)target;
-                System.out.println( "gui element:" + p
-                                    + "  elementId:" + p.getElementId()
-                                    + "  style:" + p.getStyle() );
-            }
+    protected void click(MouseButtonEvent event, Spatial target, Spatial capture) {
+        if (event.getButtonIndex() == MouseInput.BUTTON_MIDDLE && target instanceof Panel) {
+            Panel p = (Panel) target;
+            logger.info("gui element:{}  elementId:{}  style:{}", p, p.getElementId(), p.getStyle());
         }
     }
 }

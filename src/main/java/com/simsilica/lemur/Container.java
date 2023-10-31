@@ -34,24 +34,23 @@
 
 package com.simsilica.lemur;
 
-import com.simsilica.lemur.style.StyleDefaults;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.simsilica.lemur.component.SpringGridLayout;
+import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.core.GuiLayout;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.style.StyleAttribute;
+import com.simsilica.lemur.style.StyleDefaults;
 import com.simsilica.lemur.style.Styles;
-import com.simsilica.lemur.core.GuiLayout;
-import com.simsilica.lemur.core.GuiControl;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-
-import com.simsilica.lemur.component.SpringGridLayout;
 
 
 /**
- *  A special type of Panel that is preconfigured to hold
- *  children using a layout.
+ * A special type of Panel that is preconfigured to hold
+ * children using a layout.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Container extends Panel {
 
@@ -61,88 +60,88 @@ public class Container extends Panel {
         this(null, true, new ElementId(ELEMENT_ID), null);
     }
 
-    public Container( GuiLayout layout ) {
+    public Container(GuiLayout layout) {
         this(layout, true, new ElementId(ELEMENT_ID), null);
     }
 
-    public Container( String style ) {
+    public Container(String style) {
         this(null, true, new ElementId(ELEMENT_ID), style);
     }
 
-    public Container( ElementId elementId ) {
+    public Container(ElementId elementId) {
         this(null, true, elementId, null);
     }
-    
-    public Container( ElementId elementId, String style ) {
+
+    public Container(ElementId elementId, String style) {
         this(null, true, elementId, style);
     }
 
-    public Container( GuiLayout layout, ElementId elementId ) {
+    public Container(GuiLayout layout, ElementId elementId) {
         this(layout, true, elementId, null);
     }
-    
-    public Container( GuiLayout layout, String style ) {
+
+    public Container(GuiLayout layout, String style) {
         this(layout, true, new ElementId(ELEMENT_ID), style);
     }
 
-    public Container( GuiLayout layout, ElementId elementId, String style ) {
+    public Container(GuiLayout layout, ElementId elementId, String style) {
         this(layout, true, elementId, style);
     }
 
-    protected Container( GuiLayout layout, boolean applyStyles,
-                         ElementId elementId, String style ) {
+    protected Container(GuiLayout layout, boolean applyStyles,
+                        ElementId elementId, String style) {
         super(false, elementId, style);
 
-        if( applyStyles ) {
+        if (applyStyles) {
             Styles styles = GuiGlobals.getInstance().getStyles();
             styles.applyStyles(this, elementId, style);
         }
 
-        if( layout != null ) {
+        if (layout != null) {
             setLayout(layout);
         }
-        
-        if( applyStyles && getLayout() == null ) {
+
+        if (applyStyles && getLayout() == null) {
             // Force some layout to be set
             setLayout(new SpringGridLayout());
         }
     }
 
     @StyleDefaults(ELEMENT_ID)
-    public static void initializeDefaultStyles( Attributes attrs ) {
+    public static void initializeDefaultStyles(Attributes attrs) {
         attrs.set("layout", new SpringGridLayout(), false);
     }
 
-    public <T extends Node> T addChild( T child, Object... constraints ) {
+    public <T extends Node> T addChild(T child, Object... constraints) {
         getLayout().addChild(child, constraints);
         return child;
     }
 
-    public void removeChild( Node child ) {
+    public void removeChild(Node child) {
         getLayout().removeChild(child);
     }
 
     public void clearChildren() {
-        getLayout().clearChildren();   
+        getLayout().clearChildren();
     }
- 
+
     @Override
-    public Spatial detachChildAt( int index ) {
+    public Spatial detachChildAt(int index) {
         Spatial child = getChild(index);
-        
+
         // See if this child is managed by the layout
-        if( child instanceof Node && getLayout().getChildren().contains((Node)child) ) {
-            removeChild((Node)child);
+        if (child instanceof Node && getLayout().getChildren().contains(child)) {
+            removeChild((Node) child);
             return child;
         } else {
             // Just let the superclass do its thing with the 
             // unmanaged child
             return super.detachChildAt(index);
-        }        
+        }
     }
-    
-    @StyleAttribute(value="layout", lookupDefault=false)
-    public void setLayout( GuiLayout layout ) {
+
+    @StyleAttribute(value = "layout", lookupDefault = false)
+    public void setLayout(GuiLayout layout) {
         getControl(GuiControl.class).setLayout(layout);
     }
 

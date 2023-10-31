@@ -48,107 +48,107 @@ import com.jme3.scene.Spatial;
 import com.jme3.util.SafeArrayList;
 import com.simsilica.lemur.event.BaseAppState;
 import com.simsilica.lemur.event.DefaultRawInputListener;
+
 import java.util.HashSet;
 import java.util.Set;
 
 
 /**
- *  Keeps track of the current selection and provides 
- *  scene-level object picking.  This is different than the
- *  picking normally provided by Lemur because in this case
- *  we want the events for all Geometries in the scene without
- *  having decorated them with listeners... and we may implement 
- *  some "click-through" chaining for selection of objects behind
- *  other objects.
+ * Keeps track of the current selection and provides
+ * scene-level object picking.  This is different than the
+ * picking normally provided by Lemur because in this case
+ * we want the events for all Geometries in the scene without
+ * having decorated them with listeners... and we may implement
+ * some "click-through" chaining for selection of objects behind
+ * other objects.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public class SelectionState extends BaseAppState
-{
+public class SelectionState extends BaseAppState {
     // This state owns the "Selection" mode.
     public static final String MODE_SELECTION = "Selection";
- 
+
     /**
-     *  Set this user data to a Geometry if it should be ignored
-     *  in the selection chain.
+     * Set this user data to a Geometry if it should be ignored
+     * in the selection chain.
      */
     public static final String UD_IGNORE = "ignoreSelection";
-    
+
     private MouseObserver mouseObserver = new MouseObserver();
     private Ray ray = new Ray(); // we reuse it
-    
+
     /**
-     *  For hover and mouse-over type of effects, we only
-     *  sample at 60 FPS regardless of actual FPS
+     * For hover and mouse-over type of effects, we only
+     * sample at 60 FPS regardless of actual FPS
      */
     private long sampleFrequency = 1000000000 / 60; // 60 fps
     private long lastSample = 0;
- 
+
     /**
      *  A set of Geometries to ignore during picking... this is necessary
      *  because collisions with the sky are dumb.
      */
     //private Set<Spatial> ignore = new HashSet<Spatial>(); 
- 
+
     /**
-     *  The root node we will do picking against.
+     * The root node we will do picking against.
      */
     private Spatial pickRoot;
-    
+
     /**
-     *  The current selected.
+     * The current selected.
      */
     private Spatial selected;
- 
-    /**
-     *  The previous selection when selections overlap... used for
-     *  selection chaining.
-     */
-    private Set<Spatial> previous = new HashSet<Spatial>(); 
 
     /**
-     *  The current "flyover", always a Geometry
+     * The previous selection when selections overlap... used for
+     * selection chaining.
+     */
+    private Set<Spatial> previous = new HashSet<Spatial>();
+
+    /**
+     * The current "flyover", always a Geometry
      */
     private Geometry hover;
- 
+
     /**
-     *  Listeners notified when selection changes, either as the result
-     *  of a mouse click or an external change of state.
+     * Listeners notified when selection changes, either as the result
+     * of a mouse click or an external change of state.
      */
-    private SafeArrayList<SelectionListener> selectionListeners = new SafeArrayList<SelectionListener>(SelectionListener.class);     
-    
+    private SafeArrayList<SelectionListener> selectionListeners = new SafeArrayList<SelectionListener>(SelectionListener.class);
+
     public SelectionState() {
     }
-    
-    public void addIgnore( Spatial... ignore ) {
+
+    public void addIgnore(Spatial... ignore) {
         //this.ignore.addAll( Arrays.asList(ignore) );
-        for( Spatial s : ignore ) {
+        for (Spatial s : ignore) {
             s.setUserData(UD_IGNORE, true);
-        } 
+        }
     }
- 
-    protected boolean isIgnored( Spatial s ) {
+
+    protected boolean isIgnored(Spatial s) {
         return s.getUserData(UD_IGNORE) == Boolean.TRUE;
     }
- 
-    public void addSelectionListener( SelectionListener l ) {
+
+    public void addSelectionListener(SelectionListener l) {
         selectionListeners.add(l);
     }
-    
-    public void removeSelectionListener( SelectionListener l ) {
+
+    public void removeSelectionListener(SelectionListener l) {
         selectionListeners.remove(l);
-    }
-        
-    @Override
-    protected void initialize( Application app ) {
-        AppMode.getInstance().onModeEnable( this, MODE_SELECTION );                        
-        app.getInputManager().addRawInputListener(mouseObserver);
-        pickRoot = ((Main)app).getRootNode();
     }
 
     @Override
-    protected void cleanup( Application app ) {
-        AppMode.getInstance().clearModeLinks( this );    
+    protected void initialize(Application app) {
+        AppMode.getInstance().onModeEnable(this, MODE_SELECTION);
+        app.getInputManager().addRawInputListener(mouseObserver);
+        pickRoot = ((Main) app).getRootNode();
+    }
+
+    @Override
+    protected void cleanup(Application app) {
+        AppMode.getInstance().clearModeLinks(this);
         app.getInputManager().removeRawInputListener(mouseObserver);
     }
 
@@ -162,35 +162,35 @@ public class SelectionState extends BaseAppState
         getApplication().getInputManager().setCursorVisible(false);
     }
 
-    protected Ray getPickRay( Vector2f cursor ) {    
+    protected Ray getPickRay(Vector2f cursor) {
         Camera cam = getApplication().getCamera();
-        Vector3f clickFar  = cam.getWorldCoordinates(cursor, 1);
+        Vector3f clickFar = cam.getWorldCoordinates(cursor, 1);
         Vector3f clickNear = cam.getWorldCoordinates(cursor, 0);
         ray.setOrigin(clickNear);
         ray.setDirection(clickFar.subtractLocal(clickNear).normalizeLocal());
         return ray;
     }
 
-    protected CollisionResults getCollisions( Vector2f cursor ) {    
-    
+    protected CollisionResults getCollisions(Vector2f cursor) {
+
         CollisionResults results = new CollisionResults();
 
         Ray mouseRay = getPickRay(cursor);
 
         pickRoot.collideWith(mouseRay, results);
-        
+
         return results;
     }
 
-    protected void setHover( Geometry hover ) {
-        if( this.hover == hover ) {
+    protected void setHover(Geometry hover) {
+        if (this.hover == hover) {
             return;
         }
-        
+
         this.hover = hover;
 
         // Notify listeners
-        
+
         // If the hover changes then clear the previous selection
         // set because we've moved the mouse enough for it to not
         // matter anymore.  This isn't 'required' because the pick
@@ -199,135 +199,135 @@ public class SelectionState extends BaseAppState
         // back will reset the pick stack
         previous.clear();
     }
-    
-    public void setSelectedSpatial( Spatial selected ) {
-        if( this.selected == selected ) {
+
+    public void setSelectedSpatial(Spatial selected) {
+        if (this.selected == selected) {
             return;
         }
-        
+
         Spatial last = this.selected;
         this.selected = selected;
-        
-        for( SelectionListener l : selectionListeners.getArray() ) {
+
+        for (SelectionListener l : selectionListeners.getArray()) {
             l.selectionChanged(selected, last);
-        } 
-    } 
-    
+        }
+    }
+
     public Spatial getSelectedSpatial() {
         return selected;
     }
 
-    protected void processClickEvent( Vector2f click, MouseButtonEvent evt ) {
-    
+    protected void processClickEvent(Vector2f click, MouseButtonEvent evt) {
+
         CollisionResults collisions = getCollisions(click);
 
         // Add the current selection to the "previous" set if not
         // null... this will let us click through it.  If we run out
         // of geometry then we will reset it
-        if( selected != null ) {
+        if (selected != null) {
             previous.add(selected);
-        } 
+        }
 
         // Make a first pass through the collisions to adjust the
         // 'previous' set to only include things actually under the cursor
         boolean remove = false;
-        for( CollisionResult cr : collisions ) {
+        for (CollisionResult cr : collisions) {
             Geometry geom = cr.getGeometry();
-            if( isIgnored(geom) ) {
+            if (isIgnored(geom)) {
                 continue;
             }
-            if( remove ) {
+            if (remove) {
                 previous.remove(geom);
-            } else if( previous.contains(geom) ) {
+            } else if (previous.contains(geom)) {
                 // We're fine... we haven't started removing
                 // and the current in-order set of geometry
                 // still matches what's in the set.
             } else {
                 // Now we've found a geometry not previously
                 // selected... so remove everything after this
-                remove = true; 
+                remove = true;
             }
-        }            
- 
-        for( CollisionResult cr : collisions ) {
+        }
+
+        for (CollisionResult cr : collisions) {
             Geometry geom = cr.getGeometry();
-            if( isIgnored(geom) ) {
+            if (isIgnored(geom)) {
                 continue;
             }
-                       
+
             // Now, if it's in the previous selection set then
             // we will click through it
-            if( previous.contains(geom) ) {
+            if (previous.contains(geom)) {
                 continue;
             }
-            
+
             // Else we have a winner
             setSelectedSpatial(geom);
             return;
         }
- 
+
         // We found nothing or clicked through everything.
         previous.clear();
-        setSelectedSpatial(null);       
+        setSelectedSpatial(null);
     }
 
     @Override
-    public void update( float tpf ) {
+    public void update(float tpf) {
         super.update(tpf);
 
         long time = System.nanoTime();
-        if( time - lastSample < sampleFrequency )
+        if (time - lastSample < sampleFrequency)
             return;
         lastSample = time;
 
         Vector2f cursor = getApplication().getInputManager().getCursorPosition();
         CollisionResults collisions = getCollisions(cursor);
 
-        for( CollisionResult cr : collisions ) {
+        for (CollisionResult cr : collisions) {
             Geometry geom = cr.getGeometry();
-            if( geom == selected ) {
+            if (geom == selected) {
                 // If the hover is already the selection then
                 // don't bother changinge
-                if( geom == hover ) {
+                if (geom == hover) {
                     return;
                 }
             }
-            if( isIgnored(geom) ) {
+            if (isIgnored(geom)) {
                 continue;
             }
             setHover(geom);
             return;
         }
-        
+
         // Else clear the hover
         setHover(null);
     }
-    
+
     protected class MouseObserver extends DefaultRawInputListener {
- 
+
         private float clickRadiusSq = 4; // 2 pixel slop       
         private Vector2f clickStart = new Vector2f();
-    
+
         @Override
-        public void onMouseMotionEvent( MouseMotionEvent evt ) {
+        public void onMouseMotionEvent(MouseMotionEvent evt) {
             //if( isEnabled() )
             //    dispatch(evt);
         }
 
         @Override
-        public void onMouseButtonEvent( MouseButtonEvent evt ) {
-            if( !isEnabled() ) {
+        public void onMouseButtonEvent(MouseButtonEvent evt) {
+            if (!isEnabled()) {
                 return;
             }
-            if( evt.isPressed() ) {
+            if (evt.isPressed()) {
                 // Save the location for later
                 clickStart.set(evt.getX(), evt.getY());
-            } else if( evt.isReleased() ) {
-                
+            } else if (evt.isReleased()) {
+
                 Vector2f click = new Vector2f(evt.getX(), evt.getY());
-                if( click.distanceSquared(clickStart) < clickRadiusSq ) {
+                if (click.distanceSquared(clickStart) < clickRadiusSq) {
                     processClickEvent(click, evt);
-                }  
+                }
             }
         }
     }

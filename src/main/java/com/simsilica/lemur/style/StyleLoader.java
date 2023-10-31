@@ -34,13 +34,25 @@
 
 package com.simsilica.lemur.style;
 
-import java.io.*;
-import java.util.*;
-import javax.script.*;
-
 import com.simsilica.lemur.GuiGlobals;
 
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -52,12 +64,10 @@ import java.net.URL;
  */
 public class StyleLoader {
 
-    private List<CompiledScript> api = new ArrayList<CompiledScript>();
-    private Map<CompiledScript, Object> sources = new HashMap<CompiledScript, Object>();
-    private ScriptEngine engine;
-    private Compilable compiler;
-    private Bindings bindings;
-    private Styles styles;
+    private final List<CompiledScript> api = new ArrayList<>();
+    private final Map<CompiledScript, Object> sources = new HashMap<>();
+    private final Compilable compiler;
+    private final Bindings bindings;
     private boolean initialized = false;
 
     public StyleLoader() {
@@ -70,9 +80,8 @@ public class StyleLoader {
     }
 
     public StyleLoader(GuiGlobals globals, Styles styles, Object... apiScripts) {
-        this.styles = styles;
         ScriptEngineManager factory = new ScriptEngineManager();
-        this.engine = factory.getEngineByName("groovy");
+        ScriptEngine engine = factory.getEngineByName("groovy");
         if (engine == null) {
             throw new RuntimeException("Groovy scripting engine not available.");
         }
@@ -105,8 +114,9 @@ public class StyleLoader {
 
     protected void compileApiResource(String s) throws ScriptException {
         InputStream rawIn = getClass().getResourceAsStream(s);
-        if (rawIn == null)
+        if (rawIn == null) {
             throw new ScriptException("Script resource not found for:" + s);
+        }
         Reader in = new InputStreamReader(rawIn);
         addApiScript(compiler.compile(in), "resource:" + s);
     }
@@ -144,9 +154,11 @@ public class StyleLoader {
             initializeApi();
         }
 
-        try {
-            Reader in = new InputStreamReader(getClass().getResourceAsStream(s));
-            CompiledScript script = compiler.compile(in);
+        try (InputStream in = getClass().getResourceAsStream(s)) {
+            if (in == null) {
+                throw new IllegalArgumentException("Error finding resource " + s);
+            }
+            CompiledScript script = compiler.compile(new InputStreamReader(in));
 
             int before = bindings.size();
             Object result = script.eval(bindings);
@@ -154,7 +166,7 @@ public class StyleLoader {
             if (before != bindings.size()) {
                 //log.warn( "Binding count increased executing:" + s + "  keys:" + bindings.keySet() );
             }
-        } catch (ScriptException e) {
+        } catch (ScriptException | IOException e) {
             throw new RuntimeException("Error running resource:" + s, e);
         }
     }

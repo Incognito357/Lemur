@@ -65,12 +65,6 @@ public abstract class GridModelWrapper<S, T> implements GridModel<T> {
     }
 
     @Override
-    public abstract T getCell(int row, int col, T existing);
-
-    @Override
-    public abstract void setCell(int row, int col, T value);
-
-    @Override
     public long getVersion() {
         return delegate.getVersion();
     }

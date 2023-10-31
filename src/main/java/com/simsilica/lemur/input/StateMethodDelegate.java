@@ -34,31 +34,31 @@
 
 package com.simsilica.lemur.input;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
 
 /**
- *  A convenience StateFunctionListener implementation that
- *  can call a method using reflection.  By default, the method
- *  is called on the "release" of a particular function, ie: when
- *  its state returns to Off.  Methods that take an InputState
- *  argument and are called by a StateMethodDelegate with the
- *  "takesArgument" parameter as 'true' will receive all events,
- *  POSTIVE, Negative, and Off.
+ * A convenience StateFunctionListener implementation that
+ * can call a method using reflection.  By default, the method
+ * is called on the "release" of a particular function, ie: when
+ * its state returns to Off.  Methods that take an InputState
+ * argument and are called by a StateMethodDelegate with the
+ * "takesArgument" parameter as 'true' will receive all events,
+ * POSTIVE, Negative, and Off.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class StateMethodDelegate implements StateFunctionListener {
 
-    private Object target;
-    private Method method;
-    private boolean takesArgument;
+    private final Object target;
+    private final Method method;
+    private final boolean takesArgument;
 
-    public StateMethodDelegate( Object target, String method ) {
+    public StateMethodDelegate(Object target, String method) {
         this(target, method, false);
     }
 
-    public StateMethodDelegate( Object target, String method, boolean takesArgument ) {
+    public StateMethodDelegate(Object target, String method, boolean takesArgument) {
         this.target = target;
         this.method = resolveMethod(target.getClass(), method, takesArgument);
         this.takesArgument = takesArgument;
@@ -72,36 +72,35 @@ public class StateMethodDelegate implements StateFunctionListener {
         return method.getName();
     }
 
-    @SuppressWarnings("unchecked")
-    protected static Method resolveMethod( Class targetClass, String name,
-                                           boolean takesArgument ) {
+    protected static Method resolveMethod(Class<?> targetClass, String name,
+                                          boolean takesArgument) {
         try {
-            if( takesArgument ) {
+            if (takesArgument) {
                 return targetClass.getMethod(name, InputState.class);
             } else {
                 return targetClass.getMethod(name);
             }
-        } catch( Exception e ) {
+        } catch (Exception e) {
             throw new RuntimeException("Error resolving delegate method:" + name, e);
         }
     }
 
     protected void callMethod(InputState state) {
         try {
-            if( takesArgument ) {
+            if (takesArgument) {
                 method.invoke(target, state);
             } else {
                 method.invoke(target);
             }
-        } catch( Exception e ) {
+        } catch (Exception e) {
             throw new RuntimeException("Error calling method:" + method, e);
         }
     }
 
-    public void valueChanged( FunctionId func, InputState value, double tpf ) {
+    public void valueChanged(FunctionId func, InputState value, double tpf) {
         // We only forward on the releases unless the "takesArgument" flag
         // is true and then we deliver everything
-        if( takesArgument || value == InputState.Off ) {
+        if (takesArgument || value == InputState.Off) {
             callMethod(value);
         }
     }

@@ -40,26 +40,26 @@ import com.jme3.texture.Texture;
 
 
 /**
- *  GuiMaterial wrapper for JME's default Unshaded material.
+ * GuiMaterial wrapper for JME's default Unshaded material.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class UnshadedMaterialAdapter implements GuiMaterial {
     private Material material;
     private ColorRGBA color;
     private Texture texture;
 
-    public UnshadedMaterialAdapter( Material mat ) {
+    public UnshadedMaterialAdapter(Material mat) {
         this.material = mat;
     }
 
     @Override
     public UnshadedMaterialAdapter clone() {
         try {
-            UnshadedMaterialAdapter result = (UnshadedMaterialAdapter)super.clone();
+            UnshadedMaterialAdapter result = (UnshadedMaterialAdapter) super.clone();
             result.material = material.clone();
             return result;
-        } catch( CloneNotSupportedException e ) {
+        } catch (CloneNotSupportedException e) {
             throw new RuntimeException("Error cloning", e);
         }
     }
@@ -68,9 +68,9 @@ public class UnshadedMaterialAdapter implements GuiMaterial {
         return false;
     }
 
-    public void setColor( ColorRGBA color ) {
+    public void setColor(ColorRGBA color) {
         this.color = color;
-        if( color == null ) {
+        if (color == null) {
             material.clearParam("Color");
         } else {
             material.setColor("Color", color);
@@ -81,9 +81,9 @@ public class UnshadedMaterialAdapter implements GuiMaterial {
         return color;
     }
 
-    public void setTexture( Texture t ) {
+    public void setTexture(Texture t) {
         this.texture = t;
-        if( texture == null ) {
+        if (texture == null) {
             material.clearParam("ColorMap");
         } else {
             material.setTexture("ColorMap", texture);

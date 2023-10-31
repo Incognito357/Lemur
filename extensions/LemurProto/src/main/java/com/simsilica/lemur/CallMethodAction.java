@@ -36,13 +36,13 @@
 
 package com.simsilica.lemur;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -107,7 +107,7 @@ public class CallMethodAction extends Action {
         return true;
     }
 
-    protected Object toParm(Button source, Class type) {
+    protected Object toParm(Button source, Class<?> type) {
         if (Button.class.isAssignableFrom(type)) {
             return source;
         }
@@ -136,10 +136,7 @@ public class CallMethodAction extends Action {
                 continue;
             }
             Class<?>[] parms = m.getParameterTypes();
-            if (parms.length > 2) {
-                continue;
-            }
-            if (!isValidArgumentList(parms)) {
+            if (parms.length > 2 || !isValidArgumentList(parms)) {
                 continue;
             }
 
@@ -213,7 +210,7 @@ public class CallMethodAction extends Action {
     @Override
     protected void appendFields(StringBuilder sb) {
         super.appendFields(sb);
-        sb.append(", methodName=").append(methodName);
-        sb.append(", object=").append(object);
+        sb.append(", methodName=").append(methodName)
+                .append(", object=").append(object);
     }
 }

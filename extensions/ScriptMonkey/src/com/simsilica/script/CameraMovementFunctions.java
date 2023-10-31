@@ -43,12 +43,12 @@ import com.simsilica.lemur.input.InputState;
 
 
 /**
- *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class CameraMovementFunctions {
 
-    private CameraMovementFunctions() {}
+    private CameraMovementFunctions() {
+    }
 
     public static final String GROUP_MOVEMENT = "Movement";
 
@@ -59,7 +59,7 @@ public class CameraMovementFunctions {
     public static final FunctionId F_STRAFE = new FunctionId(GROUP_MOVEMENT, "Strafe");
 
     public static final FunctionId F_ALTITUDE = new FunctionId(GROUP_MOVEMENT, "Altitude");
-    
+
     public static final FunctionId F_RUN = new FunctionId(GROUP_MOVEMENT, "Run");
 
     public static InputMapper.Mapping MOUSE_X_LOOK;
@@ -67,31 +67,30 @@ public class CameraMovementFunctions {
     public static InputMapper.Mapping JOY_X_LOOK;
     public static InputMapper.Mapping JOY_Y_LOOK;
 
-    public static void initializeDefaultMappings( InputMapper inputMapper )
-    {
+    public static void initializeDefaultMappings(InputMapper inputMapper) {
         // The joystick axes are backwards on game pads... forward
         // is negative.  So we'll flip it over in the mapping.
-        inputMapper.map( F_MOVE, InputState.Negative, Axis.JOYSTICK_LEFT_Y );
-        inputMapper.map( F_MOVE, KeyInput.KEY_W );
-        inputMapper.map( F_MOVE, InputState.Negative, KeyInput.KEY_S );
-        inputMapper.map( F_STRAFE, Axis.JOYSTICK_LEFT_X );
-        inputMapper.map( F_STRAFE, KeyInput.KEY_D );
-        inputMapper.map( F_STRAFE, InputState.Negative, KeyInput.KEY_A );
+        inputMapper.map(F_MOVE, InputState.Negative, Axis.JOYSTICK_LEFT_Y);
+        inputMapper.map(F_MOVE, KeyInput.KEY_W);
+        inputMapper.map(F_MOVE, InputState.Negative, KeyInput.KEY_S);
+        inputMapper.map(F_STRAFE, Axis.JOYSTICK_LEFT_X);
+        inputMapper.map(F_STRAFE, KeyInput.KEY_D);
+        inputMapper.map(F_STRAFE, InputState.Negative, KeyInput.KEY_A);
 
-        inputMapper.map( F_ALTITUDE, KeyInput.KEY_Q );
-        inputMapper.map( F_ALTITUDE, InputState.Negative, KeyInput.KEY_Z ); 
+        inputMapper.map(F_ALTITUDE, KeyInput.KEY_Q);
+        inputMapper.map(F_ALTITUDE, InputState.Negative, KeyInput.KEY_Z);
 
-        MOUSE_X_LOOK = inputMapper.map( F_X_LOOK, Axis.MOUSE_X );
-        JOY_X_LOOK = inputMapper.map( F_X_LOOK, Axis.JOYSTICK_RIGHT_X );
-        inputMapper.map( F_X_LOOK, KeyInput.KEY_RIGHT );
-        inputMapper.map( F_X_LOOK, InputState.Negative, KeyInput.KEY_LEFT );
+        MOUSE_X_LOOK = inputMapper.map(F_X_LOOK, Axis.MOUSE_X);
+        JOY_X_LOOK = inputMapper.map(F_X_LOOK, Axis.JOYSTICK_RIGHT_X);
+        inputMapper.map(F_X_LOOK, KeyInput.KEY_RIGHT);
+        inputMapper.map(F_X_LOOK, InputState.Negative, KeyInput.KEY_LEFT);
 
-        MOUSE_Y_LOOK = inputMapper.map( F_Y_LOOK, Axis.MOUSE_Y );
-        JOY_Y_LOOK = inputMapper.map( F_Y_LOOK, Axis.JOYSTICK_RIGHT_Y );
-        inputMapper.map( F_Y_LOOK, KeyInput.KEY_UP );
-        inputMapper.map( F_Y_LOOK, InputState.Negative, KeyInput.KEY_DOWN );
+        MOUSE_Y_LOOK = inputMapper.map(F_Y_LOOK, Axis.MOUSE_Y);
+        JOY_Y_LOOK = inputMapper.map(F_Y_LOOK, Axis.JOYSTICK_RIGHT_Y);
+        inputMapper.map(F_Y_LOOK, KeyInput.KEY_UP);
+        inputMapper.map(F_Y_LOOK, InputState.Negative, KeyInput.KEY_DOWN);
 
-        inputMapper.map( F_RUN, KeyInput.KEY_LSHIFT );
-        inputMapper.map( F_RUN, Button.JOYSTICK_RIGHT1 );
+        inputMapper.map(F_RUN, KeyInput.KEY_LSHIFT);
+        inputMapper.map(F_RUN, Button.JOYSTICK_RIGHT1);
     }
 }

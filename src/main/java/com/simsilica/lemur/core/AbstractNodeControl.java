@@ -42,39 +42,40 @@ import com.jme3.scene.control.AbstractControl;
 
 
 /**
- *  A default abstract implementation of a Control that
- *  will only allow attachment to a Node and provides a special
- *  getNode() method to subclasses.
+ * A default abstract implementation of a Control that
+ * will only allow attachment to a Node and provides a special
+ * getNode() method to subclasses.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public abstract class AbstractNodeControl extends AbstractControl {
     protected Node getNode() {
-        return (Node)getSpatial();
+        return (Node) getSpatial();
     }
 
     @Override
-    public void setSpatial( Spatial s ) {
-        if( s != null && !(s instanceof Node) )
-            throw new RuntimeException( "Node controls must be associated with Nodes or Node subclasses." );
+    public void setSpatial(Spatial s) {
+        if (s != null && !(s instanceof Node))
+            throw new RuntimeException("Node controls must be associated with Nodes or Node subclasses.");
 
-        if( getSpatial() != null ) {
+        if (getSpatial() != null) {
             detach();
         }
         super.setSpatial(s);
-        if( getSpatial() != null ) {
+        if (getSpatial() != null) {
             attach();
         }
     }
 
     protected abstract void attach();
+
     protected abstract void detach();
 
     @Override
-    protected void controlUpdate( float tpf ) {
+    protected void controlUpdate(float tpf) {
     }
 
     @Override
-    protected void controlRender( RenderManager rm, ViewPort vp ) {
+    protected void controlRender(RenderManager rm, ViewPort vp) {
     }
 }

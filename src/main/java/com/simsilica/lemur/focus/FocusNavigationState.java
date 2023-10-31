@@ -85,12 +85,10 @@ public class FocusNavigationState extends BaseAppState {
             return null;
         }
         FocusTraversal ft = getControl(s, FocusTraversal.class);
-        if (ft instanceof GuiControl) {
-            if (((GuiControl) ft).getLayout() == null) {
-                // It implements the interface but isn't really
-                // a container.
-                return null;
-            }
+        if (ft instanceof GuiControl && ((GuiControl) ft).getLayout() == null) {
+            // It implements the interface but isn't really
+            // a container.
+            return null;
         }
         return ft;
     }

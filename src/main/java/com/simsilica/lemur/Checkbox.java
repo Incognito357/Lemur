@@ -34,26 +34,23 @@
 
 package com.simsilica.lemur;
 
-import com.simsilica.lemur.style.StyleDefaults;
+import com.jme3.math.ColorRGBA;
+import com.simsilica.lemur.component.IconComponent;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.core.GuiComponent;
+import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.style.StyleAttribute;
+import com.simsilica.lemur.style.StyleDefaults;
 import com.simsilica.lemur.style.Styles;
-import com.simsilica.lemur.core.GuiComponent;
-import com.simsilica.lemur.core.VersionedReference;
-import com.simsilica.lemur.core.GuiControl;
-import com.simsilica.lemur.component.QuadBackgroundComponent;
-import com.simsilica.lemur.component.IconComponent;
-import com.jme3.math.ColorRGBA;
-
-import java.util.Collections;
 
 
 /**
- *  A standard Checkbox GUI element that can be used to toggle
- *  a boolean state represented by a CheckboxModel.
+ * A standard Checkbox GUI element that can be used to toggle
+ * a boolean state represented by a CheckboxModel.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Checkbox extends Button {
 
@@ -66,38 +63,38 @@ public class Checkbox extends Button {
     private GuiComponent onView;
     private GuiComponent offView;
 
-    public Checkbox( String s ) {
+    public Checkbox(String s) {
         this(s, null, true, new ElementId(ELEMENT_ID), null);
     }
 
-    public Checkbox( String s, String style ) {
+    public Checkbox(String s, String style) {
         this(s, null, true, new ElementId(ELEMENT_ID), style);
     }
 
-    public Checkbox( String s, ElementId elementId, String style ) {
+    public Checkbox(String s, ElementId elementId, String style) {
         this(s, null, true, elementId, style);
     }
-    
-    public Checkbox( String s, CheckboxModel model, ElementId elementId, String style ) {
+
+    public Checkbox(String s, CheckboxModel model, ElementId elementId, String style) {
         this(s, model, true, elementId, style);
     }
 
-    public Checkbox( String s, CheckboxModel model ) {
+    public Checkbox(String s, CheckboxModel model) {
         this(s, model, true, new ElementId(ELEMENT_ID), null);
     }
 
-    public Checkbox( String s, CheckboxModel model, String style ) {
+    public Checkbox(String s, CheckboxModel model, String style) {
         this(s, model, true, new ElementId(ELEMENT_ID), style);
     }
 
-    protected Checkbox( String s, CheckboxModel model, boolean applyStyles,
-                        ElementId elementId, String style ) {
+    protected Checkbox(String s, CheckboxModel model, boolean applyStyles,
+                       ElementId elementId, String style) {
         super(s, false, elementId, style);
 
         setModel(model == null ? new DefaultCheckboxModel() : model);
 
         Styles styles = GuiGlobals.getInstance().getStyles();
-        if( applyStyles ) {
+        if (applyStyles) {
             styles.applyStyles(this, elementId, style);
         }
 
@@ -109,21 +106,21 @@ public class Checkbox extends Button {
     }
 
     @StyleDefaults(ELEMENT_ID)
-    public static void initializeDefaultStyles( Attributes attrs ) {
+    public static void initializeDefaultStyles(Attributes attrs) {
         IconComponent on = new IconComponent("/com/simsilica/lemur/icons/Check.png", 1.2f,
-                                   2, 2, 0.01f, false);
+                2, 2, 0.01f, false);
         IconComponent off = new IconComponent("/com/simsilica/lemur/icons/Check.png", 1.2f,
-                                   2, 2, 0.01f, false);
-        off.setColor(new ColorRGBA(0,0,0,0));
+                2, 2, 0.01f, false);
+        off.setColor(new ColorRGBA(0, 0, 0, 0));
 
-        attrs.set("background", new QuadBackgroundComponent( new ColorRGBA(0,0,0,0) ), false);
+        attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0, 0, 0, 0)), false);
         attrs.set("onView", on, false);
         attrs.set("offView", off, false);
         attrs.set("textVAlignment", VAlignment.Center, false);
     }
 
-    public void setModel( CheckboxModel model ) {
-        if( this.model == model )
+    public void setModel(CheckboxModel model) {
+        if (this.model == model)
             return;
         this.model = model;
         this.state = model.createReference();
@@ -134,7 +131,7 @@ public class Checkbox extends Button {
         return model;
     }
 
-    protected void setStateView( GuiComponent c ) { 
+    protected void setStateView(GuiComponent c) {
         setIcon(c);
     }
 
@@ -145,24 +142,24 @@ public class Checkbox extends Button {
     @Override
     public void updateLogicalState(float tpf) {
         super.updateLogicalState(tpf);
-        if( state.update() ) {
+        if (state.update()) {
             resetStateView();
         }
     }
 
-    public void setChecked( boolean b ) {
+    public void setChecked(boolean b) {
         getModel().setChecked(b);
     }
 
     public boolean isChecked() {
-        if( getModel() == null )
+        if (getModel() == null)
             return false;
         return getModel().isChecked();
     }
 
-    @StyleAttribute(value="onView", lookupDefault=false)
-    public void setOnView( GuiComponent c ) {
-        if( this.onView == c )
+    @StyleAttribute(value = "onView", lookupDefault = false)
+    public void setOnView(GuiComponent c) {
+        if (this.onView == c)
             return;
 
         this.onView = c.clone();
@@ -173,9 +170,9 @@ public class Checkbox extends Button {
         return onView;
     }
 
-    @StyleAttribute(value="offView", lookupDefault=false)
-    public void setOffView( GuiComponent c ) {
-        if( this.onView == c )
+    @StyleAttribute(value = "offView", lookupDefault = false)
+    public void setOffView(GuiComponent c) {
+        if (this.onView == c)
             return;
 
         this.offView = c.clone();
@@ -193,9 +190,9 @@ public class Checkbox extends Button {
 
     protected static class ToggleCommand implements Command<Button> {
 
-        public void execute( Button source ) {
-            if( source instanceof Checkbox ) {
-                Checkbox cb = (Checkbox)source;
+        public void execute(Button source) {
+            if (source instanceof Checkbox) {
+                Checkbox cb = (Checkbox) source;
                 cb.setChecked(!cb.isChecked());
             }
         }

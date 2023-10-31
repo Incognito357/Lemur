@@ -471,7 +471,8 @@ public class DefaultDocumentModel implements DocumentModel, Cloneable {
         private int value;
         private long version;
 
-        public Carat() {}
+        public Carat() {
+        }
 
         public Carat(Carat other) {
             this.value = other.value;

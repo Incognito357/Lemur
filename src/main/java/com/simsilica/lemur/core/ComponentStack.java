@@ -79,7 +79,6 @@ import java.util.Objects;
  */
 public class ComponentStack extends AbstractList<GuiComponent> {
 
-    private static final Logger log = LoggerFactory.getLogger(ComponentStack.class);
     /**
      * The "materialized" list of actual components.  This
      * is rebuild from the index + top list whenever a new component
@@ -219,7 +218,7 @@ public class ComponentStack extends AbstractList<GuiComponent> {
     /**
      * Sets the specified component to the specified layer and
      * returns the specified component.  Note: this is different
-     * than java.util.List.set() behavior where it would return the
+     * from java.util.List.set() behavior where it would return the
      * previous value.
      */
     public <T extends GuiComponent> T setComponent(String layer, T c) {

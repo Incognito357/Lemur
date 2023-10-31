@@ -177,6 +177,7 @@ public class GridPanel extends Panel {
         setVisibleSize(visibleRows, columns);
     }
 
+    @Override
     public void setAlpha(float alpha, boolean recursive) {
         this.alpha = alpha;
         super.setAlpha(alpha, recursive);

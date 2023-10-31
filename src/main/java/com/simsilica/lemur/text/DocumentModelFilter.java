@@ -39,7 +39,6 @@ package com.simsilica.lemur.text;
 import com.simsilica.lemur.core.VersionedReference;
 
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -57,8 +56,8 @@ import java.util.function.UnaryOperator;
 public class DocumentModelFilter implements DocumentModel {
 
     private final DocumentModel delegate;
-    private Function<Character, Character> inputTransform;
-    private Function<String, String> outputTransform;
+    private UnaryOperator<Character> inputTransform;
+    private UnaryOperator<String> outputTransform;
     private String lastOutput = null;
     private String lastTransformedOutput = null;
     private long version;
@@ -92,7 +91,7 @@ public class DocumentModelFilter implements DocumentModel {
         return delegate;
     }
 
-    public Function<String, String> getOutputTransform() {
+    public UnaryOperator<String> getOutputTransform() {
         return outputTransform;
     }
 
@@ -113,7 +112,7 @@ public class DocumentModelFilter implements DocumentModel {
         version++;
     }
 
-    public Function<Character, Character> getInputTransform() {
+    public UnaryOperator<Character> getInputTransform() {
         return inputTransform;
     }
 

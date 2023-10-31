@@ -57,7 +57,7 @@ import java.util.Map;
  */
 public class EffectControl<T extends Spatial> extends AbstractControl {
 
-    private final Map<String, Effect<? super T>> effects = new HashMap<>();
+    private final Map<String, Effect<T>> effects = new HashMap<>();
     private final Map<String, EffectInfo> channels = new HashMap<>();
     private AnimationState state;
 
@@ -97,7 +97,7 @@ public class EffectControl<T extends Spatial> extends AbstractControl {
         return state;
     }
 
-    public void addEffect(String name, Effect<? super T> effect) {
+    public void addEffect(String name, Effect<T> effect) {
         effects.put(name, effect);
     }
 
@@ -105,11 +105,11 @@ public class EffectControl<T extends Spatial> extends AbstractControl {
         return effects.containsKey(name);
     }
 
-    public Effect<? super T> removeEffect(String name) {
+    public Effect<T> removeEffect(String name) {
         return effects.remove(name);
     }
 
-    public Map<String, Effect<? super T>> getEffects() {
+    public Map<String, Effect<T>> getEffects() {
         return effects;
     }
 
@@ -122,7 +122,7 @@ public class EffectControl<T extends Spatial> extends AbstractControl {
             return null;
         }
 
-        Effect<? super T> e = effects.get(name);
+        Effect<T> e = effects.get(name);
         if (e == null) {
             return null;
         }
@@ -135,8 +135,8 @@ public class EffectControl<T extends Spatial> extends AbstractControl {
 
         Animation a = e.create(getSpatial(), existing);
 
-        // If we want to fast forward and we are a different effect
-        // Then see if these are animations that we can use to fast forward
+        // If we want to fast-forward, and we are a different effect,
+        // then see if these are animations that we can use to fast-forward
         if (fastForward && existing != null && e != existing.getEffect() &&
                 a instanceof TweenAnimation && existing.getAnimation() instanceof TweenAnimation) {
             TweenAnimation aFrom = (TweenAnimation) existing.getAnimation();
@@ -145,7 +145,7 @@ public class EffectControl<T extends Spatial> extends AbstractControl {
 
         }
 
-        // If there was an existing channel animation the always cancel it
+        // If there was an existing channel animation then always cancel it
         if (existing != null) {
             anim().cancel(existing.getAnimation());
         }

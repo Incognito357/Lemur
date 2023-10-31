@@ -44,7 +44,6 @@ import com.jme3.texture.Image;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.image.ImageRaster;
 import com.jme3.util.BufferUtils;
-import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.IconComponent;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.SpringGridLayout;
@@ -90,17 +89,13 @@ public class ColorChooser extends Panel {
 
     private VersionedObject<ColorRGBA> model;
     private VersionedReference<ColorRGBA> modelRef;
-    private Texture2D swatchTexture;
 
-    private Panel value;
-    private Container colorPanel;
-    private Panel colors;
-    private Panel crosshair;
-    private Vector3f crosshairOffset;
-    private QuadBackgroundComponent valueColor = new QuadBackgroundComponent();
-    private QuadBackgroundComponent swatchComponent;
-    private Slider brightness;
-    private VersionedReference brightnessRef;
+    private final Panel colors;
+    private final Panel crosshair;
+    private final Vector3f crosshairOffset;
+    private final QuadBackgroundComponent valueColor = new QuadBackgroundComponent();
+    private final Slider brightness;
+    private final VersionedReference<Double> brightnessRef;
 
     private float hIndex = 0;
     private float sIndex = 0;
@@ -126,16 +121,14 @@ public class ColorChooser extends Panel {
                            ElementId elementId, String style) {
         super(false, elementId.child(CONTAINER_ID), style);
 
-        this.swatchTexture = defaultTexture;
-
         SpringGridLayout layout = new SpringGridLayout();
         getControl(GuiControl.class).setLayout(layout);
 
-        colorPanel = new Container(elementId.child(COLORS_ID), style);
+        Container colorPanel = new Container(elementId.child(COLORS_ID), style);
         colorPanel.setLayout(new SpringGridLayout());
         colors = new Panel();
         colorPanel.addChild(colors);
-        this.swatchComponent = new QuadBackgroundComponent(swatchTexture);
+        QuadBackgroundComponent swatchComponent = new QuadBackgroundComponent(defaultTexture);
         CursorEventControl.addListenersToSpatial(colors, new SwatchListener());
         colors.setBackground(swatchComponent);
         colors.setPreferredSize(new Vector3f(256, 64, 0));
@@ -145,7 +138,7 @@ public class ColorChooser extends Panel {
         layout.addChild(brightness, 1);
         brightnessRef = brightness.getModel().createReference();
 
-        value = new Panel(elementId.child(VALUE_ID), style);
+        Panel value = new Panel(elementId.child(VALUE_ID), style);
         value.setPreferredSize(new Vector3f(64, 64, 0));
         value.setBackground(valueColor);
         layout.addChild(value, 0);
@@ -236,7 +229,6 @@ public class ColorChooser extends Panel {
     }
 
     protected void updateColorView() {
-
         ColorRGBA c = model.getObject();
 
         int r = Math.round(c.getRed() * 255);
@@ -252,7 +244,6 @@ public class ColorChooser extends Panel {
     }
 
     protected void updateColorView(float h, float s, float v) {
-
         Color awtColor = Color.getHSBColor(h, s, v);
         valueColor.setColor(toJmeColor(awtColor));
 

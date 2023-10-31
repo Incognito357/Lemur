@@ -50,8 +50,7 @@ import com.simsilica.script.SelectionState;
 
 
 /**
- *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class SelectionIndicator extends AbstractControl {
 
@@ -60,38 +59,38 @@ public class SelectionIndicator extends AbstractControl {
     private ColorRGBA color;
     private Node indicator;
 
-    public SelectionIndicator( Node root, ColorRGBA color ) {
+    public SelectionIndicator(Node root, ColorRGBA color) {
         this.root = root;
         this.color = color;
     }
-    
+
     @Override
-    public void setSpatial( Spatial s ) {
+    public void setSpatial(Spatial s) {
         super.setSpatial(s);
-    
-        if( s == null && indicator != null ) {
+
+        if (s == null && indicator != null) {
             indicator.removeFromParent();
             indicator = null;
         } else {
             setupIndicator();
-        }       
-    } 
+        }
+    }
 
-    protected Geometry cloneGeometry( Geometry geom ) {
+    protected Geometry cloneGeometry(Geometry geom) {
         // We don't really clone because 1) we are likely to
         // be a control in that hierarchy and that's weird, 2)
         // we don't want to clone the controls, 3) it gives us
         // a chance to give the geometry a better non-lookup-confusing
         // and finally, 4) we only need the mesh anyway.
-        Geometry copy = new Geometry( "Indicator:" + geom.getName() );
+        Geometry copy = new Geometry("Indicator:" + geom.getName());
         copy.setUserData(SelectionState.UD_IGNORE, true);
         copy.setMesh(geom.getMesh());
-        copy.setMaterial(material);    
+        copy.setMaterial(material);
         copyTransforms(copy, geom);
         return copy;
     }
 
-    protected void copyTransforms( Geometry copy, Geometry original ) {
+    protected void copyTransforms(Geometry copy, Geometry original) {
         // For now we will assume the root is the actual
         // world root so that the math is easier.
         copy.setLocalTranslation(original.getWorldTranslation());
@@ -103,29 +102,29 @@ public class SelectionIndicator extends AbstractControl {
         indicator = new Node("Indicator");
         indicator.setQueueBucket(Bucket.Translucent);
         root.attachChild(indicator);
-        
+
         // Just in case the root node has been moved
         indicator.setLocalTranslation(root.getLocalTranslation().negate());
         indicator.setLocalRotation(root.getLocalRotation().inverse());
-        
+
         // Setup the indicator material
         this.material = GuiGlobals.getInstance().createMaterial(color, false).getMaterial();
         material.getAdditionalRenderState().setWireframe(true);
         material.getAdditionalRenderState().setDepthFunc(TestFunction.Always);
-        
+
         // Find all of the geometry children of our spatial
-        spatial.depthFirstTraversal( new SceneGraphVisitorAdapter() {
-                @Override
-                public void visit( Geometry geom ) {
-                    // Make a copy of it
-                    Geometry copy = cloneGeometry(geom);
-                    indicator.attachChild(copy);
-                }
-            });        
+        spatial.depthFirstTraversal(new SceneGraphVisitorAdapter() {
+            @Override
+            public void visit(Geometry geom) {
+                // Make a copy of it
+                Geometry copy = cloneGeometry(geom);
+                indicator.attachChild(copy);
+            }
+        });
     }
 
     @Override
-    protected void controlUpdate(float f) {        
+    protected void controlUpdate(float f) {
     }
 
     @Override

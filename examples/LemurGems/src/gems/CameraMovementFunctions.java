@@ -71,6 +71,7 @@ public class CameraMovementFunctions {
     public static InputMapper.Mapping MOUSE_Y_LOOK;
     public static InputMapper.Mapping JOY_X_LOOK;
     public static InputMapper.Mapping JOY_Y_LOOK;
+
     private CameraMovementFunctions() {
     }
 

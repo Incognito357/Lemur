@@ -34,31 +34,30 @@
 
 package com.simsilica.lemur;
 
-import com.simsilica.lemur.style.StyleDefaults;
-import com.simsilica.lemur.style.Attributes;
-import com.simsilica.lemur.style.ElementId;
-import com.simsilica.lemur.style.Styles;
-import com.simsilica.lemur.core.VersionedReference;
-import com.simsilica.lemur.core.GuiControl;
 import com.jme3.input.MouseInput;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
-
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.core.AbstractGuiControlListener;
+import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.CursorMotionEvent;
 import com.simsilica.lemur.event.DefaultCursorListener;
+import com.simsilica.lemur.style.Attributes;
+import com.simsilica.lemur.style.ElementId;
+import com.simsilica.lemur.style.StyleDefaults;
+import com.simsilica.lemur.style.Styles;
 
 
 /**
- *  A composite GUI element consisting of a draggable slider
- *  with increment and decrement buttons at each end.  The slider
- *  value is managed by a RangedValueModel.
+ * A composite GUI element consisting of a draggable slider
+ * with increment and decrement buttons at each end.  The slider
+ * value is managed by a RangedValueModel.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Slider extends Panel {
 
@@ -76,12 +75,12 @@ public class Slider extends Panel {
     public static final String THUMB_ID = "thumb.button";
     public static final String RANGE_ID = "range";
 
-    private BorderLayout layout;
-    private Axis axis;
+    private final BorderLayout layout;
+    private final Axis axis;
     private Button increment;
     private Button decrement;
-    private Panel  range;
-    private Button thumb;
+    private Panel range;
+    private final Button thumb;
 
     private RangedValueModel model;
     private double delta = 1.0f;
@@ -119,24 +118,24 @@ public class Slider extends Panel {
         this(new DefaultRangedValueModel(), axis, true, new ElementId(ELEMENT_ID), style);
     }
 
-    public Slider( RangedValueModel model, String style ) {
+    public Slider(RangedValueModel model, String style) {
         this(model, Axis.X, true, new ElementId(ELEMENT_ID), style);
     }
 
-    public Slider( RangedValueModel model, ElementId elementId ) {
+    public Slider(RangedValueModel model, ElementId elementId) {
         this(model, Axis.X, true, elementId, null);
     }
 
-    public Slider( RangedValueModel model, Axis axis, String style ) {
+    public Slider(RangedValueModel model, Axis axis, String style) {
         this(model, axis, true, new ElementId(ELEMENT_ID), style);
     }
 
-    public Slider( RangedValueModel model, Axis axis, ElementId elementId, String style ) {
+    public Slider(RangedValueModel model, Axis axis, ElementId elementId, String style) {
         this(model, axis, true, elementId, style);
     }
 
-    protected Slider( RangedValueModel model, Axis axis, boolean applyStyles,
-                      ElementId elementId, String style ) {
+    protected Slider(RangedValueModel model, Axis axis, boolean applyStyles,
+                     ElementId elementId, String style) {
         super(false, elementId, style);
 
         // Because the slider accesses styles (for its children) before
@@ -152,19 +151,19 @@ public class Slider extends Panel {
 
         this.model = model;
 
-        switch( axis ) {
+        switch (axis) {
             case X:
                 increment = layout.addChild(BorderLayout.Position.East,
-                                            new Button(null, true, elementId.child(RIGHT_ID), style));                
+                        new Button(null, true, elementId.child(RIGHT_ID), style));
                 decrement = layout.addChild(BorderLayout.Position.West,
-                                            new Button(null, true, elementId.child(LEFT_ID), style));                
+                        new Button(null, true, elementId.child(LEFT_ID), style));
                 range = layout.addChild(new Panel(true, 50, 2, elementId.child(RANGE_ID), style));
                 break;
             case Y:
                 increment = layout.addChild(BorderLayout.Position.North,
-                                            new Button(null, true, elementId.child(UP_ID), style));
+                        new Button(null, true, elementId.child(UP_ID), style));
                 decrement = layout.addChild(BorderLayout.Position.South,
-                                            new Button(null, true, elementId.child(DOWN_ID), style));
+                        new Button(null, true, elementId.child(DOWN_ID), style));
                 range = layout.addChild(new Panel(true, 2, 50, elementId.child(RANGE_ID), style));
                 break;
             case Z:
@@ -181,18 +180,18 @@ public class Slider extends Panel {
         // out... so we will force it to be its own preferred size.
         thumb.getControl(GuiControl.class).setSize(thumb.getControl(GuiControl.class).getPreferredSize());
 
-        if( applyStyles ) {
+        if (applyStyles) {
             styles.applyStyles(this, elementId, style);
         }
     }
-    @SuppressWarnings("unchecked") // because Java doesn't like var-arg generics
+
     protected final void setupCommands() {
         increment.addClickCommand(new ChangeValueCommand(1));
         decrement.addClickCommand(new ChangeValueCommand(-1));
     }
 
     @StyleDefaults(ELEMENT_ID)
-    public static void initializeDefaultStyles( Styles styles, Attributes attrs ) {
+    public static void initializeDefaultStyles(Styles styles, Attributes attrs) {
         ElementId parent = new ElementId(ELEMENT_ID);
         styles.getSelector(parent.child(UP_ID), null).set("text", "^", false);
         styles.getSelector(parent.child(DOWN_ID), null).set("text", "v", false);
@@ -201,8 +200,8 @@ public class Slider extends Panel {
         styles.getSelector(parent.child(THUMB_ID), null).set("text", "#", false);
     }
 
-    public void setModel( RangedValueModel model ) {
-        if( this.model == model )
+    public void setModel(RangedValueModel model) {
+        if (this.model == model)
             return;
         this.model = model;
         this.state = null;
@@ -212,7 +211,7 @@ public class Slider extends Panel {
         return model;
     }
 
-    public void setDelta( double delta ) {
+    public void setDelta(double delta) {
         this.delta = delta;
     }
 
@@ -235,57 +234,55 @@ public class Slider extends Panel {
     public Button getThumbButton() {
         return thumb;
     }
-    
-    /**
-     *  Returns the slider range value for the specified location
-     *  in the slider's local coordinate system.  (For example,
-     *  for world space location use slider.worldToLocal() first.)
-     */
-    public double getValueForLocation( Vector3f loc ) {
 
+    /**
+     * Returns the slider range value for the specified location
+     * in the slider's local coordinate system.  (For example,
+     * for world space location use slider.worldToLocal() first.)
+     */
+    public double getValueForLocation(Vector3f loc) {
         Vector3f relative = loc.subtract(range.getLocalTranslation());
 
-        // Components always grow down from their location
-        // so we'll invert y
+        // Components always grow down from their location, so we'll invert y
         relative.y *= -1;
-                
+
         Vector3f axisDir = axis.getDirection();
         double projection = relative.dot(axisDir);
-        if( projection < 0 ) {
-            if( axis == Axis.Y ) {
+        if (projection < 0) {
+            if (axis == Axis.Y) {
                 return model.getMaximum();
             } else {
                 return model.getMinimum();
             }
         }
-        
+
         Vector3f rangeSize = range.getSize().clone();
-         
+
         double rangeLength = rangeSize.dot(axisDir);
         projection = Math.min(projection, rangeLength);
-        double part = projection / rangeLength;       
+        double part = projection / rangeLength;
         double rangeDelta = model.getMaximum() - model.getMinimum();
-        
+
         // For the y-axis, the slider is inverted from the direction
         // that the component's grow... so our part is backwards
-        if( axis == Axis.Y ) {
+        if (axis == Axis.Y) {
             part = 1 - part;
         }
- 
-        return model.getMinimum() + rangeDelta * part;        
+
+        return model.getMinimum() + rangeDelta * part;
     }
 
     @Override
     public void updateLogicalState(float tpf) {
         super.updateLogicalState(tpf);
 
-        if( state == null || state.update() ) {
+        if (state == null || state.update()) {
             resetStateView();
         }
     }
 
     protected void resetStateView() {
-        if( state == null ) {
+        if (state == null) {
             state = model.createReference();
         }
 
@@ -298,7 +295,7 @@ public class Slider extends Panel {
         double x;
         double y;
 
-        switch( axis ) {
+        switch (axis) {
             case X:
                 visibleRange = rangeSize.x - thumbSize.x;
 
@@ -308,9 +305,9 @@ public class Slider extends Panel {
 
                 // We cheated and included the half-thumb spacing in x already which
                 // is why this is axis-specific.
-                thumb.setLocalTranslation((float)x,
-                                          (float)(y + thumbSize.y * 0.5),
-                                          pos.z + size.z);
+                thumb.setLocalTranslation((float) x,
+                        (float) (y + thumbSize.y * 0.5),
+                        pos.z + size.z);
                 break;
             case Y:
                 visibleRange = rangeSize.y - thumbSize.y;
@@ -319,51 +316,49 @@ public class Slider extends Panel {
                 x = pos.x + rangeSize.x * 0.5;
                 y = pos.y - rangeSize.y + (visibleRange * model.getPercent());
 
-                thumb.setLocalTranslation((float)(x - thumbSize.x * 0.5),
-                                          (float)(y + thumbSize.y),
-                                          pos.z + size.z );
+                thumb.setLocalTranslation((float) (x - thumbSize.x * 0.5),
+                        (float) (y + thumbSize.y),
+                        pos.z + size.z);
+                break;
+            default:
                 break;
         }
 
     }
 
     private class ChangeValueCommand implements Command<Button> {
+        private final double scale;
 
-        private double scale;
-
-        public ChangeValueCommand( double scale ) {
+        public ChangeValueCommand(double scale) {
             this.scale = scale;
         }
 
-        public void execute( Button source ) {
+        public void execute(Button source) {
             model.setValue(model.getValue() + delta * scale);
         }
     }
 
     private class ReshapeListener extends AbstractGuiControlListener {
         @Override
-        public void reshape( GuiControl source, Vector3f pos, Vector3f size ) {
+        public void reshape(GuiControl source, Vector3f pos, Vector3f size) {
             // Make sure the thumb is positioned appropriately
             // for the new size
-            resetStateView();   
+            resetStateView();
         }
     }
 
     private class ButtonDragger extends DefaultCursorListener {
-
         private Vector2f drag = null;
         private double startPercent;
 
         @Override
-        public void cursorButtonEvent( CursorButtonEvent event, Spatial target, Spatial capture ) {
-            if( event.getButtonIndex() != MouseInput.BUTTON_LEFT )
+        public void cursorButtonEvent(CursorButtonEvent event, Spatial target, Spatial capture) {
+            if (event.getButtonIndex() != MouseInput.BUTTON_LEFT) {
                 return;
-
-            //if( capture != null && capture != target )
-            //    return;
+            }
 
             event.setConsumed();
-            if( event.isPressed() ) {
+            if (event.isPressed()) {
                 drag = new Vector2f(event.getX(), event.getY());
                 startPercent = model.getPercent();
             } else {
@@ -373,9 +368,10 @@ public class Slider extends Panel {
         }
 
         @Override
-        public void cursorMoved( CursorMotionEvent event, Spatial target, Spatial capture ) {
-            if( drag == null )
+        public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
+            if (drag == null) {
                 return;
+            }
 
             // Need to figure out how our mouse motion projects
             // onto the slider axis.  Easiest way is to project
@@ -383,27 +379,29 @@ public class Slider extends Panel {
             // against which we can do dot products.
             Vector3f v1 = null;
             Vector3f v2 = null;
-            switch( axis ) {
+            switch (axis) {
                 case X:
-                    v1 = new Vector3f(thumb.getSize().x*0.5f,0,0);
-                    v2 = v1.add(range.getSize().x - thumb.getSize().x*0.5f, 0, 0);
+                    v1 = new Vector3f(thumb.getSize().x * 0.5f, 0, 0);
+                    v2 = v1.add(range.getSize().x - thumb.getSize().x * 0.5f, 0, 0);
                     break;
                 case Y:
-                    v1 = new Vector3f(0,thumb.getSize().y*0.5f,0);
-                    v2 = v1.add(0, (range.getSize().y - thumb.getSize().y*0.5f), 0);
+                    v1 = new Vector3f(0, thumb.getSize().y * 0.5f, 0);
+                    v2 = v1.add(0, (range.getSize().y - thumb.getSize().y * 0.5f), 0);
+                    break;
+                default:
                     break;
             }
-                        
+
             v1 = event.getRelativeViewCoordinates(range, v1);
             v2 = event.getRelativeViewCoordinates(range, v2);
 
             Vector3f dir = v2.subtract(v1);
             float length = dir.length();
-            dir.multLocal(1/length);
+            dir.multLocal(1 / length);
             Vector3f cursorDir = new Vector3f(event.getX() - drag.x, event.getY() - drag.y, 0);
 
             float dot = cursorDir.dot(dir);
-            
+
             // Now, the actual amount is then dot/length
             float percent = dot / length;
             model.setPercent(startPercent + percent);

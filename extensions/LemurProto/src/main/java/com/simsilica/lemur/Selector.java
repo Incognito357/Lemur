@@ -42,6 +42,7 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.core.AbstractGuiControlListener;
 import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.core.GuiUpdateListener;
 import com.simsilica.lemur.core.VersionedHolder;
 import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.core.VersionedReference;
@@ -65,97 +66,92 @@ import java.util.function.Function;
 
 
 /**
- *  A GUI element that presents a value and a drop down for selecting
- *  a different value.
+ * A GUI element that presents a value and a dropdown for selecting
+ * a different value.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class Selector<T> extends Panel {
 
-    static Logger log = LoggerFactory.getLogger(Selector.class);
+    private static final Logger log = LoggerFactory.getLogger(Selector.class);
 
     public static final String ELEMENT_ID = "selector";
     public static final String CONTAINER_ID = "container";
     public static final String EXPANDER_ID = "down.button";
 
-    private BorderLayout layout;
+    private final BorderLayout layout;
 
     private ValueRenderer<T> valueRenderer;
-    private ListBox<T> listBox;
+    private final ListBox<T> listBox;
     private Panel view;
-    private Button expander;
-    private Container popup; // because it won't look good with the default list background
+    private final Button expander;
+    private final Container popup; // because it won't look good with the default list background
 
-    private ClickListener clickListener = new ClickListener();
-    private SelectListener selectListener = new SelectListener();
-    private ReshapeListener reshapeListener = new ReshapeListener();
-    private AutoCloseListener autoCloseListener = new AutoCloseListener(); 
+    private final ClickListener clickListener = new ClickListener();
+    private final SelectListener selectListener = new SelectListener();
+    private final ReshapeListener reshapeListener = new ReshapeListener();
+    private final AutoCloseListener autoCloseListener = new AutoCloseListener();
 
     private boolean expanded;
     private int maximumVisibleItems;
     private long expandedFrames;
 
     private VersionedReference<Integer> selectionRef;
-    private VersionedHolder<T> selectedItem = new VersionedHolder<>();
+    private final VersionedHolder<T> selectedItem = new VersionedHolder<>();
     private VersionedReference<List<T>> modelRef;
 
     public Selector() {
-        this(true, new VersionedList<T>(), null,
-             new SelectionModel(),
-             new ElementId(ELEMENT_ID), null);
+        this(true, new VersionedList<>(), null, new SelectionModel(), new ElementId(ELEMENT_ID), null);
     }
 
-    public Selector( VersionedList<T> model ) {
-        this(true, model, null,
+    public Selector(VersionedList<T> model) {
+        this(true, model, null, new SelectionModel(), new ElementId(ELEMENT_ID), null);
+    }
+
+    public Selector(VersionedList<T> model, Function<? super T, String> stringTransform) {
+        this(true, model, new DefaultValueRenderer<>(new ElementId(ELEMENT_ID).child("item"), null, stringTransform),
                 new SelectionModel(), new ElementId(ELEMENT_ID), null);
     }
 
-    public Selector( VersionedList<T> model, Function<? super T, String> stringTransform ) {
-        this(true, model,
-                new DefaultValueRenderer<T>(new ElementId(ELEMENT_ID).child("item"), null, stringTransform),
-                new SelectionModel(), new ElementId(ELEMENT_ID), null);
-    }
-
-    public Selector( VersionedList<T> model, ValueRenderer<T> renderer ) {
+    public Selector(VersionedList<T> model, ValueRenderer<T> renderer) {
         this(true, model, renderer, new SelectionModel(), new ElementId(ELEMENT_ID), null);
     }
 
-    public Selector( VersionedList<T> model, ValueRenderer<T> renderer, String style ) {
+    public Selector(VersionedList<T> model, ValueRenderer<T> renderer, String style) {
         this(true, model, renderer, new SelectionModel(), new ElementId(ELEMENT_ID), style);
     }
 
-    public Selector( VersionedList<T> model, String style ) {
+    public Selector(VersionedList<T> model, String style) {
         this(true, model, null, new SelectionModel(), new ElementId(ELEMENT_ID), style);
     }
 
-    public Selector( VersionedList<T> model, ElementId elementId ) {
+    public Selector(VersionedList<T> model, ElementId elementId) {
         this(true, model, null, new SelectionModel(), elementId, null);
     }
 
-    public Selector( VersionedList<T> model, ElementId elementId, String style ) {
+    public Selector(VersionedList<T> model, ElementId elementId, String style) {
         this(true, model, null, new SelectionModel(), elementId, style);
     }
 
-    public Selector( VersionedList<T> model, ValueRenderer<T> renderer, ElementId elementId, String style ) {
+    public Selector(VersionedList<T> model, ValueRenderer<T> renderer, ElementId elementId, String style) {
         this(true, model, renderer, new SelectionModel(), elementId, style);
     }
 
-    @SuppressWarnings("unchecked") // because Java doesn't like var-arg generics
-    protected Selector( boolean applyStyles, VersionedList<T> model, ValueRenderer<T> valueRenderer,
-                        SelectionModel selection, ElementId elementId, String style ) {
+    protected Selector(boolean applyStyles, VersionedList<T> model, ValueRenderer<T> valueRenderer,
+                       SelectionModel selection, ElementId elementId, String style) {
         super(false, elementId.child(CONTAINER_ID), style);
 
-        // For now we will internally use a ListBox for the drop down part.
+        // For now, we will internally use a ListBox for the dropdown part.
         // I think any problems we have with this are actually ListBox problems
         // and so may work themselves out in the end.  For example, it would be
         // nice to have a scroll bar only when required.
 
         // We create it here to share it with the ListBox because we will
         // need to render the element for display.
-        if( valueRenderer == null ) {
+        if (valueRenderer == null) {
             // Create a default one
             valueRenderer = new DefaultValueRenderer<>(elementId.child("item"), style);
-        } else  {
+        } else {
             valueRenderer.configureStyle(elementId.child("item"), style);
         }
         this.valueRenderer = valueRenderer;
@@ -173,7 +169,7 @@ public class Selector<T> extends Panel {
 
         // Apply styles before creating children to make sure the
         // default styles are applied first.
-        if( applyStyles ) {
+        if (applyStyles) {
             Styles styles = GuiGlobals.getInstance().getStyles();
             styles.applyStyles(this, getElementId(), style);
         }
@@ -191,7 +187,7 @@ public class Selector<T> extends Panel {
     }
 
     @StyleDefaults(ELEMENT_ID)
-    public static void initializeDefaultStyles( Styles styles, Attributes attrs ) {
+    public static void initializeDefaultStyles(Styles styles, Attributes attrs) {
         ElementId parent = new ElementId(ELEMENT_ID);
         styles.getSelector(parent.child(EXPANDER_ID), null).set("text", "v", false);
     }
@@ -200,13 +196,13 @@ public class Selector<T> extends Panel {
         return listBox.getModel();
     }
 
-    public void setModel( VersionedList<T> model ) {
+    public void setModel(VersionedList<T> model) {
         listBox.setModel(model);
         this.modelRef = model.createReference();
         boundSelection();
     }
 
-    public void setSelectionModel( SelectionModel selectionModel ) {
+    public void setSelectionModel(SelectionModel selectionModel) {
         listBox.setSelectionModel(selectionModel);
         this.selectionRef = listBox.getSelectionModel().createSelectionReference();
         boundSelection();
@@ -216,8 +212,8 @@ public class Selector<T> extends Panel {
         return listBox.getSelectionModel();
     }
 
-    public void setValueRenderer( ValueRenderer<T> valueRenderer ) {
-        if( this.valueRenderer == valueRenderer ) {
+    public void setValueRenderer(ValueRenderer<T> valueRenderer) {
+        if (this.valueRenderer == valueRenderer) {
             return;
         }
         this.valueRenderer = valueRenderer;
@@ -229,7 +225,7 @@ public class Selector<T> extends Panel {
         return valueRenderer;
     }
 
-    public ListBox getListBox() {
+    public ListBox<T> getListBox() {
         return listBox;
     }
 
@@ -241,9 +237,9 @@ public class Selector<T> extends Panel {
         return popup;
     }
 
-    @StyleAttribute(value="maximumVisibleItems", lookupDefault=false)
-    public void setMaximumVisibleItems( int count ) {
-        if( this.maximumVisibleItems == count ) {
+    @StyleAttribute(value = "maximumVisibleItems", lookupDefault = false)
+    public void setMaximumVisibleItems(int count) {
+        if (this.maximumVisibleItems == count) {
             return;
         }
         this.maximumVisibleItems = count;
@@ -253,10 +249,10 @@ public class Selector<T> extends Panel {
         return maximumVisibleItems;
     }
 
-    public void setSelectedItem( T item ) {
+    public void setSelectedItem(T item) {
         int i = listBox.getModel().indexOf(item);
-        if( i < 0 ) {
-            log.warn("No item in list:" + item);
+        if (i < 0) {
+            log.warn("No item in list:{}", item);
             listBox.getSelectionModel().clear();
         } else {
             listBox.getSelectionModel().setSelection(i);
@@ -277,17 +273,17 @@ public class Selector<T> extends Panel {
     }
 
     /**
-     *  Attempts to make sure that the selected item is always in range.
+     * Attempts to make sure that the selected item is always in range.
      */
     protected void boundSelection() {
         Integer i = listBox.getSelectionModel().getSelection();
-        if( i == null ) {
-            if( !listBox.getModel().isEmpty() ) {
+        if (i == null) {
+            if (!listBox.getModel().isEmpty()) {
                 listBox.getSelectionModel().setSelection(0);
             }
-        } else if( i >= listBox.getModel().size() ) {
+        } else if (i >= listBox.getModel().size()) {
             // clamp it
-            listBox.getSelectionModel().setSelection(listBox.getModel().size()-1);
+            listBox.getSelectionModel().setSelection(listBox.getModel().size() - 1);
         }
     }
 
@@ -296,13 +292,13 @@ public class Selector<T> extends Panel {
         // changed and invalidated our actual selection value.  This 
         // is extra work we need to do because of the keeping of codependent
         // state and this may not be the last of it.
-        if( selectionRef.update() || modelRef.needsUpdate() ) {        
+        if (selectionRef.update() || modelRef.needsUpdate()) {
             Integer i = selectionRef.get();
-            if( i == null ) {
+            if (i == null) {
                 selectedItem.setObject(null);
             } else {
                 // Clamp it in range
-                i = Math.min(i, listBox.getModel().size()-1);
+                i = Math.min(i, listBox.getModel().size() - 1);
                 i = Math.max(i, 0);
                 selectedItem.setObject(listBox.getModel().get(i));
             }
@@ -311,30 +307,30 @@ public class Selector<T> extends Panel {
     }
 
     @Override
-    public void updateLogicalState( float tpf ) {
-        if( expanded ) {
+    public void updateLogicalState(float tpf) {
+        if (expanded) {
             expandedFrames++;
         }
         super.updateLogicalState(tpf);
-        if( modelRef.update() ) {
+        if (modelRef.update()) {
             boundSelection();
 
             // Don't try to fix the selection if the selectionRef is already
             // out of date.  It's quite possible that it's already accurate
             // with the latest list model and trying to move the selection
             // will end up reverting it.
-            if( !selectionRef.needsUpdate() ) {
+            if (!selectionRef.needsUpdate()) {
                 // Make sure that the selected item is pointing to
                 // something that exists or the proper item if it has moved.
                 T item = null;
                 Integer i = selectionRef.get();
-                if( i != null ) {
+                if (i != null) {
                     item = listBox.getModel().get(i);
                 }
-                if( !Objects.equals(item, selectedItem.getObject()) ) {
+                if (!Objects.equals(item, selectedItem.getObject())) {
                     // See whether it's gone or just moved
                     int newIndex = listBox.getModel().indexOf(selectedItem.getObject());
-                    if( newIndex < 0 ) {
+                    if (newIndex < 0) {
                         // It's gone... so we need to reassert the current
                         // selection
                         listBox.getSelectionModel().clear();
@@ -349,11 +345,11 @@ public class Selector<T> extends Panel {
         updateSelection();
     }
 
-    public void setExpanded( boolean b ) {
-        if( this.expanded == b ) {
+    public void setExpanded(boolean b) {
+        if (this.expanded == b) {
             return;
         }
-        if( b ) {
+        if (b) {
             expand();
         } else {
             collapse();
@@ -366,7 +362,7 @@ public class Selector<T> extends Panel {
 
     protected void resetView() {
         Panel newView = valueRenderer.getView(getSelectedListValue(), false, view);
-        if( newView != view ) {
+        if (newView != view) {
             // Transfer the click listener
             CursorEventControl.addListenersToSpatial(newView, clickListener);
             CursorEventControl.removeListenersFromSpatial(view, clickListener);
@@ -378,10 +374,10 @@ public class Selector<T> extends Panel {
 
     protected T getSelectedListValue() {
         Integer i = listBox.getSelectionModel().getSelection();
-        if( i == null ) {
+        if (i == null) {
             return null;
         }
-        if( i >= listBox.getModel().size() ) {
+        if (i >= listBox.getModel().size()) {
             i = 0;
         }
         return listBox.getModel().get(i);
@@ -389,22 +385,22 @@ public class Selector<T> extends Panel {
 
     protected int calculateListSize() {
         int size = listBox.getModel().size();
-        if( maximumVisibleItems != 0 ) {
+        if (maximumVisibleItems != 0) {
             size = Math.min(maximumVisibleItems, size);
         }
         // Either way, we should make sure that we don't fall off the
         // bottom or sides of the screen.
         // We'll guess the size from the view
         Vector2f guiSize = GuiGlobals.getInstance().getPopupState().getGuiSize();
-        int maxSize = (int)(guiSize.y / view.getSize().y);
+        int maxSize = (int) (guiSize.y / view.getSize().y);
         maxSize = Math.max(maxSize, 3); // always show at least 3 items
         size = Math.min(size, maxSize);
 
         return size;
     }
 
-    protected Vector3f calculatePopupLocation( Vector3f screen ) {
-        Vector3f loc = GuiGlobals.getInstance().getPopupState().screenToGui(screen); 
+    protected Vector3f calculatePopupLocation(Vector3f screen) {
+        Vector3f loc = GuiGlobals.getInstance().getPopupState().screenToGui(screen);
         Vector3f pref = popup.getPreferredSize();
         Vector2f guiSize = GuiGlobals.getInstance().getPopupState().getGuiSize();
         loc.x = Math.min(loc.x, guiSize.x - pref.x);
@@ -420,12 +416,7 @@ public class Selector<T> extends Panel {
         // Make sure we keep it on screen even if it resizes itself
         popup.getControl(GuiControl.class).addListener(reshapeListener);
 
-        GuiGlobals.getInstance().getPopupState()
-                .showPopup(popup, new Command<PopupState>() {
-                        public void execute( PopupState state ) {
-                            collapse();
-                        }
-                    });
+        GuiGlobals.getInstance().getPopupState().showPopup(popup, state -> collapse());
 
         expandedFrames = 0;
         autoCloseListener.updatedFrames = 0;
@@ -435,7 +426,7 @@ public class Selector<T> extends Panel {
 
     protected void collapse() {
         PopupState state = GuiGlobals.getInstance().getPopupState();
-        if( state.isPopup(popup) ) {
+        if (state.isPopup(popup)) {
             state.closePopup(popup);
         }
         popup.getControl(GuiControl.class).removeListener(reshapeListener);
@@ -445,17 +436,17 @@ public class Selector<T> extends Panel {
     private class ClickListener extends DefaultCursorListener implements Command<Button> {
 
         @Override
-        protected void click( CursorButtonEvent event, Spatial target, Spatial capture ) {
+        protected void click(CursorButtonEvent event, Spatial target, Spatial capture) {
             expand();
         }
 
-        public void execute( Button button ) {
+        public void execute(Button button) {
             expand();
         }
     }
 
     private class SelectListener implements Command<ListBox<T>> {
-        public void execute( ListBox list ) {
+        public void execute(ListBox<T> list) {
             collapse();
         }
     }
@@ -463,7 +454,7 @@ public class Selector<T> extends Panel {
     private class ReshapeListener extends AbstractGuiControlListener {
 
         @Override
-        public void reshape( GuiControl source, Vector3f pos, Vector3f size ) {
+        public void reshape(GuiControl source, Vector3f pos, Vector3f size) {
             // Note: reshape() is about the layout within the container
             // and not its position on screen... so moving the popup isn't
             // really a recursive operation.
@@ -476,19 +467,19 @@ public class Selector<T> extends Panel {
             popup.setLocalTranslation(loc);
         }
     }
- 
+
     /**
-     *  Listens to the update of the popup so we can count frames.  If
-     *  the popup frames become greater than the selector frames then we
-     *  guess that the selector has been removed from the scene and we
-     *  are still popped up. 
-     */   
+     * Listens to the update of the popup so we can count frames.  If
+     * the popup frames become greater than the selector frames then we
+     * guess that the selector has been removed from the scene and we
+     * are still popped up.
+     */
     private class AutoCloseListener implements GuiUpdateListener {
         private long updatedFrames = 0;
-            
-        public void guiUpdate( GuiControl source, float tpf ) {
+
+        public void guiUpdate(GuiControl source, float tpf) {
             updatedFrames++;
-            if( updatedFrames > expandedFrames ) {
+            if (updatedFrames > expandedFrames) {
                 log.warn("Auto-closing left-open selector.");
                 // The selector was removed from the scene without anything
                 // being selected in the popup... so we'll close.

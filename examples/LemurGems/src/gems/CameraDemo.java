@@ -43,7 +43,7 @@ import com.jme3.scene.shape.Box;
 import com.simsilica.lemur.GuiGlobals;
 
 /**
- *  The main application for demonstrating the Lemur Gems examples. 
+ * The main application for demonstrating the Lemur Gems examples.
  *
  * @author pspeed
  */
@@ -60,14 +60,14 @@ public class CameraDemo extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-    
+
         // Let Lemur's GuiGlobals initialize a lot of goodies for us.
         // This will also setup a static InputMapper that we can reference.
         // An alternative would have been to create and manage our own
         // InputMapper instance instead... but later tutorials will rely
         // on other parts of Lemur so we might as well initialize it now.
         GuiGlobals.initialize(this);
-        
+
         // The camera input mappings and the camera input handling have
         // been separated for clarity but this means that by default
         // the CameraMovementState won't be provided any input.

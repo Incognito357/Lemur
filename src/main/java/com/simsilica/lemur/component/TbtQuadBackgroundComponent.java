@@ -35,11 +35,12 @@
 package com.simsilica.lemur.component;
 
 import com.jme3.material.RenderState.BlendMode;
-import com.jme3.math.*;
-import com.jme3.scene.*;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
-
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.core.GuiMaterial;
@@ -67,7 +68,7 @@ import com.simsilica.lemur.geom.TbtQuad;
  *    +---+--------------+-------+
  *       x1             x2
  * </pre>
- *
+ * <p>
  * Arrows indicate the direction in which each grid cell will stretch to fill
  * the area given by the component.<br>
  * All coordinates are relative to the lower-left border.
@@ -87,32 +88,31 @@ import com.simsilica.lemur.geom.TbtQuad;
  *
  * @author Paul Speed, Joachim "Toolforger" Durchholz (Javadoc)
  */
-public class TbtQuadBackgroundComponent extends AbstractGuiComponent
-                                        implements Cloneable, ColoredComponent {
+public class TbtQuadBackgroundComponent extends AbstractGuiComponent implements Cloneable, ColoredComponent {
     private TbtQuad quad;
     private Geometry background;
     private Texture texture;
     private ColorRGBA color;
     private float alpha = 1f;
     private GuiMaterial material;
-    private float xMargin = 0;
-    private float yMargin = 0;
-    private float zOffset = 0.01f;
-    private boolean lit = false;
+    private float xMargin;
+    private float yMargin;
+    private float zOffset;
+    private final boolean lit;
 
     public TbtQuadBackgroundComponent(TbtQuad quad) {
         this(quad, null, 0, 0, 0.01f, false);
     }
 
-    public TbtQuadBackgroundComponent( TbtQuad quad, Texture texture ) {
+    public TbtQuadBackgroundComponent(TbtQuad quad, Texture texture) {
         this(quad, texture, 0, 0, 0.01f, false);
     }
 
-    public TbtQuadBackgroundComponent( TbtQuad quad, Texture texture, float xMargin, float yMargin ) {
+    public TbtQuadBackgroundComponent(TbtQuad quad, Texture texture, float xMargin, float yMargin) {
         this(quad, texture, xMargin, yMargin, 0.01f, false);
     }
 
-    public TbtQuadBackgroundComponent( TbtQuad quad, Texture texture, float xMargin, float yMargin, float zOffset, boolean lit ) {
+    public TbtQuadBackgroundComponent(TbtQuad quad, Texture texture, float xMargin, float yMargin, float zOffset, boolean lit) {
         this.quad = quad;
         this.xMargin = xMargin;
         this.yMargin = yMargin;
@@ -122,32 +122,31 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
         createMaterial();
     }
 
-    public static TbtQuadBackgroundComponent create( String texture,
-                                                     float imageScale,
-                                                     int x1, int y1, int x2, int y2,
-                                                     float zOffset, boolean lit ) {
+    public static TbtQuadBackgroundComponent create(String texture,
+                                                    float imageScale,
+                                                    int x1, int y1, int x2, int y2,
+                                                    float zOffset, boolean lit) {
         Texture t = GuiGlobals.getInstance().loadTexture(texture, false, false);
         return create(t, imageScale, x1, y1, x2, y2, zOffset, lit);
     }
 
-    public static TbtQuadBackgroundComponent create( Texture t,
-                                                     float imageScale,
-                                                     int x1, int y1, int x2, int y2,
-                                                     float zOffset, boolean lit ) {
+    public static TbtQuadBackgroundComponent create(Texture t,
+                                                    float imageScale,
+                                                    int x1, int y1, int x2, int y2,
+                                                    float zOffset, boolean lit) {
         Image img = t.getImage();
 
         // we use the image size for the quad just to make sure
         // it is always big enough for whatever insets are thrown at it
         TbtQuad q = new TbtQuad(img.getWidth(), img.getHeight(),
-                                x1, y1, x2, y2, img.getWidth(), img.getHeight(),
-                                imageScale);
-        TbtQuadBackgroundComponent c = new TbtQuadBackgroundComponent(q, t, x1, y1, zOffset, lit);
-        return c;
+                x1, y1, x2, y2, img.getWidth(), img.getHeight(),
+                imageScale);
+        return new TbtQuadBackgroundComponent(q, t, x1, y1, zOffset, lit);
     }
 
     @Override
     public TbtQuadBackgroundComponent clone() {
-        TbtQuadBackgroundComponent result = (TbtQuadBackgroundComponent)super.clone();
+        TbtQuadBackgroundComponent result = (TbtQuadBackgroundComponent) super.clone();
 
         // Null out the things we don't really want cloned
         result.background = null;
@@ -160,29 +159,29 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
     }
 
     @Override
-    public void attach( GuiControl parent ) {
+    public void attach(GuiControl parent) {
         super.attach(parent);
     }
 
     @Override
-    public void detach( GuiControl parent ) {
-        if( background != null ) {
+    public void detach(GuiControl parent) {
+        if (background != null) {
             getNode().detachChild(background);
         }
         super.detach(parent);
     }
 
     @Override
-    public void setColor( ColorRGBA c ) {
+    public void setColor(ColorRGBA c) {
         this.color = c;
         resetColor();
     }
-    
+
     protected void resetColor() {
-        if( material == null ) {
+        if (material == null) {
             return;
         }
-        if( alpha >= 1 ) {
+        if (alpha >= 1) {
             // Just set it directly
             material.setColor(color);
         } else {
@@ -199,24 +198,25 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
     }
 
     @Override
-    public void setAlpha( float f ) {
-        if( this.alpha == f ) {
+    public void setAlpha(float f) {
+        if (this.alpha == f) {
             return;
         }
         this.alpha = f;
         resetColor();
     }
-    
+
     @Override
     public float getAlpha() {
         return alpha;
     }
 
-    public void setTexture( Texture t ) {
-        if( this.texture == t )
+    public void setTexture(Texture t) {
+        if (this.texture == t) {
             return;
+        }
         this.texture = t;
-        if( material != null ) {
+        if (material != null) {
             material.setTexture(texture);
         }
     }
@@ -225,15 +225,15 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
         return texture;
     }
 
-    public void setMargin( float x, float y ) {
+    public void setMargin(float x, float y) {
         this.xMargin = x;
         this.yMargin = y;
 
         invalidate();
     }
 
-    public void setMargin( Vector2f margin ) {
-        if( margin == null ) {
+    public void setMargin(Vector2f margin) {
+        if (margin == null) {
             throw new IllegalArgumentException("Margin cannot be null");
         }
         setMargin(margin.x, margin.y);
@@ -243,7 +243,7 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
         return new Vector2f(xMargin, yMargin);
     }
 
-    public void setZOffset( float z ) {
+    public void setZOffset(float z) {
         this.zOffset = z;
         invalidate();
     }
@@ -256,13 +256,13 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
         return material;
     }
 
-    public void calculatePreferredSize( Vector3f size ) {
+    public void calculatePreferredSize(Vector3f size) {
         size.x += xMargin * 2;
         size.y += yMargin * 2;
         size.z += Math.abs(zOffset);
     }
 
-    public void reshape( Vector3f pos, Vector3f size ) {
+    public void reshape(Vector3f pos, Vector3f size) {
         refreshBackground(size);
 
         background.setLocalTranslation(pos.x, pos.y - size.y, pos.z);
@@ -277,7 +277,7 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
 
     protected void createMaterial() {
         material = GuiGlobals.getInstance().createMaterial(texture, lit);
-        if( color != null ) {
+        if (color != null) {
             material.setColor(color);
         }
         material.getMaterial().getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
@@ -285,28 +285,28 @@ public class TbtQuadBackgroundComponent extends AbstractGuiComponent
 
     protected void createGeometry() {
         background = new Geometry("background", quad);
-        if( material == null ) {
+        if (material == null) {
             createMaterial();
         }
         background.setMaterial(material.getMaterial());
         getNode().attachChild(background);
     }
 
-    protected void refreshBackground( Vector3f size ) {
-        if( background == null ) {
+    protected void refreshBackground(Vector3f size) {
+        if (background == null) {
             createGeometry();
         }
         // Always need to at least reset the size because
         // the original quad may have been passed in with
         // a totally different size.
-        TbtQuad q = (TbtQuad)background.getMesh();
+        TbtQuad q = (TbtQuad) background.getMesh();
         q.updateSize(size.x, size.y);
-        q.clearCollisionData(); 
+        q.clearCollisionData();
     }
- 
-    @Override   
+
+    @Override
     public String toString() {
         return getClass().getName() + "[texture=" + texture + ", color=" + color + ", alpha=" + alpha
-                                        + ", margin=" + getMargin() + ", zOffset=" + zOffset + "]";
+                + ", margin=" + getMargin() + ", zOffset=" + zOffset + "]";
     }
 }

@@ -95,8 +95,8 @@ public class Panel extends Node {
     public static final String EFFECT_OPEN = "open";
     public static final String EFFECT_CLOSE = "close";
 
-    private ElementId elementId;
-    private String style;
+    private final ElementId elementId;
+    private final String style;
 
     public Panel() {
         this(true, new ElementId(ELEMENT_ID), null);
@@ -345,7 +345,7 @@ public class Panel extends Node {
      */
     @SuppressWarnings("unchecked")
     protected EffectControl<Panel> getEffectControl() {
-        return (EffectControl<Panel>) getControl(EffectControl.class);
+        return getControl(EffectControl.class);
     }
 
     /**
@@ -373,7 +373,7 @@ public class Panel extends Node {
      * Adds the specified effect to this GUI element.  Later calls
      * to runEffect() will then be able to execute this effect.
      */
-    public void addEffect(String effectName, Effect<? super Panel> effect) {
+    public void addEffect(String effectName, Effect<Panel> effect) {
         EffectControl<Panel> effects = getEffectControl();
         if (effects == null) {
             effects = new EffectControl<>();
@@ -386,7 +386,7 @@ public class Panel extends Node {
      * Removes a previously registered effect if it exists.  Returns
      * the removed effect if it existed.
      */
-    public Effect<? super Panel> removeEffect(String effectName) {
+    public Effect<Panel> removeEffect(String effectName) {
         EffectControl<Panel> effects = getEffectControl();
         if (effects == null) {
             return null;
@@ -409,7 +409,7 @@ public class Panel extends Node {
     /**
      * Returns a read-only view of the entire map of effects for this GUI element.
      */
-    public Map<String, Effect<? super Panel>> getEffects() {
+    public Map<String, Effect<Panel>> getEffects() {
         EffectControl<Panel> effects = getEffectControl();
         if (effects == null) {
             return Collections.emptyMap();
@@ -421,8 +421,8 @@ public class Panel extends Node {
      * Adds multiple effects at once through a stylable attribute.
      */
     @StyleAttribute(value = "effects", lookupDefault = false)
-    public void setEffects(Map<String, Effect<? super Panel>> map) {
-        for (Map.Entry<String, Effect<? super Panel>> e : map.entrySet()) {
+    public void setEffects(Map<String, Effect<Panel>> map) {
+        for (Map.Entry<String, Effect<Panel>> e : map.entrySet()) {
             if (e.getValue() != null) {
                 addEffect(e.getKey(), e.getValue());
             } else {

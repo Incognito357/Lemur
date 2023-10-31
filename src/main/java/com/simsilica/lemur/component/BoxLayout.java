@@ -209,6 +209,7 @@ public class BoxLayout extends AbstractGuiComponent implements GuiLayout, Clonea
                     float relation = axisPref / axisPrefTotal;
                     axisSize = relation * axisSizeTotal;
                     break;
+                default: break;
             }
 
             // Set the location while "pos" is correct.

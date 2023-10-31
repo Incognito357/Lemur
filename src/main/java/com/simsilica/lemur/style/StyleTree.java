@@ -34,22 +34,28 @@
 
 package com.simsilica.lemur.style;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 
 /**
- *  Used internally by the Styles API to track the style
- *  definition hierarchy in tail-first form.
+ * Used internally by the Styles API to track the style
+ * definition hierarchy in tail-first form.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class StyleTree {
 
-    private Styles styles;
-    private Node root = new Node(null);
+    private static final Logger logger = LoggerFactory.getLogger(StyleTree.class);
 
-    public StyleTree( Styles styles ) {
+    private final Styles styles;
+    private final Node root = new Node(null);
+
+    public StyleTree(Styles styles) {
         this.styles = styles;
     }
 
@@ -57,51 +63,49 @@ public class StyleTree {
         return root;
     }
 
-    public Attributes getSelector( ElementId id, boolean create ) { 
-        Node node = findChild(root, id.getParts(), create);   
-        if( node == null ) {
+    public Attributes getSelector(ElementId id, boolean create) {
+        Node node = findChild(root, id.getParts(), create);
+        if (node == null) {
             return null;
         }
         return node.getAttributes(create);
     }
-    
-    public Attributes getSelector( ElementId parent, ElementId child, boolean create ) {
- 
-        Node nested = findChild(root, child.getParts(), create);
-        if( nested == null ) {
-            return null;
-        }
-        
-        Node wildCard = nested.getChild(null, create);
-        if( wildCard == null ) {
-            return null;
-        }
- 
-        Node node = findChild(wildCard, parent.getParts(), create);
-        if( node == null ) {
-            return null;
-        }
-    
-        return node.getAttributes(create);
-    } 
 
-    public Attributes getAttributes( ElementId elementId ) {
+    public Attributes getSelector(ElementId parent, ElementId child, boolean create) {
+        Node nested = findChild(root, child.getParts(), create);
+        if (nested == null) {
+            return null;
+        }
+
+        Node wildCard = nested.getChild(null, create);
+        if (wildCard == null) {
+            return null;
+        }
+
+        Node node = findChild(wildCard, parent.getParts(), create);
+        if (node == null) {
+            return null;
+        }
+
+        return node.getAttributes(create);
+    }
+
+    public Attributes getAttributes(ElementId elementId) {
         Attributes results = new Attributes(styles);
 
         String[] parts = elementId.getParts();
-        
+
         // Recursively descend starting at the tail of the ID
         // doing a depth first traversal.  When a wild card is
         // hit then a second stage traversal is done allowing
         // gaps.
         accumulateAttributes(root, parts, parts.length - 1, true, results);
-        
+
         return results;
     }
 
-    protected void accumulateAttributes( Node node, String[] parts, int index, boolean followWildCards,
-                                         Attributes results ) {
- 
+    protected void accumulateAttributes(Node node, String[] parts, int index, boolean followWildCards,
+                                        Attributes results) {
         // At each level we check to see if there is an exact match
         // here and then traverse.  If there are no more 'parts' then we 
         // stop and just grab any attributes on the way back up.  This
@@ -111,18 +115,18 @@ public class StyleTree {
         // It's safe to pick up any attributes along the way because those
         // are specific selectors in the hierarchy.  If 'button' has attributes
         // then that's because the general 'button' was assigned attributes.
-        if( index < 0 ) {
+        if (index < 0) {
             return;
         }
- 
+
         // So check for an exact match at this level       
-        String key = parts[index];       
+        String key = parts[index];
         Node child = node.getChild(key, false);
-        if( child != null ) {
-            accumulateAttributes(child, parts, index-1, followWildCards, results);
+        if (child != null) {
+            accumulateAttributes(child, parts, index - 1, followWildCards, results);
         }
- 
-        if( followWildCards ) {       
+
+        if (followWildCards) {
             // The above accumulate already went as low as it could go and
             // accumulated the longest specific chain that it could at that level.
             // Before we apply any of the direct child's attributes we need to
@@ -135,81 +139,77 @@ public class StyleTree {
             // fail to find wild-carded 'parents' at the highest level.
             // So something like "something.label" with a something * label rule
             // would fail to resolve            
-            if( wildCard != null ) {
+            if (wildCard != null) {
                 // Check each part for a wild card child and apply
                 // each in turn.  Because we start with most current then
                 // we _should_ get most specific first.
-                for( int i = index; i >= 0; i-- ) {
+                for (int i = index; i >= 0; i--) {
                     Node n = wildCard.getChild(parts[i], false);
-                    if( n == null ) {
+                    if (n == null) {
                         continue;
                     }
-                    accumulateAttributes(n, parts, i-1, false, results);
- 
+                    accumulateAttributes(n, parts, i - 1, false, results);
+
                     // If this node has attributes then that means the
                     // less specific wild-carded container had attributes.
                     // We need to apply them.          
                     // For example: attributes set for slider | button
                     // should hit even if the id is list.slider.up.button         
-                    if( n.attributes != null ) {
+                    if (n.attributes != null) {
                         results.applyNew(n.attributes);
                     }
                 }
             }
-        } 
-                
-        if( child != null ) {
-            // Add any attributes we may have found specifically at this
-            // level
-            if( child.attributes != null ) {
-                results.applyNew(child.attributes);
-            }
+        }
+
+        // Add any attributes we may have found specifically at this
+        // level
+        if (child != null && child.attributes != null) {
+            results.applyNew(child.attributes);
         }
     }
 
-    protected Node findChild( Node node, String[] parts, boolean create ) {
-        for( int i = parts.length - 1; i >= 0; i-- ) {
+    protected Node findChild(Node node, String[] parts, boolean create) {
+        for (int i = parts.length - 1; i >= 0; i--) {
             node = node.getChild(parts[i], create);
-            if( node == null ) {
+            if (node == null) {
                 return null;
             }
         }
-        return node;                
+        return node;
     }
-    
-    protected void dump( Node node, String indent ) {
-        System.out.println( indent + node + " {" );
-        if( node.children != null ) {
-            for( Node n : node.children.values() ) {
-                dump(n, indent + "    ");
+
+    protected StringJoiner dump(Node node, String indent) {
+        StringJoiner joiner = new StringJoiner("\n", indent + node + " {\n", indent + "\n}");
+        if (node.children != null) {
+            for (Node n : node.children.values()) {
+                joiner.add(dump(n, indent + "    ").toString());
             }
         }
-        System.out.println( indent + "}" );
+        return joiner;
     }
 
     protected void debug() {
-        System.out.println( "Style tree:" );
-        dump(root, "   ");
+        logger.info("Style tree:{}", dump(root, "   "));
     }
 
-    public static void main( String... args ) {
-        
+    public static void main(String... args) {
         Styles styles = new Styles();
         StyleTree tree = new StyleTree(styles);
-        
+
         Attributes test1 = tree.getSelector(new ElementId("slider.up.button"), true);
-        test1.set( "foo", "123" );
-        test1.set( "bar", "345" );
+        test1.set("foo", "123");
+        test1.set("bar", "345");
         Attributes test2 = tree.getSelector(new ElementId("races.list"), new ElementId("up.button"), true);
-        test2.set( "bar", "789" );
-        test2.set( "color", "lunch" );
+        test2.set("bar", "789");
+        test2.set("color", "lunch");
         Attributes test3 = tree.getSelector(new ElementId("button"), true);
-        test3.set( "color", "bacon" );
+        test3.set("color", "bacon");
         Attributes test4 = tree.getSelector(new ElementId("races.list"), new ElementId("slider.up.button"), true);
-        test4.set( "bar", "override" );
+        test4.set("bar", "override");
         Attributes test5 = tree.getSelector(new ElementId("list"), new ElementId("up.button"), true);
-        test5.set( "baz", "arrow" );
- 
+        test5.set("baz", "arrow");
+
         // So which should take precendence:
         // silder.up.button
         // ...or...
@@ -223,60 +223,60 @@ public class StyleTree {
         // It _should_ take precedence over slider.up.button because
         // it's more specific.  I will need to make sure that the algorithm does
         // it though.
- 
-        
+
+
         tree.dump(tree.root, "");
- 
+
         // Given the current precedence rules
-        String[][] tests = { { "slider.up.button", "foo=123, bar=345, color=bacon" },
-                             { "races.list.slider.up.button", "foo=123, bar=override, color=lunch, baz=arrow" },
-                             { "button", "color=bacon" }
-                           };
-        for( int i = 0; i < tests.length; i++ ) {
-            Attributes attrs = tree.getAttributes(new ElementId(tests[i][0]));
-            System.out.println( "test [" + tests[i][0] + "] = " + attrs );
-            System.out.println( "    should be:" + tests[i][1] );
-        }                                    
+        String[][] tests = {{"slider.up.button", "foo=123, bar=345, color=bacon"},
+                {"races.list.slider.up.button", "foo=123, bar=override, color=lunch, baz=arrow"},
+                {"button", "color=bacon"}
+        };
+        for (String[] test : tests) {
+            Attributes attrs = tree.getAttributes(new ElementId(test[0]));
+            logger.info("test [{}] = {}", test[0], attrs);
+            logger.info("    should be:{}", test[1]);
+        }
     }
 
     protected class Node {
-        private String id;
+        private final String id;
         private Attributes attributes;
         private Map<String, Node> children;
- 
-        public Node( String id ) {
+
+        public Node(String id) {
             this.id = id;
         }
-        
-        public Node getChild( String childId, boolean create ) {
-            if( children == null ) {
-                if( !create ) {
+
+        public Node getChild(String childId, boolean create) {
+            if (children == null) {
+                if (!create) {
                     return null;
                 } else {
-                    children = new HashMap<String, Node>();
+                    children = new HashMap<>();
                 }
             }
             Node result = children.get(childId);
-            if( result == null && create ) {
+            if (result == null && create) {
                 result = new Node(childId);
                 children.put(childId, result);
             }
             return result;
         }
-        
-        public Attributes getAttributes( boolean create ) {
-            if( attributes == null && create ) {
+
+        public Attributes getAttributes(boolean create) {
+            if (attributes == null && create) {
                 attributes = new Attributes(styles);
             }
             return attributes;
-        }   
-        
+        }
+
         protected Map<String, Node> getChildren() {
             return children;
         }
-        
+
         public String toString() {
-            return "Node[" + (id == null ? "*":id) + (attributes == null ? "" : (", " + attributes)) + "]";
+            return "Node[" + (id == null ? "*" : id) + (attributes == null ? "" : (", " + attributes)) + "]";
         }
     }
 }

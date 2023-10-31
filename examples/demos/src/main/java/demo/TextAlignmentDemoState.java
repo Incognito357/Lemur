@@ -48,17 +48,17 @@ import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.text.DocumentModel;
 
 /**
- *  A demo of text alignment using a set of buttons.
+ * A demo of text alignment using a set of buttons.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class TextAlignmentDemoState extends BaseAppState {
 
     private Container window;
 
     /**
-     *  A command we'll pass to the label pop-up to let
-     *  us know when the user clicks away.
+     * A command we'll pass to the label pop-up to let
+     * us know when the user clicks away.
      */
     private CloseCommand closeCommand = new CloseCommand();
 
@@ -66,11 +66,11 @@ public class TextAlignmentDemoState extends BaseAppState {
     }
 
     @Override
-    protected void initialize( Application app ) {
+    protected void initialize(Application app) {
     }
 
     @Override
-    protected void cleanup( Application app ) {
+    protected void cleanup(Application app) {
     }
 
     @Override
@@ -147,7 +147,7 @@ public class TextAlignmentDemoState extends BaseAppState {
         // also because it's better UX... even if the popup will close if
         // you click outside of it.
         window.addChild(new ActionButton(new CallMethodAction("Close",
-                                                              window, "removeFromParent")));
+                window, "removeFromParent")));
 
         // Position the window and pop it up
         window.setLocalTranslation(400, getApplication().getCamera().getHeight() * 0.9f, 50);
@@ -161,7 +161,7 @@ public class TextAlignmentDemoState extends BaseAppState {
 
     private class CloseCommand implements Command<Object> {
 
-        public void execute( Object src ) {
+        public void execute(Object src) {
             getState(MainMenuState.class).closeChild(TextAlignmentDemoState.this);
         }
     }

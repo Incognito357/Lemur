@@ -40,26 +40,26 @@ import com.simsilica.lemur.core.GuiControl;
 
 
 /**
- *  Base implementation of a stackable GuiComponent.
+ * Base implementation of a stackable GuiComponent.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public abstract class AbstractGuiComponent implements GuiComponent {
     private GuiControl guiControl;
 
     protected void invalidate() {
-        if( guiControl != null ) {
+        if (guiControl != null) {
             guiControl.invalidate();
         }
     }
 
     @Override
-    public void attach( GuiControl parent ) {
+    public void attach(GuiControl parent) {
         this.guiControl = parent;
     }
 
     @Override
-    public void detach( GuiControl parent ) {
+    public void detach(GuiControl parent) {
         this.guiControl = null;
     }
 
@@ -76,17 +76,17 @@ public abstract class AbstractGuiComponent implements GuiComponent {
     @Override
     public GuiComponent clone() {
         try {
-            AbstractGuiComponent result = (AbstractGuiComponent)super.clone();
+            AbstractGuiComponent result = (AbstractGuiComponent) super.clone();
             result.guiControl = null;
             return result;
-        } catch( CloneNotSupportedException e ) {
+        } catch (CloneNotSupportedException e) {
             throw new RuntimeException("Error cloning " + getClass().getName(), e);
         }
     }
 
     protected Node getNode() {
-        if( guiControl == null )
-            throw new IllegalStateException( "Component is not attached." );
+        if (guiControl == null)
+            throw new IllegalStateException("Component is not attached.");
         return guiControl.getNode();
     }
 }

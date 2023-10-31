@@ -55,8 +55,8 @@ import java.util.Map;
  * @author Paul Speed
  */
 public abstract class BasePickState extends BaseAppState implements PickState {
+    private static final Logger log = LoggerFactory.getLogger(BasePickState.class);
     private static final long sampleFrequency = 1000000000 / 60; // 60 fps
-    static Logger log = LoggerFactory.getLogger(BasePickState.class);
     /**
      * The session that tracks the state of pick events from one
      * event frame to the next.

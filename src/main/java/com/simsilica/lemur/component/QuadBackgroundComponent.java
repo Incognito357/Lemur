@@ -35,53 +35,54 @@
 package com.simsilica.lemur.component;
 
 import com.jme3.material.RenderState.BlendMode;
-import com.jme3.math.*;
-import com.jme3.scene.*;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
-import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.core.GuiMaterial;
 
 
 /**
- *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public class QuadBackgroundComponent extends AbstractGuiComponent
-                                     implements Cloneable, ColoredComponent {
+public class QuadBackgroundComponent extends AbstractGuiComponent implements Cloneable, ColoredComponent {
     private Geometry background;
     private ColorRGBA color;
     private float alpha = 1f;
     private Texture texture;
     private Vector2f textureCoordinateScale;
     private GuiMaterial material;
-    private float xMargin = 0;
-    private float yMargin = 0;
-    private float zOffset = 0.01f;
+    private float xMargin;
+    private float yMargin;
+    private float zOffset;
     private float alphaDiscard = 0;
-    private boolean lit = false;
+    private final boolean lit;
 
     // Keep track of any scale we've already applied to the quad
     // so that we know how to apply scale changes.
-    private Vector2f appliedTextureScale = new Vector2f(1, 1);
+    private final Vector2f appliedTextureScale = new Vector2f(1, 1);
 
     public QuadBackgroundComponent() {
         this(ColorRGBA.Gray, 0, 0, 0.01f, false);
     }
 
-    public QuadBackgroundComponent( ColorRGBA color ) {
+    public QuadBackgroundComponent(ColorRGBA color) {
         this(color, 0, 0, 0.01f, false);
     }
 
-    public QuadBackgroundComponent( ColorRGBA color, float xMargin, float yMargin ) {
+    public QuadBackgroundComponent(ColorRGBA color, float xMargin, float yMargin) {
         this(color, xMargin, yMargin, 0.01f, false);
     }
 
-    public QuadBackgroundComponent( ColorRGBA color,
-                                    float xMargin, float yMargin, float zOffset,
-                                    boolean lit ) {
+    public QuadBackgroundComponent(ColorRGBA color,
+                                   float xMargin, float yMargin, float zOffset,
+                                   boolean lit) {
         this.xMargin = xMargin;
         this.yMargin = yMargin;
         this.zOffset = zOffset;
@@ -90,17 +91,17 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
         createMaterial();
     }
 
-    public QuadBackgroundComponent( Texture texture ) {
+    public QuadBackgroundComponent(Texture texture) {
         this(texture, 0, 0, 0.01f, false);
     }
 
-    public QuadBackgroundComponent( Texture texture, float xMargin, float yMargin ) {
+    public QuadBackgroundComponent(Texture texture, float xMargin, float yMargin) {
         this(texture, xMargin, yMargin, 0.01f, false);
     }
 
-    public QuadBackgroundComponent( Texture texture,
-                                    float xMargin, float yMargin, float zOffset,
-                                    boolean lit ) {
+    public QuadBackgroundComponent(Texture texture,
+                                   float xMargin, float yMargin, float zOffset,
+                                   boolean lit) {
         this.xMargin = xMargin;
         this.yMargin = yMargin;
         this.zOffset = zOffset;
@@ -113,36 +114,31 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
 
     @Override
     public QuadBackgroundComponent clone() {
-        QuadBackgroundComponent result = (QuadBackgroundComponent)super.clone();
+        QuadBackgroundComponent result = (QuadBackgroundComponent) super.clone();
         result.material = material.clone();
         result.background = null;
         return result;
     }
 
     @Override
-    public void attach( GuiControl parent ) {
-        super.attach(parent);
-    }
-
-    @Override
-    public void detach( GuiControl parent ) {
-        if( background != null ) {
+    public void detach(GuiControl parent) {
+        if (background != null) {
             getNode().detachChild(background);
         }
         super.detach(parent);
     }
 
     @Override
-    public void setColor( ColorRGBA c ) {
+    public void setColor(ColorRGBA c) {
         this.color = c;
         resetColor();
     }
 
     protected void resetColor() {
-        if( material == null ) {
+        if (material == null) {
             return;
         }
-        if( alpha >= 1 ) {
+        if (alpha >= 1) {
             // Just set it directly
             material.setColor(color);
         } else {
@@ -159,8 +155,8 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
     }
 
     @Override
-    public void setAlpha( float f ) {
-        if( this.alpha == f ) {
+    public void setAlpha(float f) {
+        if (this.alpha == f) {
             return;
         }
         this.alpha = f;
@@ -172,11 +168,12 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
         return alpha;
     }
 
-    public void setTexture( Texture t ) {
-        if( this.texture == t )
+    public void setTexture(Texture t) {
+        if (this.texture == t) {
             return;
+        }
         this.texture = t;
-        if( material != null ) {
+        if (material != null) {
             material.setTexture(texture);
         }
     }
@@ -185,7 +182,7 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
         return texture;
     }
 
-    public void setTextureCoordinateScale( Vector2f scale ) {
+    public void setTextureCoordinateScale(Vector2f scale) {
         this.textureCoordinateScale = scale;
     }
 
@@ -193,15 +190,15 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
         return textureCoordinateScale;
     }
 
-    public void setMargin( float x, float y ) {
+    public void setMargin(float x, float y) {
         this.xMargin = x;
         this.yMargin = y;
 
         invalidate();
     }
 
-    public void setMargin( Vector2f margin ) {
-        if( margin == null ) {
+    public void setMargin(Vector2f margin) {
+        if (margin == null) {
             throw new IllegalArgumentException("Margin cannot be null");
         }
         setMargin(margin.x, margin.y);
@@ -211,7 +208,7 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
         return new Vector2f(xMargin, yMargin);
     }
 
-    public void setZOffset( float z ) {
+    public void setZOffset(float z) {
         this.zOffset = z;
         invalidate();
     }
@@ -221,22 +218,22 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
     }
 
     /**
-     *  Sets the alphaDiscardThreshold for the image material.  If an
-     *  alpha value is below this threshold then it will be discarded
-     *  rather than being written to the color and zbuffers.  Set to 0
-     *  to disable.  Defaults to 0.
+     * Sets the alphaDiscardThreshold for the image material.  If an
+     * alpha value is below this threshold then it will be discarded
+     * rather than being written to the color and zbuffers.  Set to 0
+     * to disable.  Defaults to 0.
      *
-     *  <p>Note: for 2D UIs this threshold is not necessary as 2D GUIs
-     *  will always sort purely back-to-front on Z.  For 3D UIs, this
-     *  setting may prevent visual artifacts from certain directions
-     *  for very transparent pixels (background showing through, etc.))</p>
+     * <p>Note: for 2D UIs this threshold is not necessary as 2D GUIs
+     * will always sort purely back-to-front on Z.  For 3D UIs, this
+     * setting may prevent visual artifacts from certain directions
+     * for very transparent pixels (background showing through, etc.))</p>
      */
-    public void setAlphaDiscard( float alphaDiscard ) {
-        if( this.alphaDiscard == alphaDiscard ) {
+    public void setAlphaDiscard(float alphaDiscard) {
+        if (this.alphaDiscard == alphaDiscard) {
             return;
         }
         this.alphaDiscard = alphaDiscard;
-        if( material != null ) {
+        if (material != null) {
             material.getMaterial().setFloat("AlphaDiscardThreshold", alphaDiscard);
         }
     }
@@ -249,13 +246,13 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
         return material;
     }
 
-    public void calculatePreferredSize( Vector3f size ) {
+    public void calculatePreferredSize(Vector3f size) {
         size.x += xMargin * 2;
         size.y += yMargin * 2;
         size.z += Math.abs(zOffset);
     }
 
-    public void reshape( Vector3f pos, Vector3f size ) {
+    public void reshape(Vector3f pos, Vector3f size) {
         refreshBackground(size);
 
         background.setLocalTranslation(pos.x, pos.y - size.y, pos.z);
@@ -270,32 +267,32 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
 
     protected void createMaterial() {
         material = GuiGlobals.getInstance().createMaterial(color, lit);
-        if( texture != null ) {
+        if (texture != null) {
             material.setTexture(texture);
         }
         material.getMaterial().getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
         material.getMaterial().setFloat("AlphaDiscardThreshold", alphaDiscard);
     }
 
-    protected void refreshBackground( Vector3f size ) {
-        if( background == null ) {
+    protected void refreshBackground(Vector3f size) {
+        if (background == null) {
             Quad q = new Quad(size.x, size.y);
-            if( lit ) {
+            if (lit) {
                 // Give the quad some normals
                 q.setBuffer(Type.Normal, 3,
-                            new float[] {
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1,
-                                        0, 0, 1
-                            });
+                        new float[]{
+                                0, 0, 1,
+                                0, 0, 1,
+                                0, 0, 1,
+                                0, 0, 1
+                        });
             }
             background = new Geometry("background", q);
             // Can't do this even though it seems logical because it
             // is just as likely that we are in bucket.gui.  It is up to
             // the caller to put the main 3D ui in the transparent bucket
             //background.setQueueBucket(Bucket.Transparent);
-            if( material == null ) {
+            if (material == null) {
                 createMaterial();
             }
             background.setMaterial(material.getMaterial());
@@ -309,21 +306,21 @@ public class QuadBackgroundComponent extends AbstractGuiComponent
             appliedTextureScale.set(1, 1);
         } else {
             // Else reset the size of the quad
-            Quad q = (Quad)background.getMesh();
-            if( size.x != q.getWidth() || size.y != q.getHeight() ) {
+            Quad q = (Quad) background.getMesh();
+            if (size.x != q.getWidth() || size.y != q.getHeight()) {
                 q.updateGeometry(size.x, size.y);
                 q.clearCollisionData();
             }
         }
 
         Vector2f effectiveScale = textureCoordinateScale == null ? Vector2f.UNIT_XY : textureCoordinateScale;
-        if( !appliedTextureScale.equals(effectiveScale) ) {
+        if (!appliedTextureScale.equals(effectiveScale)) {
 
             // Need to apply new texture coordinate scaling
             Mesh m = background.getMesh();
 
             // Unscale what we already scaled
-            m.scaleTextureCoordinates(new Vector2f(1/appliedTextureScale.x, 1/appliedTextureScale.y));
+            m.scaleTextureCoordinates(new Vector2f(1 / appliedTextureScale.x, 1 / appliedTextureScale.y));
 
             appliedTextureScale.set(effectiveScale);
 

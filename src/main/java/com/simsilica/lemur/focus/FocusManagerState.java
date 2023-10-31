@@ -56,7 +56,7 @@ import java.util.Set;
  */
 public class FocusManagerState extends BaseAppState {
 
-    static Logger log = LoggerFactory.getLogger(FocusManagerState.class);
+    private static final Logger log = LoggerFactory.getLogger(FocusManagerState.class);
 
     private Spatial focus;
     private FocusNavigationState focusNavigationState;
@@ -296,7 +296,7 @@ public class FocusManagerState extends BaseAppState {
         for (int i = lca + 1; i < oldHierarchy.size(); i++) {
             FocusTarget target = findFocusTarget(oldHierarchy.get(i));
             if (log.isTraceEnabled()) {
-                log.trace("[" + i + "]:" + oldHierarchy.get(i) + "  target:" + target);
+                log.trace("[{}]:{}  target:{}", i, oldHierarchy.get(i), target);
             }
             if (target != null) {
                 target.focusLost();
@@ -308,7 +308,7 @@ public class FocusManagerState extends BaseAppState {
         for (int i = lca + 1; i < newHierarchy.size(); i++) {
             FocusTarget target = findFocusTarget(newHierarchy.get(i));
             if (log.isTraceEnabled()) {
-                log.trace("[" + i + "]:" + newHierarchy.get(i) + "  target:" + target);
+                log.trace("[{}]:{}  target:{}", i, newHierarchy.get(i), target);
             }
             if (target != null) {
                 target.focusGained();

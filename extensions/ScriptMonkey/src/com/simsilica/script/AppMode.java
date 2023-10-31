@@ -38,6 +38,7 @@ import com.google.common.base.Objects;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.simsilica.lemur.event.BaseAppState;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,10 +51,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
- *  Keeps track of a global application "mode" that can be watched for
- *  changes and/or tied to the enable/disable of other app states. 
+ * Keeps track of a global application "mode" that can be watched for
+ * changes and/or tied to the enable/disable of other app states.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class AppMode extends BaseAppState {
 
@@ -79,21 +80,21 @@ public class AppMode extends BaseAppState {
         return instance;
     }
 
-    protected void setAppMode( String mode ) {
-    
-        if( renderThread != Thread.currentThread() ) {
+    protected void setAppMode(String mode) {
+
+        if (renderThread != Thread.currentThread()) {
             modeChanges.add(mode);
             return;
         }
 
-        if( Objects.equal(this.currentMode, mode) ) {
+        if (Objects.equal(this.currentMode, mode)) {
             return;
         }
 
         // Otherwise, just notify the listeners
         String lastMode = currentMode;
         this.currentMode = mode;
-        for( ModeListener l : listeners ) {
+        for (ModeListener l : listeners) {
             l.modeChanged(currentMode, lastMode);
         }
     }
@@ -102,9 +103,9 @@ public class AppMode extends BaseAppState {
         return currentMode;
     }
 
-    protected boolean pushAppMode( String mode ) {
-    
-        if( Objects.equal(mode, currentMode) )
+    protected boolean pushAppMode(String mode) {
+
+        if (Objects.equal(mode, currentMode))
             return false;
 
         modeStack.addFirst(currentMode);
@@ -113,21 +114,21 @@ public class AppMode extends BaseAppState {
         return true;
     }
 
-    protected void popAppMode( String mode ) {
-    
-        if( !mode.equals(currentMode) )
-            throw new IllegalStateException( "Attempting to pop from a mode that is not current." );
-        if( modeStack.isEmpty() )
-            throw new IllegalStateException( "Mode stack is empty." );
+    protected void popAppMode(String mode) {
+
+        if (!mode.equals(currentMode))
+            throw new IllegalStateException("Attempting to pop from a mode that is not current.");
+        if (modeStack.isEmpty())
+            throw new IllegalStateException("Mode stack is empty.");
         setAppMode(modeStack.removeFirst());
     }
 
-    public static void setMode( String mode ) {
+    public static void setMode(String mode) {
         getInstance().setAppMode(mode);
     }
 
-    public static boolean changeMode( String from, String to ) {    
-        if( !from.equals(getMode()) )
+    public static boolean changeMode(String from, String to) {
+        if (!from.equals(getMode()))
             return false;
         setMode(to);
         return true;
@@ -137,99 +138,99 @@ public class AppMode extends BaseAppState {
         return getInstance().getAppMode();
     }
 
-    public static boolean pushMode( String mode ) {
+    public static boolean pushMode(String mode) {
         return getInstance().pushAppMode(mode);
     }
 
-    public static void popMode( String mode ) {
+    public static void popMode(String mode) {
         getInstance().popAppMode(mode);
     }
 
     @Override
-    public void update( float tpf ) {
+    public void update(float tpf) {
         // Perform any delayed mode changes
-        while( !modeChanges.isEmpty() ) {
+        while (!modeChanges.isEmpty()) {
             setAppMode(modeChanges.poll());
         }
     }
 
-    protected ModeEnabler getEnabler( AppState state, boolean create ) {
-    
+    protected ModeEnabler getEnabler(AppState state, boolean create) {
+
         ModeEnabler result = modeEnabled.get(state);
-        if( result == null && create ) {
+        if (result == null && create) {
             result = new ModeEnabler(state);
-            listeners.add( result );
-            modeEnabled.put( state, result );
+            listeners.add(result);
+            modeEnabled.put(state, result);
         }
         return result;
     }
 
-    public void addModeListener( ModeListener l ) {
+    public void addModeListener(ModeListener l) {
         listeners.add(l);
     }
 
-    public void removeModeListener( ModeListener l ) {
+    public void removeModeListener(ModeListener l) {
         listeners.remove(l);
     }
 
     /**
-     *  Setup the specified app state to be enabled whenever
-     *  any of the registered modes is the current mode or disabled
-     *  when none of the registered modes are the current mode.
+     * Setup the specified app state to be enabled whenever
+     * any of the registered modes is the current mode or disabled
+     * when none of the registered modes are the current mode.
      */
-    public void onModeEnable( AppState state, String... modes ) {
+    public void onModeEnable(AppState state, String... modes) {
         ModeEnabler enabler = getEnabler(state, true);
-        if( enabler.enabled == null ) {
+        if (enabler.enabled == null) {
             enabler.enabled = true;
-        } else if( !enabler.enabled ) {
-            throw new RuntimeException( "State is already setup with a disabled mode set." );
+        } else if (!enabler.enabled) {
+            throw new RuntimeException("State is already setup with a disabled mode set.");
         }
 
         enabler.modes.addAll(Arrays.asList(modes));
     }
 
     /**
-     *  Setup the specified app state to be disabled whenever
-     *  any of the registered modes is the current mode or enabled
-     *  when none of the registered modes are the current mode.
-     *  This is the opposite of onModeEnable and an app state can
-     *  only be in one mode or another at a time.
+     * Setup the specified app state to be disabled whenever
+     * any of the registered modes is the current mode or enabled
+     * when none of the registered modes are the current mode.
+     * This is the opposite of onModeEnable and an app state can
+     * only be in one mode or another at a time.
      */
-    public void onModeDisable( AppState state, String... modes ) {
+    public void onModeDisable(AppState state, String... modes) {
         ModeEnabler enabler = getEnabler(state, true);
-        if( enabler.enabled == null )
+        if (enabler.enabled == null)
             enabler.enabled = false;
-        else if( enabler.enabled )
-            throw new RuntimeException( "State is already setup with an enabled mode set." );
+        else if (enabler.enabled)
+            throw new RuntimeException("State is already setup with an enabled mode set.");
 
-        enabler.modes.addAll( Arrays.asList(modes) );
+        enabler.modes.addAll(Arrays.asList(modes));
     }
 
-    public void unlinkModes( AppState state, String... modes ) {
+    public void unlinkModes(AppState state, String... modes) {
         ModeEnabler enabler = getEnabler(state, false);
-        if( enabler == null ) {
+        if (enabler == null) {
             return;
         }
-        enabler.modes.removeAll( Arrays.asList(modes) );
+        enabler.modes.removeAll(Arrays.asList(modes));
     }
 
     /**
-     *  Clears all linked mode settings setup for the specified app state.
+     * Clears all linked mode settings setup for the specified app state.
      */
-    public void clearModeLinks( AppState state ) {
+    public void clearModeLinks(AppState state) {
         ModeEnabler enabler = modeEnabled.remove(state);
-        if( enabler != null ) {
-            listeners.remove( enabler );
+        if (enabler != null) {
+            listeners.remove(enabler);
         }
     }
 
     @Override
-    protected void initialize( Application app ) {
+    protected void initialize(Application app) {
         this.renderThread = Thread.currentThread();
     }
 
     @Override
-    protected void cleanup( Application app ) {
+    protected void cleanup(Application app) {
     }
 
     @Override
@@ -241,32 +242,32 @@ public class AppMode extends BaseAppState {
     }
 
     protected class ModeEnabler implements ModeListener {
-    
+
         private AppState state;
         private Boolean enabled;
         private Set<String> modes = new HashSet<>();
 
-        public ModeEnabler( AppState state ) {
+        public ModeEnabler(AppState state) {
             this.state = state;
         }
 
-        public void modeChanged( String mode, String lastMode ) {
+        public void modeChanged(String mode, String lastMode) {
             boolean was = modes.contains(lastMode);
             boolean is = modes.contains(mode);
-            if( was == is ) {
+            if (was == is) {
                 return; // avoid unnecessary enable changes
             }
 
-            if( is ) {
-                state.setEnabled( enabled );
+            if (is) {
+                state.setEnabled(enabled);
             } else {
-                state.setEnabled( !enabled );
+                state.setEnabled(!enabled);
             }
         }
 
         @Override
         public String toString() {
-            return "ModeEnabler[state="+ state + ", enabled=" + enabled + ", modes=" + modes + "]";
+            return "ModeEnabler[state=" + state + ", enabled=" + enabled + ", modes=" + modes + "]";
         }
     }
 }

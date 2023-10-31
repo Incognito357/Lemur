@@ -38,26 +38,30 @@ import com.simsilica.lemur.core.VersionedObject;
 
 
 /**
- *  Represents a settable value between a certain minimum
- *  and maximum range.  The value can be retrieved in original
- *  units or as a percentage of the delta between min and max.
- *  Value versioning is provided for low-overhead external monitoring
- *  of the value.
+ * Represents a settable value between a certain minimum
+ * and maximum range.  The value can be retrieved in original
+ * units or as a percentage of the delta between min and max.
+ * Value versioning is provided for low-overhead external monitoring
+ * of the value.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public interface RangedValueModel extends VersionedObject<Double> {
 
-    public void setValue( double val );
-    public double getValue();
+    void setValue(double val);
 
-    public void setPercent( double val );
-    public double getPercent();
+    double getValue();
 
-    public void setMaximum( double max );
-    public double getMaximum();
+    void setPercent(double val);
 
-    public void setMinimum( double min );
-    public double getMinimum();
+    double getPercent();
+
+    void setMaximum(double max);
+
+    double getMaximum();
+
+    void setMinimum(double min);
+
+    double getMinimum();
 }
 

@@ -34,10 +34,12 @@
 
 package com.simsilica.lemur.core;
 
-import java.util.*;
-import java.util.concurrent.*;
-
 import com.simsilica.lemur.Command;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A general mapping of source to some list of Command objects.  This

@@ -44,9 +44,8 @@ import com.jme3.input.KeyNames;
  */
 public class KeyAction {
 
-    private static final KeyNames names = new KeyNames();
-    private int keyCode;
-    private int modifiers;
+    private final int keyCode;
+    private final int modifiers;
 
     public KeyAction(int keyCode, int... modifiers) {
         this.keyCode = keyCode;
